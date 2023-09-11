@@ -1,4 +1,4 @@
-package essentials
+package essentials.generics
 
 import junit.framework.TestCase.*
 import org.junit.Before

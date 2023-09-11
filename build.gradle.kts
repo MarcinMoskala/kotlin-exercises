@@ -15,6 +15,10 @@ repositories {
 dependencies {
     implementation(kotlin("test"))
     implementation(kotlin("test-junit"))
+    
+    // collections access list
+    implementation("com.fasterxml.jackson.dataformat:jackson-dataformat-yaml:2.13.0")
+    implementation("com.fasterxml.jackson.module:jackson-module-kotlin:2.9.+")
 }
 
 tasks.withType<KotlinCompile> {

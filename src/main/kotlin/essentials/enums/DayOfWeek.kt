@@ -1,4 +1,4 @@
-package essentials
+package essentials.enums
 
 fun main() {
 //    val friday: DayOfWeek = DayOfWeek.FRIDAY

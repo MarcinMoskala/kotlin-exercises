@@ -1,4 +1,4 @@
-package essentials
+package essentials.loops
 
 import org.junit.Test
 import kotlin.test.assertEquals

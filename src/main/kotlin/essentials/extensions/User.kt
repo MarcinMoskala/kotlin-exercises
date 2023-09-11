@@ -22,7 +22,8 @@ data class UserJson(
     val heightCm: Int,
 )
 
-// TODO: Implement extension properties
+// TODO: Implement extensions to convert User to UserJson and vice versa, 
+//  and to create Centimeters from Int
 
 fun main() {
 //    val user = User(
