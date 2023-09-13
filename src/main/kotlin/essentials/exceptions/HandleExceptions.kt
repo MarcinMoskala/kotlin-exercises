@@ -19,7 +19,8 @@ fun handleInput() {
     println("Result: $result")
 }
 
-class IllegalOperatorException(operator: String) : Exception("Unknown operator: $operator")
+class IllegalOperatorException(operator: String) :
+    Exception("Unknown operator: $operator")
 
 fun main() {
     while (true) {

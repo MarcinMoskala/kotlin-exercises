@@ -2,7 +2,10 @@ package essentials.operators
 
 import java.math.BigDecimal
 
-data class Money(val amount: BigDecimal, val currency: Currency) {
+data class Money(
+    val amount: BigDecimal, 
+    val currency: Currency
+) {
     // TODO: Implement operators overloading here
     
     companion object {
