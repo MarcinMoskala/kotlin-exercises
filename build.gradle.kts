@@ -15,6 +15,9 @@ repositories {
 dependencies {
     implementation(kotlin("test"))
     implementation(kotlin("test-junit"))
+    implementation(kotlin("reflect"))
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.5.2")
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-test:1.5.2")
 }
 
 tasks.withType<KotlinCompile> {

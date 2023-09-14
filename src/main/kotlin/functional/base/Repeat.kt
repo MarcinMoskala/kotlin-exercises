@@ -1,4 +1,4 @@
-package functional
+package functional.base
 
 import org.junit.Assert
 import org.junit.Test
