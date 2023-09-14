@@ -34,6 +34,19 @@ inline fun <T> Iterable<T>.filter(predicate: (T) -> Boolean): List<T> {
     return list
 }
 
+inline fun <reified T> Iterable<*>.anyIs(): Boolean = this.any { it is T }
+
+inline fun <reified T> Iterable<*>.firstInstanceOf(): T? = this.find { it is T } as? T
+
+inline fun <K, V, R> Map<out K, V>.mapValuesNotNull(transform: (Map.Entry<K, V>) -> R?): Map<K, R> {
+    val destination = LinkedHashMap<K, R>(size)
+    for (element in this) {
+        val transformedValue = transform(element) ?: continue
+        destination.put(element.key, transformedValue)
+    }
+    return destination
+}
+
 fun main(args: Array<String>) {
     val numbers = 1..10
     val names = listOf("Mike", "Jane", "Marcin", "John", "James")

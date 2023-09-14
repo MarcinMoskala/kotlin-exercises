@@ -48,7 +48,7 @@ fun main() {
     // IllegalArgumentException
 }
 
-class UserInformationTest {
+class StudentInformationTest {
 
     @Test
     fun `valid user information`() {

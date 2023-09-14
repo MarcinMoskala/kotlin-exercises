@@ -5,9 +5,7 @@ import org.junit.Assert.*
 import org.junit.Test
 import kotlin.test.assertEquals
 
-fun <T> List<T>.plusAt(index: Int, element: T): List<T> {
-    TODO()
-}
+fun <T> List<T>.plusAt(index: Int, element: T): List<T> = TODO()
 
 class PlusAtTest {
 

@@ -4,17 +4,6 @@ import org.junit.Test
 import kotlin.test.assertEquals
 
 fun createTable(): TableBuilder {
-    // TODO: This is how I would prefer to print it
-//return table {
-//    tr {
-//      td { +"A" }
-//      td { +"B" }
-//    }
-//    tr {
-//      td { +"C" }
-//      td { +"D" }
-//    }
-//}
     val td1 = TdBuilder()
     td1.text = "A"
     val td2 = TdBuilder()
@@ -46,9 +35,11 @@ fun main() {
 data class TableBuilder(var trs: List<TrBuilder> = emptyList()) {
     override fun toString(): String = "<table>${trs.joinToString(separator = "")}</table>"
 }
+
 data class TrBuilder(var tds: List<TdBuilder> = emptyList()) {
     override fun toString(): String = "<tr>${tds.joinToString(separator = "")}</tr>"
 }
+
 data class TdBuilder(var text: String = "") {
     override fun toString(): String = "<td>$text</td>"
 }
