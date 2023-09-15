@@ -22,9 +22,9 @@ dependencies {
 
 tasks.withType<KotlinCompile> {
     kotlinOptions.jvmTarget = "1.8"
+    kotlinOptions.freeCompilerArgs = listOf("-Xcontext-receivers")
 }
 
 java.sourceSets["test"].java {
     srcDir("src/main/kotlin")
 }
- 
