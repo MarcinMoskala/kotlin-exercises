@@ -27,6 +27,18 @@ fun createTable(): TableBuilder {
     html.trs += tr2
     return html
 }
+// You want it to look like that
+//= table {
+//    tr {
+//        td { +"A" }
+//        td { +"B" }
+//    }
+//    tr {
+//        td { +"C" }
+//        td { +"D" }
+//    }
+//}
+
 
 fun main() {
     println(createTable()) //<table><tr><td>This is row 1</td><td>This is row 2</td></tr></table>
