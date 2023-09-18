@@ -229,6 +229,7 @@ class FunctionalTest {
         }
     }
 
+    @Suppress("UNCHECKED_CAST")
     private fun <T: Any> checkPropertyBehavior(
         instance: T,
         expectLongestOf: Boolean = true,
