@@ -60,6 +60,14 @@ class LambdaFunctionalTypeInferred {
     //  See add property for example
 }
 
+class LambdaUsingImplicitParameter {
+    val add: (Int, Int) -> Int = { num1, num2 -> num1 + num2 }
+
+    // TODO: Implement printNum, triple, produceName and longestOf properties, 
+    //  just like in LambdaFunctionalTypeSpecified, but this time, whenever possible, 
+    //  use implicit parameter `it`. 
+}
+
 class FunctionReference {
     val add: (Int, Int) -> Int = Int::plus
 
@@ -143,6 +151,16 @@ class FunctionalTest {
     @Test
     fun `LambdaFunctionalTypeInferred has correct property behavior`() {
         checkPropertyBehavior(LambdaFunctionalTypeInferred())
+    }
+
+    @Test
+    fun `LambdaUsingImplicitParameter has correct property signatures`() {
+        checkPropertySignatures(LambdaUsingImplicitParameter::class)
+    }
+
+    @Test
+    fun `LambdaUsingImplicitParameter has correct property behavior`() {
+        checkPropertyBehavior(LambdaUsingImplicitParameter())
     }
 
     @Test
