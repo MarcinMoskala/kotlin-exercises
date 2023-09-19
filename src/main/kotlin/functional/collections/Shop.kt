@@ -9,112 +9,371 @@ data class Order(val products: List<Product>, val isDelivered: Boolean)
 data class Product(val name: String, val price: Double)
 data class City(val name: String)
 
-// Get customers with undelivered products
-fun Shop.getWaitingCustomers(): List<Customer> = TODO()
+fun Shop.getWaitingCustomers(): List<Customer> = 
+    customers
+        .filter { 
+            it.orders.any { !it.isDelivered } 
+        }
 
-// Return the number of times the given product was ordered.
-// Note: a customer may order the same product for several times.
-fun Shop.countProductSales(product: Product): Int = TODO()
+fun Shop.countProductSales(product: Product): Int = 
+    this.customers
+        .sumOf {
+            it.orders.sumOf {
+                it.products.count { it == product }
+            }
+        }
 
-// Get customers who paid at least `amount`
-fun Shop.getCustomers(minAmount: Double): List<Customer> = TODO()
+fun Shop.getCustomers(minAmount: Double): List<Customer> = 
+    customers
+        .filter { 
+            it.orders.sumOf { 
+                it.products.sumOf { it.price }
+            } >= minAmount 
+        }
 
-class ShopTests {
+class ShopFunctionsTests {
     @Test
-    fun testCustomersWhoPaidAtLeastFilter() {
-        val customersWhoBoughtAtLeast10 = shop.customers - customersMap[cooper]
-        assertEquals(customersWhoBoughtAtLeast10, shop.getCustomers(10.0))
-        val customersWhoBoughtAtLeast150 = customersWhoBoughtAtLeast10 - customersMap[nathan] - customersMap[bajram]
-        assertEquals(customersWhoBoughtAtLeast150, shop.getCustomers(150.0))
-        val customersWhoBoughtAtLeast300 = listOf(customersMap[lucas], customersMap[reka])
-        assertEquals(customersWhoBoughtAtLeast300, shop.getCustomers(300.0))
+    fun `getWaitingCustomers should get customers with any delivered order`() {
+        // given
+        val shop = Shop(
+            name = "Test shop",
+            customers = listOf(
+                Customer(
+                    name = "Customer 1",
+                    city = City("City 1"),
+                    orders = listOf(
+                        Order(
+                            products = listOf(
+                                Product("Product 1", 1.0),
+                                Product("Product 2", 2.0),
+                            ),
+                            isDelivered = true,
+                        ),
+                        Order(
+                            products = listOf(
+                                Product("Product 3", 3.0),
+                                Product("Product 4", 4.0),
+                            ),
+                            isDelivered = false,
+                        ),
+                    ),
+                ),
+                Customer(
+                    name = "Customer 2",
+                    city = City("City 2"),
+                    orders = listOf(
+                        Order(
+                            products = listOf(
+                                Product("Product 5", 5.0),
+                                Product("Product 6", 6.0),
+                            ),
+                            isDelivered = true,
+                        ),
+                        Order(
+                            products = listOf(
+                                Product("Product 7", 7.0),
+                                Product("Product 8", 8.0),
+                            ),
+                            isDelivered = true,
+                        ),
+                    ),
+                ),
+            ),
+        )
+
+        // when
+        val result = shop.getWaitingCustomers()
+
+        // then
+        val expected = listOf(
+            Customer(
+                name = "Customer 1",
+                city = City("City 1"),
+                orders = listOf(
+                    Order(
+                        products = listOf(
+                            Product("Product 1", 1.0),
+                            Product("Product 2", 2.0),
+                        ),
+                        isDelivered = true,
+                    ),
+                    Order(
+                        products = listOf(
+                            Product("Product 3", 3.0),
+                            Product("Product 4", 4.0),
+                        ),
+                        isDelivered = false,
+                    ),
+                ),
+            ),
+        )
+        assertEquals(expected, result)
     }
-
+    
     @Test
-    fun testCustomersWithUndeliveredProductsilter() {
-        assertEquals(listOf(), Shop("", listOf()).getWaitingCustomers())
-        assertEquals(listOf(customersMap[reka]), shop.getWaitingCustomers())
+    fun `getWaitingCustomers should not return customers with no orders`() {
+        // given
+        val shop = Shop(
+            name = "Test shop",
+            customers = listOf(
+                Customer(
+                    name = "Customer 1",
+                    city = City("City 1"),
+                    orders = listOf(
+                        Order(
+                            products = listOf(
+                                Product("Product 1", 1.0),
+                                Product("Product 2", 2.0),
+                            ),
+                            isDelivered = true,
+                        ),
+                        Order(
+                            products = listOf(
+                                Product("Product 3", 3.0),
+                                Product("Product 4", 4.0),
+                            ),
+                            isDelivered = false,
+                        ),
+                    ),
+                ),
+                Customer(
+                    name = "Customer 2",
+                    city = City("City 2"),
+                    orders = listOf(),
+                ),
+            ),
+        )
 
-        val fakeProducts = listOf(Product("", 0.0))
-        val emptyCity = City("")
-        val c1 = Customer("C1", emptyCity, listOf(Order(fakeProducts, isDelivered = false)))
-        val c2 = Customer("C2", emptyCity, listOf(Order(fakeProducts, isDelivered = false)))
-        val cDelivered = Customer("CDelivered", emptyCity, listOf(Order(fakeProducts, isDelivered = true)))
-        assertEquals(listOf(c1), Shop("", listOf(c1)).getWaitingCustomers())
-        assertEquals(listOf(c2), Shop("", listOf(c2)).getWaitingCustomers())
-        assertEquals(listOf(), Shop("", listOf(cDelivered)).getWaitingCustomers())
-        assertEquals(listOf(c1, c2), Shop("", listOf(c1, c2)).getWaitingCustomers())
-        assertEquals(listOf(c1, c2), Shop("", listOf(c1, cDelivered, c2)).getWaitingCustomers())
+        // when
+        val result = shop.getWaitingCustomers()
+
+        // then
+        val expected = listOf(
+            Customer(
+                name = "Customer 1",
+                city = City("City 1"),
+                orders = listOf(
+                    Order(
+                        products = listOf(
+                            Product("Product 1", 1.0),
+                            Product("Product 2", 2.0),
+                        ),
+                        isDelivered = true,
+                    ),
+                    Order(
+                        products = listOf(
+                            Product("Product 3", 3.0),
+                            Product("Product 4", 4.0),
+                        ),
+                        isDelivered = false,
+                    ),
+                ),
+            ),
+        )
+        assertEquals(expected, result)
     }
-
+    
+    
     @Test
-    fun testNumberOfTimesEachProductWasOrdered() {
-        assertEquals(4, shop.countProductSales(idea))
+    fun `getWaitingCustomers should not return customers all orders delivered`() {
+        // given
+        val shop = Shop(
+            name = "Test shop",
+            customers = listOf(
+                Customer(
+                    name = "Customer 1",
+                    city = City("City 1"),
+                    orders = listOf(
+                        Order(
+                            products = listOf(
+                                Product("Product 1", 1.0),
+                                Product("Product 2", 2.0),
+                            ),
+                            isDelivered = true,
+                        ),
+                        Order(
+                            products = listOf(
+                                Product("Product 3", 3.0),
+                                Product("Product 4", 4.0),
+                            ),
+                            isDelivered = true,
+                        ),
+                    ),
+                ),
+                Customer(
+                    name = "Customer 2",
+                    city = City("City 2"),
+                    orders = listOf(
+                        Order(
+                            products = listOf(
+                                Product("Product 5", 5.0),
+                                Product("Product 6", 6.0),
+                            ),
+                            isDelivered = true,
+                        ),
+                        Order(
+                            products = listOf(
+                                Product("Product 7", 7.0),
+                                Product("Product 8", 8.0),
+                            ),
+                            isDelivered = true,
+                        ),
+                    ),
+                ),
+            ),
+        )
+
+        // when
+        val result = shop.getWaitingCustomers()
+
+        // then
+        assertEquals(listOf(), result)
     }
-
+    
     @Test
-    fun testNumberOfTimesEachProductWasOrderedForRepeatedProduct() {
-        assertEquals(3, shop.countProductSales(reSharper), "A customer may order a product for several times")
+    fun `countProductSales should count repeating sales`() {
+        // given
+        val p1 = Product("Product 1", 1.0)
+        val p2 = Product("Product 2", 2.0)
+        val p3 = Product("Product 3", 3.0)
+        val shop = Shop(
+            name = "Test shop",
+            customers = listOf(
+                Customer(
+                    name = "Customer 1",
+                    city = City("City 1"),
+                    orders = listOf(
+                        Order(
+                            products = listOf(p1, p2),
+                            isDelivered = true,
+                        ),
+                        Order(
+                            products = listOf(p1, p3),
+                            isDelivered = false,
+                        ),
+                    ),
+                ),
+                Customer(
+                    name = "Customer 2",
+                    city = City("City 2"),
+                    orders = listOf(
+                        Order(
+                            products = listOf(p1, p1),
+                            isDelivered = true,
+                        ),
+                        Order(
+                            products = listOf(p2, p3),
+                            isDelivered = true,
+                        ),
+                    ),
+                ),
+            ),
+        )
+
+        // then
+        assertEquals(4, shop.countProductSales(p1))
+        assertEquals(2, shop.countProductSales(p2))
+        assertEquals(2, shop.countProductSales(p3))
     }
-
+    
     @Test
-    fun testNumberOfTimesEachProductWasOrderedForRepeatedInOrderProduct() {
-        assertEquals(3, shop.countProductSales(phpStorm), "An order may contain a particular product more than once")
+    fun `countProductSales should count sales with exactly the same product`() {
+        // given
+        val shop = Shop(
+            name = "Test shop",
+            customers = listOf(
+                Customer(
+                    name = "Customer 1",
+                    city = City("City 1"),
+                    orders = listOf(
+                        Order(
+                            products = listOf(Product("Product 2", 1.0), Product("Product 1", 2.0)),
+                            isDelivered = true,
+                        ),
+                    ),
+                ),
+            ),
+        )
+
+        // then
+        assertEquals(0, shop.countProductSales(Product("Product 1", 1.0)))
+        assertEquals(1, shop.countProductSales(Product("Product 2", 1.0)))
+        assertEquals(1, shop.countProductSales(Product("Product 1", 2.0)))
+        assertEquals(0, shop.countProductSales(Product("Product 2", 2.0)))
+    }
+    
+    @Test
+    fun `getCustomers should get customers with orders with total price greater than minAmount`() {
+        // given
+        val p1 = Product("Product 1", 1.0)
+        val p2 = Product("Product 2", 2.0)
+        val p3 = Product("Product 3", 3.0)
+        val p4 = Product("Product 4", 4.0)
+        val p5 = Product("Product 5", 5.0)
+        val p6 = Product("Product 6", 6.0)
+        val p7 = Product("Product 7", 7.0)
+        val p8 = Product("Product 8", 8.0)
+        val c1 = Customer(
+            name = "Customer 1",
+            city = City("City 1"),
+            orders = listOf(
+                Order(
+                    products = listOf(p1, p2),
+                    isDelivered = true,
+                ),
+                Order(
+                    products = listOf(p1, p3),
+                    isDelivered = false,
+                ),
+            ),
+        )
+        val c2 = Customer(
+            name = "Customer 2",
+            city = City("City 2"),
+            orders = listOf(
+                Order(
+                    products = listOf(p1, p1),
+                    isDelivered = true,
+                ),
+                Order(
+                    products = listOf(p2, p3),
+                    isDelivered = true,
+                ),
+            ),
+        )
+        val c3 = Customer(
+            name = "Customer 3",
+            city = City("City 3"),
+            orders = listOf(
+                Order(
+                    products = listOf(p4, p5),
+                    isDelivered = true,
+                ),
+                Order(
+                    products = listOf(p6, p7),
+                    isDelivered = true,
+                ),
+            ),
+        )
+        val c4 = Customer(
+            name = "Customer 4",
+            city = City("City 4"),
+            orders = listOf(
+                Order(
+                    products = listOf(p8, p8),
+                    isDelivered = true,
+                ),
+            ),
+        )
+        val shop = Shop(
+            name = "Test shop",
+            customers = listOf(c1, c2, c3, c4),
+        )
+
+        // then
+        assertEquals(listOf(c1, c2, c3, c4), shop.getCustomers(0.0))
+        assertEquals(listOf(c3, c4), shop.getCustomers(10.0))
+        assertEquals(listOf(c3), shop.getCustomers(20.0))
+        assertEquals(listOf(), shop.getCustomers(30.0))
     }
 }
-
-private val idea = Product("IntelliJ IDEA Ultimate", 199.0)
-private val reSharper = Product("ReSharper", 149.0)
-private val dotTrace = Product("DotTrace", 159.0)
-private val dotMemory = Product("DotMemory", 129.0)
-private val phpStorm = Product("PhpStorm", 99.0)
-private val rubyMine = Product("RubyMine", 99.0)
-private val webStorm = Product("WebStorm", 49.0)
-
-//customers
-private const val lucas = "Lucas"
-private const val cooper = "Cooper"
-private const val nathan = "Nathan"
-private const val reka = "Reka"
-private const val bajram = "Bajram"
-private const val asuka = "Asuka"
-private const val riku = "Riku"
-
-//cities
-private val Canberra = City("Canberra")
-private val Vancouver = City("Vancouver")
-private val Budapest = City("Budapest")
-private val Ankara = City("Ankara")
-private val Tokyo = City("Tokyo")
-
-private fun customer(name: String, city: City, vararg orders: Order) = Customer(name, city, orders.toList())
-private fun order(vararg products: Product, isDelivered: Boolean = true) = Order(products.toList(), isDelivered)
-private fun shop(name: String, vararg customers: Customer) = Shop(name, customers.toList())
-
-private val shop = shop("jb test shop",
-    customer(lucas, Canberra,
-        order(reSharper),
-        order(reSharper, dotMemory, dotTrace)
-    ),
-    customer(cooper, Canberra),
-    customer(nathan, Vancouver,
-        order(rubyMine, webStorm)
-    ),
-    customer(reka, Budapest,
-        order(idea, isDelivered = false),
-        order(idea, isDelivered = false),
-        order(idea)
-    ),
-    customer(bajram, Ankara,
-        order(reSharper)
-    ),
-    customer(asuka, Tokyo,
-        order(idea)
-    ),
-    customer(riku, Tokyo,
-        order(phpStorm, phpStorm),
-        order(phpStorm)
-    )
-)
-
-private val customersMap = shop.customers.associateBy { it.name }
