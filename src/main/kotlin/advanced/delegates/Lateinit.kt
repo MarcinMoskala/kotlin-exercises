@@ -4,8 +4,7 @@ package advanced.delegates
 
 import org.junit.Test
 import kotlin.test.assertEquals
-
-// TODO: Implement Lateinit delegate here
+import kotlin.test.assertIs
 
 class LateinitTest {
 
@@ -15,19 +14,15 @@ class LateinitTest {
 //        val res = runCatching {
 //            println(value)
 //        }
-//        assertEquals(
-//            IllegalStateException("Variable value must be set before it is initialized"),
-//            res.exceptionOrNull()
-//        )
+//        val exception = assertIs<IllegalStateException>(res.exceptionOrNull())
+//        assertEquals("Variable value must be set before it is initialized", exception.message)
 //
 //        var value2: Int by Lateinit()
 //        val res2 = runCatching {
 //            println(value)
 //        }
-//        assertEquals(
-//            IllegalStateException("Variable value2 must be set before it is initialized"),
-//            res2.exceptionOrNull()
-//        )
+//        val exception2 = assertIs<IllegalStateException>(res2.exceptionOrNull())
+//        assertEquals("Variable value must be set before it is initialized", exception2.message)
 //    }
 //
 //    @Test
