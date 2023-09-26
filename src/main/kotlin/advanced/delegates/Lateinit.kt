@@ -3,8 +3,16 @@
 package advanced.delegates
 
 import org.junit.Test
+import kotlin.properties.Delegates
+import kotlin.properties.ReadWriteProperty
+import kotlin.reflect.KProperty
 import kotlin.test.assertEquals
 import kotlin.test.assertIs
+
+// TODO: Implement Lateinit delegate here
+// Easy: Uncomment the first 2 tests and implement Lateinit so it works for Int type
+// Medium: Uncomment the first 3 tests and implement Lateinit so it works for all non-nullable types
+// Hard: Uncomment all tests and implement Lateinit so it works for all types
 
 class LateinitTest {
 
@@ -19,10 +27,10 @@ class LateinitTest {
 //
 //        var value2: Int by Lateinit()
 //        val res2 = runCatching {
-//            println(value)
+//            println(value2)
 //        }
 //        val exception2 = assertIs<IllegalStateException>(res2.exceptionOrNull())
-//        assertEquals("Variable value must be set before it is initialized", exception2.message)
+//        assertEquals("Variable value2 must be set before it is initialized", exception2.message)
 //    }
 //
 //    @Test
