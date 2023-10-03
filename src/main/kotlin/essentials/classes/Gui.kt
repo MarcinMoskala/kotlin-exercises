@@ -5,60 +5,32 @@ import junit.framework.TestCase.assertTrue
 import org.junit.Test
 import kotlin.test.assertEquals
 
-open class View(
-    val id: String, 
-    var isVisible: Boolean
-) {
-    fun show() {
-        isVisible = true
-    }
-
-    fun hide() {
-        isVisible = false
-    }
-}
-
-class TextView(
-    id: String, 
-    var text: String
-) : View(id, true)
-
-class Toggle(
-    id: String, 
-) : View(id, true) {
-    var isOn: Boolean = false
-    
-    fun click() {
-        isOn = !isOn
-    }
-}
-
 fun main() {
-    val textView = TextView(
-        id = "tv1",
-        text = "Hello, World!",
-    )
-    println(textView.id) // tv1
-
-    textView.text = "Welcome to Kotlin!"
-    println(textView.text) // Welcome to Kotlin!
-    println(textView.isVisible) // true
-    
-    textView.hide()
-    println(textView.isVisible) // false
-
-    val toggle = Toggle(
-        id = "toggle1",
-    )
-    println(toggle.id) // toggle1
-
-    println(toggle.isOn) // false
-    toggle.click()
-    println(toggle.isOn) // true
-    
-    println(toggle.isVisible) // true
-    toggle.hide()
-    println(toggle.isVisible) // false
+//    val textView = TextView(
+//        id = "tv1",
+//        text = "Hello, World!",
+//    )
+//    println(textView.id) // tv1
+//
+//    textView.text = "Welcome to Kotlin!"
+//    println(textView.text) // Welcome to Kotlin!
+//    println(textView.isVisible) // true
+//    
+//    textView.hide()
+//    println(textView.isVisible) // false
+//
+//    val toggle = Toggle(
+//        id = "toggle1",
+//    )
+//    println(toggle.id) // toggle1
+//
+//    println(toggle.isOn) // false
+//    toggle.click()
+//    println(toggle.isOn) // true
+//    
+//    println(toggle.isVisible) // true
+//    toggle.hide()
+//    println(toggle.isVisible) // false
 }
 
 class GuiTests {
