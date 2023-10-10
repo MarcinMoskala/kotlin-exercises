@@ -51,7 +51,7 @@ class GuiTests {
 //
 //    @Test
 //    fun `toggle click should toggle isOn state`() {
-//        val toggle = Toggle("toggle1", true)
+//        val toggle = Toggle("toggle1")
 //        toggle.click()
 //        assertTrue(toggle.isOn)
 //        toggle.click()
@@ -60,32 +60,34 @@ class GuiTests {
 //
 //    @Test
 //    fun `text view setText should update text property`() {
-//        val textView = TextView("textView1", true, "Hello")
+//        val textView = TextView("textView1", "Hello")
 //        textView.text = "World"
 //        assertEquals("World", textView.text)
 //    }
 //
 //    @Test
 //    fun `toggle should inherit properties from view`() {
-//        val toggle = Toggle("toggle2", false)
+//        val toggle = Toggle("toggle2")
+//        assertTrue(toggle.isVisible)
+//        toggle.hide()
 //        assertFalse(toggle.isVisible)
 //    }
 //
 //    @Test
 //    fun `text view should inherit properties from view`() {
-//        val textView = TextView("textView2", true, "Hello")
+//        val textView = TextView("textView2", "Hello")
 //        assertTrue(textView.isVisible)
 //    }
 //
 //    @Test
 //    fun `toggle should start with isOn set to false`() {
-//        val toggle = Toggle("toggle3", true)
+//        val toggle = Toggle("toggle3")
 //        assertFalse(toggle.isOn)
 //    }
 //
 //    @Test
 //    fun `toggle should toggle isOn state correctly`() {
-//        val toggle = Toggle("toggle4", true)
+//        val toggle = Toggle("toggle4")
 //        toggle.click()
 //        assertTrue(toggle.isOn)
 //        toggle.click()
@@ -105,7 +107,7 @@ class GuiTests {
 //
 //    @Test
 //    fun `text view setText and visibility interactions`() {
-//        val textView = TextView("textView3", true, "Hello")
+//        val textView = TextView("textView3", "Hello")
 //        textView.text = "World"
 //        assertEquals("World", textView.text)
 //        textView.hide()
