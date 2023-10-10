@@ -19,13 +19,19 @@ fun handleInput() {
     println("Result: $result")
 }
 
-class IllegalOperatorException(operator: String) :
+class IllegalOperatorException(val operator: String) :
     Exception("Unknown operator: $operator")
 
 fun main() {
     while (true) {
-        // Wrap below function call with try-catching block,
-        // and handle possible exceptions.
-        handleInput()
+        try {
+            handleInput()
+        } catch (e: NumberFormatException) {
+            println("Invalid input: ${e.message}")
+        } catch (e: ArithmeticException) {
+            println("Division by zero")
+        } catch (e: IllegalOperatorException) {
+            println("Illegal operator: ${e.operator}")
+        }
     }
 }
