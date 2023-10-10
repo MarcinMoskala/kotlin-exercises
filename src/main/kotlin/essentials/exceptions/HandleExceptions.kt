@@ -19,7 +19,7 @@ fun handleInput() {
     println("Result: $result")
 }
 
-class IllegalOperatorException(operator: String) :
+class IllegalOperatorException(val operator: String) :
     Exception("Unknown operator: $operator")
 
 fun main() {
