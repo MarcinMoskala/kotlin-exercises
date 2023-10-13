@@ -9,27 +9,11 @@ data class Order(val products: List<Product>, val isDelivered: Boolean)
 data class Product(val name: String, val price: Double)
 data class City(val name: String)
 
-fun Shop.getWaitingCustomers(): List<Customer> = 
-    customers
-        .filter { 
-            it.orders.any { !it.isDelivered } 
-        }
+fun Shop.getWaitingCustomers(): List<Customer> = TODO()
 
-fun Shop.countProductSales(product: Product): Int = 
-    this.customers
-        .sumOf {
-            it.orders.sumOf {
-                it.products.count { it == product }
-            }
-        }
+fun Shop.countProductSales(product: Product): Int = TODO()
 
-fun Shop.getCustomers(minAmount: Double): List<Customer> = 
-    customers
-        .filter { 
-            it.orders.sumOf { 
-                it.products.sumOf { it.price }
-            } >= minAmount 
-        }
+fun Shop.getCustomers(minAmount: Double): List<Customer> = TODO()
 
 class ShopFunctionsTests {
     @Test
