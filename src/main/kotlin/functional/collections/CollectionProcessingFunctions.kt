@@ -1,13 +1,13 @@
 package functional.collections.collectionprocessingfunctions
 
-// To prevent unintentional stdlib functions usage
-import org.junit.Assert
-import org.junit.Assert.assertEquals
 import org.junit.Test
-import kotlin.collections.flatMap as stdlibFlatMap
-import kotlin.collections.map as stdlibMap
-import kotlin.collections.filter as stdlibFilter
-import kotlin.collections.onEach as stdlibOnEach
+import kotlin.collections.onEach
+import kotlin.test.assertEquals
+// To prevent unintentional stdlib functions usage
+import kotlin.collections.map as `implement it yourself`
+import kotlin.collections.onEach as `implement it yourself`
+import kotlin.collections.flatMap as `implement it yourself`
+import kotlin.collections.filter as `implement it yourself`
 
 inline fun <T, C: Iterable<T>> C.onEach(operation: (T) -> Unit): C {
     for (elem in this) {
@@ -34,7 +34,7 @@ inline fun <T> Iterable<T>.filter(predicate: (T) -> Boolean): List<T> {
     return list
 }
 
-fun main(args: Array<String>) {
+fun main() {
     val numbers = 1..10
     val names = listOf("Mike", "Jane", "Marcin", "John", "James")
 
@@ -51,19 +51,29 @@ fun main(args: Array<String>) {
 
 //    println(names.map { it.toUpperCase() }) // [MIKE, JANE, MARCIN, JOHN, JAMES]
 //    println(numbers.map { it * 10 }) // [10, 20, 30, 40, 50, 60, 70, 80, 90, 100]
+    
+    val list = listOf(1, 2, 3)
+//    println(list.map { it * 2 }) // [2, 4, 6]
+//    println(list.map { "$it!" }) // [1!, 2!, 3!]
+//    println(list.map { it % 2 == 0 }) // [false, true, false]
 }
 
 class MapTest {
 
     @Test
     fun mapTests() {
-        val numbers = 1..5
-        val names = listOf("Mike", "Jane", "Marcin", "John", "James")
-
+//        val numbers = 1..5
+//        val names = listOf("Mike", "Jane", "Marcin", "John", "James")
+//
 //        val upper = names.map { it.uppercase() }
 //        val doubled = numbers.map { it * 2 }
 //
 //        assertEquals(listOf("MIKE", "JANE", "MARCIN", "JOHN", "JAMES"), upper)
 //        assertEquals(listOf(2, 4, 6, 8, 10), doubled)
+//        
+//        val list = listOf(1, 2, 3)
+//        assertEquals(list.map { it * 2 }, listOf(2, 4, 6))
+//        assertEquals(list.map { "$it!" }, listOf("1!", "2!", "3!"))
+//        assertEquals(list.map { it % 2 == 0 }, listOf(false, true, false))
     }
 }
