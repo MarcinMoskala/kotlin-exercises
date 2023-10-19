@@ -15,16 +15,7 @@ class UserDtoFactory(
     // Should generate key using userKeyGenerator, or generate random key using uuidGenerator if userKeyGenerator returns null
     // Should set isAdmin to false
     // Should set creationTime to current time using timeProvider
-    fun produceUserDto(addUser: AddUser): UserDto = UserDto(
-        id = uuidGenerator.generate(),
-        key = userKeyGenerator.findPublicKey(addUser.name, addUser.surname) ?: uuidGenerator.generate(),
-        email = addUser.email,
-        name = addUser.name,
-        surname = addUser.surname,
-        passwordHash = addUser.passwordHash,
-        isAdmin = false,
-        creationTime = timeProvider.now(),
-    )
+    fun produceUserDto(addUser: AddUser): UserDto = TODO()
 }
 
 class UserDtoFactoryTest {

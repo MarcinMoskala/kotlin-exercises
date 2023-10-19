@@ -5,7 +5,6 @@ import org.junit.After
 import org.junit.Test
 import java.time.LocalDate
 import java.time.LocalDateTime
-import java.util.*
 import kotlin.reflect.full.memberProperties
 import kotlin.reflect.jvm.isAccessible
 import kotlin.time.Duration
@@ -21,85 +20,40 @@ class UserService(
     // and load function to load user by id from userRepository,
     // also loaded user should be stored in userByKeyCache
     private val userByIdCache: Cache<String, User> = cache {
-        clearAfterWrite = 1.minutes
-        clearAfterRead = 1.minutes
-        load { id: String ->
-            userRepository.getUser(id)
-                ?.toUser()
-                ?.also { userByKeyCache.store(it.key, it) }
-        }
+        // TODO
     }
+
     // Cache definition, that should set clearAfterWrite and clearAfterRead both to 1 minute,
     // and load function to load user by key from userRepository,
     // also loaded user should be stored in userByIdCache
     private val userByKeyCache: Cache<String, User> = cache {
-        clearAfterWrite = 1.minutes
-        clearAfterRead = 1.minutes
-        load { key: String ->
-            userRepository.getUserByKey(key)
-                ?.toUser()
-                ?.also { userByIdCache.store(it.id, it) }
-        }
+        // TODO
     }
 
     // Should get user from cache
-    fun getUser(id: String): User? = userByIdCache.get(id)
+    fun getUser(id: String): User? = TODO()
 
     // Should get user from cache
-    fun getUserByKey(key: String): User? = userByKeyCache.get(key)
+    fun getUserByKey(key: String): User? = TODO()
 
     // Should load user from repository, and if password matches, 
     // create, token and return it,
     // otherwise throw error with message "Wrong email or password"
-    fun getToken(email: String, passwordHash: String): String =
-        userRepository.getUserByEmail(email)
-            ?.takeIf { it.passwordHash == passwordHash }
-            ?.let { tokenRepository.createToken(it.id, it.isAdmin) }
-            ?: error("Wrong email or password")
+    fun getToken(email: String, passwordHash: String): String = TODO()
 
     // Should update user in repository, and clear cache
     // should log "User updated: $user"
     // in case of user not found, should throw error with the message "User not found"
-    fun updateUser(token: String, userPatch: UserPatch): User =
-        tokenRepository.getUserId(token)
-            ?.let { userRepository.getUser(it) }
-            ?.let { userDto ->
-                userDto.copy(
-                    email = userPatch.email ?: userDto.email,
-                    name = userPatch.name ?: userDto.name,
-                    surname = userPatch.surname ?: userDto.surname,
-                )
-            }
-            ?.also {
-                userRepository.updateUser(it)
-                userByIdCache.remove(it.id)
-                userByKeyCache.remove(it.key)
-                logger.log("User updated: $it")
-            }
-            ?.toUser()
-            ?: error("User not found")
+    fun updateUser(token: String, userPatch: UserPatch): User = TODO()
 
     // Should add user to repository if token belongs to admin,
     // should log "User added: $user"
-    fun addUser(token: String, addUser: AddUser): User {
-        if (!tokenRepository.isAdmin(token)) error("Only admin can add user")
-        return userDtoFactory.produceUserDto(addUser)
-            .also(userRepository::addUser)
-            .toUser()
-            .also { logger.log("User added: $it") }
-    }
+    fun addUser(token: String, addUser: AddUser): User = TODO()
 
     // Should return statistics about users
     // in case of token not belonging to admin, should throw error with the message "Only admin can get statistics"
-    fun userStatistics(token: String): UserStatistics {
-        if (!tokenRepository.isAdmin(token)) error("Only admin can get statistics")
-        return UserStatistics(
-            numberOfUsersCreatedEachDay = userRepository.getAllUsers()
-                .groupingBy { it.creationTime.toLocalDate() }
-                .eachCount()
-        )
-    }
-    
+    fun userStatistics(token: String): UserStatistics = TODO()
+
     fun clearCache() {
         userByIdCache.clear()
         userByKeyCache.clear()
@@ -128,7 +82,7 @@ class UserServiceTest {
         tokenRepository.cleanup()
         logger.cleanup()
         userService.clearCache()
-    }   
+    }
 
     val user = User(
         id = "id",
@@ -139,19 +93,19 @@ class UserServiceTest {
         isAdmin = false,
         creationTime = LocalDateTime.of(2023, 10, 19, 13, 29, 49, 331810)
     )
-    
+
     @Test
     fun `cache is well-configured`() {
         val userByIdCache = UserService::class.memberProperties
             .find { it.name == "userByIdCache" }
             ?.also { it.isAccessible = true }
             ?.get(userService) as Cache<*, *>
-        
+
         val userByKeyCache = UserService::class.memberProperties
             .find { it.name == "userByKeyCache" }
             ?.also { it.isAccessible = true }
             ?.get(userService) as Cache<*, *>
-        
+
         assertEquals(1.minutes, userByIdCache.clearAfterWrite as Duration)
         assertEquals(1.minutes, userByIdCache.clearAfterRead as Duration)
         assertEquals(1.minutes, userByKeyCache.clearAfterWrite as Duration)
@@ -169,7 +123,7 @@ class UserServiceTest {
         // then
         assertEquals(user, result)
     }
-    
+
     @Test
     fun `should use cache when getting user by id`() {
         // given
@@ -197,7 +151,7 @@ class UserServiceTest {
         // then
         assertEquals(user, result)
     }
-    
+
     @Test
     fun `should use cache when getting user by key`() {
         // given
@@ -226,7 +180,7 @@ class UserServiceTest {
         assertEquals(false, tokenRepository.isAdmin(result))
         assertEquals(user.id, tokenRepository.getUserId(result))
     }
-    
+
     @Test
     fun `should throw error when getting token and password do not match`() {
         // given
@@ -238,7 +192,7 @@ class UserServiceTest {
         // then
         assertEquals("Wrong email or password", result.exceptionOrNull()?.message)
     }
-    
+
     @Test
     fun `should throw error when getting token and user does not exist`() {
         // when
@@ -265,7 +219,7 @@ class UserServiceTest {
         // then
         assertEquals(user.copy(email = "newEmail", name = "newName", surname = "newSurname"), result)
     }
-    
+
     @Test
     fun `should clear cache when updating user`() {
         // given
@@ -358,7 +312,7 @@ class UserServiceTest {
             result
         )
     }
-    
+
     @Test
     fun `should log when updating user`() {
         // given
@@ -379,7 +333,7 @@ class UserServiceTest {
             logger.messages
         )
     }
-    
+
     @Test
     fun `should log when adding user`() {
         // given

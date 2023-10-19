@@ -25,21 +25,7 @@ class RealUserKeyGenerator(
     // Should trim the key.
     // Should return null if the key is shorter than 4 characters.
     // Should return null if key already exists in the database.
-    override fun findPublicKey(name: String, surname: String): String? = sequenceOf(
-        "$name$surname",
-        "$surname$name",
-        "$name${surname.first()}",
-        "${name.first()}$surname",
-        "$surname${name.first()}",
-        "${surname.first()}$name",
-    ).map(::properKey)
-        .filter { it.length >= 4 }
-        .find(userRepository::isAvailableKey)
-
-    private fun properKey(original: String): String = original
-        .replace("[^0-9a-zA-Z]".toRegex(), "")
-        .lowercase()
-        .trim()
+    override fun findPublicKey(name: String, surname: String): String? = TODO()
 }
 
 class FakeUserKeyGenerator : UserKeyGenerator {
