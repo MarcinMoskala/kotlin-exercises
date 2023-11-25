@@ -9,7 +9,7 @@ fun secondsToPrettyTime(seconds: Int): String {
 
 fun main() {
     println(secondsToPrettyTime(-1)) // Invalid input
-    println(secondsToPrettyTime(0)) // 
+    println(secondsToPrettyTime(0)) // Now
     println(secondsToPrettyTime(45)) // 45 sec
     println(secondsToPrettyTime(60)) // 1 min
     println(secondsToPrettyTime(150)) // 2 min 30 sec
@@ -72,7 +72,7 @@ class PrettyTimeTest {
     @Test
     fun testZeroSeconds() {
         val seconds = 0
-        val expected = ""
+        val expected = "Now"
         assertEquals(expected, secondsToPrettyTime(seconds))
     }
 
