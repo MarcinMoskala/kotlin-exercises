@@ -1,7 +1,7 @@
 package functional.collections
 
-import org.junit.Assert.*
 import org.junit.Test
+import utils.assertThrows
 import kotlin.test.assertEquals
 
 fun <T> List<T>.plusAt(index: Int, element: T): List<T> = TODO()
@@ -33,11 +33,4 @@ class PlusAtTest {
         assertThrows<IllegalArgumentException> { listOf(1, 2, 3).plusAt(10, 7) }
         assertThrows<IllegalArgumentException> { listOf(1, 2, 3).plusAt(100, 7) }
     }
-}
-
-inline fun <reified T: Throwable> assertThrows(operation: () -> Unit) {
-    val result = runCatching { operation() }
-    assert(result.isFailure) { "Operation has not failed with exception" }
-    val exception = result.exceptionOrNull()
-    assert(exception is T) { "Incorrect exception type, it should be ${T::class}, but it is $exception" }
 }

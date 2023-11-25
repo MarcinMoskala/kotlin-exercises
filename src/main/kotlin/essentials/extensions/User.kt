@@ -33,7 +33,7 @@ fun main() {
 //            .of(1410, 7, 15, 10, 13),
 //        height = 170.cm,
 //    )
-//    val userJson = user.toJson()
+//    val userJson = user.toUserJson()
 //    println(userJson)
 //    // UserJson(username=alex, email=alex@example.com, 
 //    // registrationDate=1410-07-15T10:13, heightCm=170)
@@ -55,7 +55,7 @@ class DataConversionTest {
 //            height = 170.cm
 //        )
 //
-//        val userJson = user.toJson()
+//        val userJson = user.toUserJson()
 //
 //        assertEquals("alex", userJson.username)
 //        assertEquals("alex@example.com", userJson.email)

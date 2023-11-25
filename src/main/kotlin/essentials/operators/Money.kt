@@ -1,7 +1,7 @@
 package essentials.operators
 
-import functional.collections.assertThrows
 import org.junit.Test
+import utils.assertThrows
 import java.math.BigDecimal
 import kotlin.test.assertEquals
 
@@ -71,7 +71,7 @@ class MoneyOperationsTest {
 //        assertEquals(Money.eur("-100.00"), -Money.eur("100.00"))
 //        assertEquals(Money.eur("10.00"), -Money.eur("-10.00"))
 //        assertEquals(Money.eur("-999.999"), -Money.eur("999.999"))
-//        
+//
 //    }
 //
 //    @Test
