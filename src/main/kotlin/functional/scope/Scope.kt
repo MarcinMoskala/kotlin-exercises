@@ -6,7 +6,7 @@ import org.junit.Test
 import java.time.LocalDateTime
 import java.util.*
 
-class StudentController(
+class StudentService(
     private val studentRepository: StudentRepository,
     private val studentFactory: StudentFactory,
     private val logger: Logger,
@@ -62,13 +62,13 @@ class StudentFactory(
     )
 }
 
-class StudentControllerTest {
+class StudentServiceTest {
     private val logger = FakeLogger()
     private val userRepository = FakeStudentRepository()
     private val timeProvider = FakeTimeProvider()
     private val uuidGenerator = FakeUuidGenerator()
     private val studentFactory = StudentFactory(timeProvider, uuidGenerator)
-    private val studentController = StudentController(userRepository, studentFactory, logger)
+    private val studentService = StudentService(userRepository, studentFactory, logger)
 
     @After
     fun cleanup() {
@@ -92,7 +92,7 @@ class StudentControllerTest {
         )
 
         // When
-        val result = studentController.addStudent(addStudentRequest)
+        val result = studentService.addStudent(addStudentRequest)
 
         // Then
         val expected = Student(
@@ -116,10 +116,10 @@ class StudentControllerTest {
             semester = "1",
             result = 4.0,
         )
-        studentController.addStudent(addStudentRequest)
+        studentService.addStudent(addStudentRequest)
 
         // When
-        val result = studentController.getStudent(studentId)
+        val result = studentService.getStudent(studentId)
 
         // Then
         val expected = ExposedStudent(
@@ -140,10 +140,10 @@ class StudentControllerTest {
             semester = "1",
             result = 4.0,
         )
-        studentController.addStudent(addStudentRequest)
+        studentService.addStudent(addStudentRequest)
 
         // When
-        val result = studentController.getStudent(studentId)
+        val result = studentService.getStudent(studentId)
 
         // Then
         val expected = listOf(
@@ -162,10 +162,10 @@ class StudentControllerTest {
             semester = "1",
             result = 4.0,
         )
-        studentController.addStudent(addStudentRequest)
+        studentService.addStudent(addStudentRequest)
 
         // When
-        val result = studentController.getStudent("1")
+        val result = studentService.getStudent("1")
 
         // Then
         assertEquals(null, result)
@@ -188,10 +188,10 @@ class StudentControllerTest {
             AddStudentRequest("Kate", "Semester1", 5.0),
             AddStudentRequest("Linda", "Semester1", 3.0),
             AddStudentRequest("Marc", "Semester1", 2.0),
-        ).forEach { studentController.addStudent(it) }
+        ).forEach { studentService.addStudent(it) }
 
         // When
-        val result1 = studentController.getStudents("Semester1")
+        val result1 = studentService.getStudents("Semester1")
 
         // Then should receive students from the same semester and with result >= 3.0
         assertEquals(
@@ -211,7 +211,7 @@ class StudentControllerTest {
         logger.cleanup()
 
         // When
-        val result = studentController.getStudents("Semester2")
+        val result = studentService.getStudents("Semester2")
 
         // Then should receive students from the semester and with result >= 3.0
         assertEquals(
