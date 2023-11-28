@@ -13,7 +13,7 @@ import kotlin.system.measureTimeMillis
 import kotlin.time.Duration
 import kotlin.time.Duration.Companion.milliseconds
 
-suspend fun measureCoroutineDuration(body: suspend () -> Unit): Duration {
+suspend fun measureCoroutine(body: suspend () -> Unit): Duration {
     val dispatcher = coroutineContext[ContinuationInterceptor]
     return if (dispatcher is TestDispatcher) {
         val before = dispatcher.scheduler.currentTime
@@ -30,7 +30,7 @@ suspend fun measureCoroutineDuration(body: suspend () -> Unit): Duration {
 suspend fun main() {
 //    runTest {
 //        val result: String
-//        val duration = measureCoroutineDuration {
+//        val duration = measureCoroutine {
 //            delay(1000)
 //            result = "OK"
 //        }
@@ -40,7 +40,7 @@ suspend fun main() {
 //    
 //    runBlocking {
 //        val result: String
-//        val duration = measureCoroutineDuration {
+//        val duration = measureCoroutine {
 //            delay(1000)
 //            result = "OK"
 //        }

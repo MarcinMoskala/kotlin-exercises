@@ -16,20 +16,53 @@ class FunctionCaller {
         TODO()
     }
 
-    // Call function with set values based on parameter type
     fun <T> call(function: KFunction<T>): T {
         TODO()
     }
 }
 
+fun printStrIntNum(str: String, int: Int, num: Number) {
+    println("str: $str, int: $int, num: $num")
+}
+
+fun printWithOptionals(l: Long = 999, s: String) {
+    println("l: $l, s: $s")
+}
+
+fun main() {
+    val caller = FunctionCaller()
+    caller.setConstant("ABC")
+    caller.setConstant(123)
+    caller.setConstant(typeOf<Number>(), 3.14)
+    caller.call(::printStrIntNum)
+    // str: ABC, int: 123, num: 3.14
+    caller.call(::printWithOptionals)
+    // l: 999, s: ABC
+}
+
 class FunctionCallerTest {
     var value: Any? = null
-    fun callStr(str: String) { value = "callStr $str" }
-    fun callInt(int: Int) { value = "callInt $int" }
-    fun callStringInt(str: String, int: Int) { value = "callStringInt $str $int" }
+    fun callStr(str: String) {
+        value = "callStr $str"
+    }
+
+    fun callInt(int: Int) {
+        value = "callInt $int"
+    }
+
+    fun callStringInt(str: String, int: Int) {
+        value = "callStringInt $str $int"
+    }
+
     data class User(val id: Int, val name: String?, var surname: String?)
-    fun callUser(user: User) { value = user }
-    fun callWithDefault(c: Char, i: Int = 999, s: String = "XXX", l: Long) { value = "callWithDefault $c $i $s $l" }
+
+    fun callUser(user: User) {
+        value = user
+    }
+
+    fun callWithDefault(c: Char, i: Int = 999, s: String = "XXX", l: Long) {
+        value = "callWithDefault $c $i $s $l"
+    }
 
     @After
     fun cleanUp() {
