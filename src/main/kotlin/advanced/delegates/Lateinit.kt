@@ -23,14 +23,14 @@ class LateinitTest {
 //            println(value)
 //        }
 //        val exception = assertIs<IllegalStateException>(res.exceptionOrNull())
-//        assertEquals("Variable value must be set before it is initialized", exception.message)
+//        assertEquals("Uninitialized lateinit property value", exception.message)
 //
 //        var value2: Int by Lateinit()
 //        val res2 = runCatching {
 //            println(value2)
 //        }
 //        val exception2 = assertIs<IllegalStateException>(res2.exceptionOrNull())
-//        assertEquals("Variable value2 must be set before it is initialized", exception2.message)
+//        assertEquals("Uninitialized lateinit property value2", exception.message)
 //    }
 //
 //    @Test

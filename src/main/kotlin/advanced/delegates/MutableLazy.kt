@@ -4,9 +4,38 @@ package advanced.delegates
 import org.junit.Assert
 import org.junit.Test
 import kotlin.properties.ReadWriteProperty
+import kotlin.reflect.KProperty
 import kotlin.system.measureTimeMillis
 
-fun <T> mutableLazy(initializer: () -> T): ReadWriteProperty<Any?, T> = TODO()
+fun <T> mutableLazy(
+    initializer: () -> T
+): ReadWriteProperty<Any?, T> = MutableLazy(initializer)
+
+private class MutableLazy<T>(
+    private var initializer: (() -> Any?)? = null,
+): ReadWriteProperty<Any?, T> {
+    private var value: Any? = null
+
+    override fun getValue(
+        thisRef: Any?, 
+        property: KProperty<*>
+    ): T {
+        if (initializer != null) {
+            value = initializer?.invoke()
+            initializer = null
+        }
+        return value as T
+    }
+
+    override fun setValue(
+        thisRef: Any?,
+        property: KProperty<*>, 
+        value: T
+    ) {
+        this.value = value
+        this.initializer = null
+    }
+}
 
 class MutableLazyTest {
 

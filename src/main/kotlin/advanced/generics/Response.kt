@@ -4,10 +4,12 @@ sealed class Response<R, E>
 class Success<R, E>(val value: R) : Response<R, E>()
 class Failure<R, E>(val error: E) : Response<R, E>()
 
-fun processResponseInt(response: Response<Int, String>) { /*...*/
+fun processResponseInt(response: Response<Int, String>) { 
+    /*...*/
 }
 
-fun processResponseString(response: Response<String, Throwable>) { /*...*/
+fun processResponseString(response: Response<String, Throwable>) {
+    /*...*/
 }
 
 //fun usage() {

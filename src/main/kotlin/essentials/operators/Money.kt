@@ -15,7 +15,7 @@ data class Money(
 }
 
 enum class Currency {
-    EUR, USD, GBP, RUB
+    EUR, USD, GBP
 }
 
 fun main() {
