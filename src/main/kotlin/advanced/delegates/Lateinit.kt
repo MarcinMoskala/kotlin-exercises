@@ -30,7 +30,7 @@ class LateinitTest {
 //            println(value2)
 //        }
 //        val exception2 = assertIs<IllegalStateException>(res2.exceptionOrNull())
-//        assertEquals("Uninitialized lateinit property value2", exception.message)
+//        assertEquals("Uninitialized lateinit property value2", exception2.message)
 //    }
 //
 //    @Test
