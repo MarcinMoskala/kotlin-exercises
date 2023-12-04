@@ -3,36 +3,21 @@ import kotlin.concurrent.thread
 
 fun main() {
     val value1 = GlobalScope.async {
-        delay(1000L)
+        delay(2000L)
         1
     }
     val value2 = GlobalScope.async {
-        delay(1000L)
-        20
+        delay(2000L)
+        2
     }
     val value3 = GlobalScope.async {
-        delay(1000L)
-        300
+        delay(2000L)
+        3
     }
     println("Calculating")
     runBlocking {
-        print(value1.await() + value2.await() + value3.await())
+        print(value1.await())
+        print(value2.await())
+        print(value3.await())
     }
 }
-
-//fun main() {
-//    thread(isDaemon = true) {
-//        Thread.sleep(1000L)
-//        println("World!")
-//    }
-//    thread(isDaemon = true) {
-//        Thread.sleep(1000L)
-//        println("World!")
-//    }
-//    thread(isDaemon = true) {
-//        Thread.sleep(1000L)
-//        println("World!")
-//    }
-//    println("Hello,")
-//    Thread.sleep(2000L)
-//}
