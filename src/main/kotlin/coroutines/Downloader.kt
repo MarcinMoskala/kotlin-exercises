@@ -1,6 +1,6 @@
 import kotlinx.coroutines.*
 
-class User(val name: String)
+data class User(val name: String)
 
 interface NetworkService {
     suspend fun getUser(id: Int): User
