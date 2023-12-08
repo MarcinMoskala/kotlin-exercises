@@ -1,5 +1,6 @@
 package safe
 
+import org.junit.Before
 import org.junit.Test
 import safe.BonusRepository.User
 import kotlin.reflect.KMutableProperty
@@ -9,7 +10,7 @@ import kotlin.test.assertNotEquals
 
 // This repo is incomplete and full of errors. Improve it
 class BonusRepository(
-    private val bonusesService: BonusesService = PrintingBonusesService
+    private val bonusesService: BonusesService
 ) {
     private val users: MutableSet<User> = mutableSetOf()
     private val bonuses: MutableMap<User, MutableList<String>> = mutableMapOf()
@@ -25,17 +26,22 @@ class BonusRepository(
     }
 
     fun addBonus(user: User, bonus: String) {
-        // TODO
+        bonuses[user] = bonuses[user]?.toMutableList()?.apply { add(bonus) }
+            ?: mutableListOf(bonus)
         bonusesService.update(bonuses)
     }
 
     fun removeBonus(user: User, bonus: String) {
-        // TODO
+        bonuses[user] = bonuses[user]?.toMutableList()?.apply { remove(bonus) }
+            ?: mutableListOf()
         bonusesService.update(bonuses)
     }
 
     fun updateBonus(user: User, oldBonus: String, newBonus: String) {
-        // TODO
+        bonuses[user] = bonuses[user]?.toMutableList()?.apply {
+            remove(oldBonus)
+            add(newBonus)
+        } ?: mutableListOf(newBonus)
         bonusesService.update(bonuses)
     }
 
@@ -46,6 +52,17 @@ class BonusRepository(
         var surname: String?,
         var name: String?
     )
+}
+
+fun main() {
+    val bonusRepository = BonusRepository(
+        bonusesService = PrintingBonusesService
+    )
+    val user1 = User(0, "Moskała", "Marcin")
+    val user2 = User(1, "Kowalski", "Jan")
+    bonusRepository.addUser(user1)
+    bonusRepository.addUser(user2)
+    // ...
 }
 
 interface BonusesService {
@@ -64,10 +81,18 @@ class BonusRepositoryTest {
     private val bonus1 = "Bonus1"
     private val bonus2 = "Bonus2"
 
+    lateinit var bonusService: FakeBonusesService
+    lateinit var repo: BonusRepository
+    
+    @Before
+    fun setUp() {
+        bonusService = FakeBonusesService()
+        repo = BonusRepository(bonusService)
+    }
+    
     @Test
     fun `When user is added, it can be found with contains`() {
         val user1 = user1.copy()
-        val repo = BonusRepository()
         assert(user1 !in repo)
         repo.addUser(user1)
         assert(user1 in repo)
@@ -77,7 +102,6 @@ class BonusRepositoryTest {
     fun `User exists after surname change`() {
         val user1 = user1.copy() // We need it because User is mutable
         val user1withSurnameChanged = user1withSurnameChanged.copy() // We need it because User is mutable
-        val repo = BonusRepository()
         repo.addUser(user1.copy())
         repo.addUser(User(0, "BBB", "AAA"))
         repo.addUser(User(1, "CCC", "DDD"))
@@ -92,7 +116,6 @@ class BonusRepositoryTest {
     @Test
     fun `Bonus add, remove and update test`() {
         val user1 = user1.copy() // We need it because User is mutable
-        val repo = BonusRepository()
         repo.addUser(user1)
 
         repo.addBonus(user1, bonus1)
@@ -102,7 +125,6 @@ class BonusRepositoryTest {
     @Test
     fun `Repo is not modified when we change bonuses`() {
         val user1 = user1.copy() // We need it because User is mutable
-        val repo = BonusRepository()
         repo.addUser(user1)
 
         repo.addBonus(user1, bonus1)
@@ -120,13 +142,6 @@ class BonusRepositoryTest {
     fun `Whenever bonuses are modified, BonusesService is notified`() {
         val user1 = user1.copy() // We need it because User is mutable
         var lastUpdatedBonuses = mapOf<User, List<String>>()
-        val service = object : BonusesService {
-            override fun update(bonuses: Map<User, List<String>>) {
-                lastUpdatedBonuses = bonuses
-            }
-        }
-
-        val repo = BonusRepository(bonusesService = service)
         repo.addUser(user1)
         repo.addBonus(user1, bonus1)
         assertEquals(mapOf(user1 to listOf(bonus1)), lastUpdatedBonuses)
@@ -140,7 +155,6 @@ class BonusRepositoryTest {
     fun `Bonuses are preserved after user surname change`() {
         val user1 = user1.copy() // We need it because user is mutable
         val user1withSurnameChanged = user1withSurnameChanged.copy() // We need it because user is mutable
-        val repo = BonusRepository()
         repo.addUser(user1)
         repo.addBonus(user1, bonus1)
         repo.changeUserSurname(user1.id, user1withSurnameChanged.surname)
@@ -157,5 +171,12 @@ class BonusRepositoryTest {
             .forEach {
                 assert(it !is KMutableProperty<*>) { "Property ${it.name} is not final" }
             }
+    }
+    
+    class FakeBonusesService : BonusesService {
+        var lastUpdatedBonuses = mapOf<User, List<String>>()
+        override fun update(bonuses: Map<User, List<String>>) {
+            lastUpdatedBonuses = bonuses
+        }
     }
 }

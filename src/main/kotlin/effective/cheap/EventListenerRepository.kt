@@ -3,19 +3,24 @@ package cheap
 import org.junit.Test
 import kotlin.test.assertEquals
 
-private val LOCK = Any()
-
 class EventListenerRepository {
     private var listeners: List<EventListener> = emptyList()
+    private val lock = Any()
 
-    fun addEventListener(event: Event, handler: () -> Unit): EventListener = synchronized(LOCK) {
-        val listener = EventListener(event, handler)
+    fun addEventListener(
+        event: Event,
+        handler: () -> Unit
+    ): EventListener = synchronized(lock) {
+        val listener = EventListener(event, handler, lock)
         listeners = listeners + listener
         listener
     }
 
-    fun invokeListeners(event: Event): Unit = synchronized(LOCK) {
-        val activeListeners = listeners.filter { it.event == event && it.isActive }
+    fun invokeListeners(
+        event: Event
+    ): Unit = synchronized(lock) {
+        val activeListeners = listeners
+            .filter { it.event == event && it.isActive }
         activeListeners.onEach { it.handler() }
     }
 
@@ -25,12 +30,13 @@ class EventListenerRepository {
 class EventListener(
     val event: EventListenerRepository.Event,
     val handler: () -> Unit,
-    isActive: Boolean = true
+    val repositoryLock: Any,
+    isActive: Boolean = true,
 ) {
     var isActive: Boolean = isActive
         private set
 
-    fun cancel(): Unit = synchronized(LOCK) {
+    fun cancel(): Unit = synchronized(repositoryLock) {
         isActive = false
     }
 }

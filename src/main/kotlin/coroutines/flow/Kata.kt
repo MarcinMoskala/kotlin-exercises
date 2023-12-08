@@ -6,12 +6,10 @@ import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
-import kotlinx.coroutines.test.TestScope
-import kotlinx.coroutines.test.UnconfinedTestDispatcher
-import kotlinx.coroutines.test.currentTime
-import kotlinx.coroutines.test.runCurrent
-import kotlinx.coroutines.test.runTest
+import kotlinx.coroutines.test.*
 import org.junit.Test
+import utils.ValueAndTime
+import utils.withVirtualTime
 import java.util.concurrent.atomic.AtomicInteger
 import kotlin.test.assertEquals
 
@@ -42,7 +40,14 @@ fun Flow<*>.toNextNumbers(): Flow<Int> = TODO()
 
 // Produces not only elements, but the whole history till now
 // For instance flowOf(1, "A", 'C').withHistory() -> [[], [1], [1, A], [1, A, C]]
-fun <T> Flow<T>.withHistory(): Flow<List<T>> = TODO()
+fun <T> Flow<T>.withHistory(): Flow<List<T>> = flow {
+    val history = mutableListOf<T>()
+    emit(history)
+    collect {
+        history += it
+        emit(history)
+    }
+}
 
 // Should create a flow that every `tickEveryMillis` should emit next numbers from `startNum` to `endNum`.
 // The first number should be emitted immediately, each next one after `tickEveryMillis` delay.
@@ -80,12 +85,6 @@ fun makeLightSwitchToggle(switch1: Flow<Unit>, switch2: Flow<Unit>): Flow<Boolea
 fun polonaisePairing(track1: Flow<Person>, track2: Flow<Person>): Flow<Pair<Person, Person>> = TODO()
 
 data class Person(val name: String)
-
-@OptIn(ExperimentalCoroutinesApi::class)
-private fun <T> Flow<T>.withVirtualTime(testScope: TestScope): Flow<ValueAndTime<T>> =
-    map { ValueAndTime(it, testScope.currentTime) }
-
-data class ValueAndTime<T>(val value: T, val timeMillis: Long)
 
 @OptIn(ExperimentalCoroutinesApi::class)
 @Suppress("FunctionName")
