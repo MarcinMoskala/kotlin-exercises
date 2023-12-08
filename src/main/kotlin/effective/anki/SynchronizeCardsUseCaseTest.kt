@@ -6,14 +6,14 @@ import anki.fakes.InMemoryAnkiCardsRepository
 import anki.fakes.InMemoryAnkiNetworkRepository
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.test.runBlockingTest
+import kotlinx.coroutines.test.runTest
 import org.junit.Test
 import kotlin.test.assertEquals
 
 class SynchronizeCardsUseCaseTest {
 
     @Test
-    fun `should synchronize cards`() = runBlockingTest {
+    fun `should synchronize cards`() = runTest {
         // given
         val view = FakeAnkiView()
         val cards = listOf(AnkiCard("A", "B"), AnkiCard("C", "D"))
@@ -30,7 +30,7 @@ class SynchronizeCardsUseCaseTest {
     }
 
     @Test
-    fun `should show progress bar`() = runBlockingTest {
+    fun `should show progress bar`() = runTest {
         // given
         val view = FakeAnkiView()
         val cards = listOf(AnkiCard("A", "B"), AnkiCard("C", "D"))
@@ -57,7 +57,7 @@ class SynchronizeCardsUseCaseTest {
     }
 
     @Test
-    fun `should show exceptions`() = runBlockingTest {
+    fun `should show exceptions`() = runTest {
         // given
         val view = FakeAnkiView()
         val apiException = AnkiApiException(401, "User not found")

@@ -5,14 +5,14 @@ import anki.fakes.FakeAnkiView
 import anki.fakes.InMemoryAnkiCardsRepository
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.test.runBlockingTest
+import kotlinx.coroutines.test.runTest
 import org.junit.Test
 import kotlin.test.assertEquals
 
 class CorrectCardsUseCaseTest {
 
     @Test
-    fun `should correct cards`() = runBlockingTest {
+    fun `should correct cards`() = runTest {
         // given
         val view = FakeAnkiView()
         val cardsRepo = InMemoryAnkiCardsRepository()
@@ -27,7 +27,7 @@ class CorrectCardsUseCaseTest {
     }
 
     @Test
-    fun `should show progress bar`() = runBlockingTest {
+    fun `should show progress bar`() = runTest {
         // given
         val view = FakeAnkiView()
         val cardsRepo = InMemoryAnkiCardsRepository()
@@ -50,7 +50,7 @@ class CorrectCardsUseCaseTest {
     }
 
     @Test
-    fun `should show dialog`() = runBlockingTest {
+    fun `should show dialog`() = runTest {
         // given
         val view = FakeAnkiView()
         val cardsRepo = InMemoryAnkiCardsRepository()
