@@ -6,13 +6,41 @@ import kotlin.system.measureTimeMillis
 
 fun main() {
     measureTimeMillis {
-        // Download CSV data from: https://data.cityofchicago.org/Public-Safety/Crimes-2001-to-Present/ijzp-q8t2/data
-        File("Crimes_-_2001_to_Present.csv").readLines()
-            .drop(1)
-            .map { it.split(",")[5] }
-//           TODO: Count the number of crimes per each primary cause
-//            .sortedByDescending { (_, num) -> num }
-//            .joinToString(separator = "\n") { (type, num) -> "$num $type" }
-            .let(::println)
+        File("Crimes_-_2001_to_Present.csv").useLines { lines ->
+            lines.drop(1)
+                .map { Crime.parse(it) }
+                .groupingBy { it.primaryType }
+                .eachCount()
+                .toList()
+                .sortedByDescending { (_, num) -> num }
+                .joinToString(separator = "\n") { (type, num) ->
+                    "$num $type"
+                }
+                .let(::println)
+        }
     }.let { println("Took $it") }
+}
+
+class Crime(
+    val id: String,
+    val caseNumber: String,
+    val date: String,
+    val block: String,
+    val iucr: String,
+    val primaryType: String,
+    
+) {
+    companion object {
+        fun parse(line: String): Crime {
+            val values = line.split(",")
+            return Crime(
+                id = values[0],
+                caseNumber = values[1],
+                date = values[2],
+                block = values[3],
+                iucr = values[4],
+                primaryType = values[5]
+            )
+        }
+    }
 }

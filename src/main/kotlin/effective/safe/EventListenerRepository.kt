@@ -1,27 +1,36 @@
 package cheap
 
 import org.junit.Test
+import java.util.concurrent.ConcurrentHashMap
 import kotlin.test.assertEquals
 
 class EventListenerRepository {
-    private var listeners: List<EventListener> = emptyList()
+    private var listeners = ConcurrentHashMap
+        .newKeySet<EventListener>()
     private val lock = Any()
 
     fun addEventListener(
         event: Event,
         handler: () -> Unit
     ): EventListener = synchronized(lock) {
-        val listener = EventListener(event, handler, lock)
-        listeners = listeners + listener
+        val listener = EventListener(event, handler)
+        listeners += listener
         listener
     }
 
     fun invokeListeners(
         event: Event
-    ): Unit = synchronized(lock) {
-        val activeListeners = listeners
-            .filter { it.event == event && it.isActive }
-        activeListeners.onEach { it.handler() }
+    ) {
+        for (listener in listeners) {
+            if (
+                listener.event == event &&
+                listener.isActive
+            ) {
+                listener.handleEvent()
+            } else {
+                listeners.remove(listener)
+            }
+        }
     }
 
     enum class Event { A, B, C }
@@ -29,15 +38,17 @@ class EventListenerRepository {
 
 class EventListener(
     val event: EventListenerRepository.Event,
-    val handler: () -> Unit,
-    val repositoryLock: Any,
-    isActive: Boolean = true,
+    handler: () -> Unit,
 ) {
-    var isActive: Boolean = isActive
-        private set
+    private var handler: (() -> Unit)? = handler
+    val isActive: Boolean get() = handler != null
 
-    fun cancel(): Unit = synchronized(repositoryLock) {
-        isActive = false
+    fun handleEvent() {
+        handler?.invoke()
+    }
+
+    fun cancel() {
+        handler = null
     }
 }
 
