@@ -38,17 +38,18 @@ class EventListenerRepository {
 
 class EventListener(
     val event: EventListenerRepository.Event,
-    handler: () -> Unit,
+    val handler: () -> Unit,
+    isActive: Boolean = true
 ) {
-    private var handler: (() -> Unit)? = handler
-    val isActive: Boolean get() = handler != null
-
+    var isActive: Boolean = isActive
+        private set
+    
     fun handleEvent() {
-        handler?.invoke()
+        handler()
     }
 
     fun cancel() {
-        handler = null
+        isActive = false
     }
 }
 
