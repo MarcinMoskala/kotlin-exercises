@@ -6,18 +6,17 @@ import kotlin.system.measureTimeMillis
 
 fun main() {
     measureTimeMillis {
-        File("Crimes_-_2001_to_Present.csv").useLines { lines ->
-            lines.drop(1)
-                .map { Crime.parse(it) }
-                .groupingBy { it.primaryType }
-                .eachCount()
-                .toList()
-                .sortedByDescending { (_, num) -> num }
-                .joinToString(separator = "\n") { (type, num) ->
-                    "$num $type"
-                }
-                .let(::println)
-        }
+        File("Crimes_-_2001_to_Present.csv").readLines()
+            .drop(1)
+            .map { Crime.parse(it) }
+            .groupBy { it.primaryType }
+            .mapValues { it.value.size }
+            .toList()
+            .sortedByDescending { (_, num) -> num }
+            .joinToString(separator = "\n") { (type, num) ->
+                "$num $type"
+            }
+            .let(::println)
     }.let { println("Took $it") }
 }
 
@@ -28,8 +27,8 @@ class Crime(
     val block: String,
     val iucr: String,
     val primaryType: String,
-    
-) {
+
+    ) {
     companion object {
         fun parse(line: String): Crime {
             val values = line.split(",")
