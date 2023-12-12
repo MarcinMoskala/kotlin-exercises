@@ -40,14 +40,7 @@ fun Flow<*>.toNextNumbers(): Flow<Int> = TODO()
 
 // Produces not only elements, but the whole history till now
 // For instance flowOf(1, "A", 'C').withHistory() -> [[], [1], [1, A], [1, A, C]]
-fun <T> Flow<T>.withHistory(): Flow<List<T>> = flow {
-    val history = mutableListOf<T>()
-    emit(history)
-    collect {
-        history += it
-        emit(history)
-    }
-}
+fun <T> Flow<T>.withHistory(): Flow<List<T>> = TODO()
 
 // Should create a flow that every `tickEveryMillis` should emit next numbers from `startNum` to `endNum`.
 // The first number should be emitted immediately, each next one after `tickEveryMillis` delay.
