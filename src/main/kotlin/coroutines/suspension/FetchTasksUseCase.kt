@@ -1,4 +1,4 @@
-package callback
+package coroutines.suspension
 
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.launch

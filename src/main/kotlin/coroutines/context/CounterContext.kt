@@ -3,12 +3,26 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import org.junit.Test
 import ui.BasePresenter
+import kotlin.coroutines.AbstractCoroutineContextElement
 import kotlin.coroutines.CoroutineContext
 import kotlin.coroutines.coroutineContext
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
 
-// TODO
+// TODO: Implement CounterContext
+
+//fun main(): Unit = runBlocking(CounterContext()) {
+//    println(coroutineContext[CounterContext]?.next()) // 0
+//    println(coroutineContext[CounterContext]?.next()) // 1
+//    launch {
+//        println(coroutineContext[CounterContext]?.next())// 2
+//        println(coroutineContext[CounterContext]?.next())// 3
+//    }
+//    launch(CounterContext()) {
+//        println(coroutineContext[CounterContext]?.next())// 0
+//        println(coroutineContext[CounterContext]?.next())// 1
+//    }
+//}
 
 @Suppress("FunctionName")
 class CounterContextTests {
