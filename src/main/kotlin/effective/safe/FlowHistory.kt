@@ -12,10 +12,10 @@ import utils.withVirtualTime
 import kotlin.test.assertEquals
 
 fun <T> Flow<T>.withHistory(): Flow<List<T>> = flow {
-    var history = listOf<T>()
+    val history = mutableListOf<T>()
     emit(history)
     collect {
-        history += it
+        history.add(it)
         emit(history)
     }
 }
