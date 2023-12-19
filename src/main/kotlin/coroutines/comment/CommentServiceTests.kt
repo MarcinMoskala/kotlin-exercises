@@ -2,7 +2,7 @@
 
 package domain.comment
 
-import comment.FakeCommentsRepository
+import comment.FakeCommentRepository
 import comment.FakeUserService
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.currentTime
@@ -12,15 +12,14 @@ import org.junit.Before
 import org.junit.Test
 import java.time.Instant
 import kotlin.test.assertEquals
-import kotlin.test.assertNotNull
 
 class CommentServiceTests {
-    private val commentsRepository = FakeCommentsRepository()
+    private val commentsRepository = FakeCommentRepository()
     private val userService = FakeUserService()
     private val uuidProvider = FakeUuidProvider()
     private val timeProvider = FakeTimeProvider()
     private val commentsFactory: CommentFactory = CommentFactory(uuidProvider, timeProvider)
-    private val commentsService: CommentsService = CommentsService(commentsRepository, userService, commentsFactory)
+    private val commentService: CommentService = CommentService(commentsRepository, userService, commentsFactory)
 
     @Before
     fun setup() {
@@ -50,7 +49,7 @@ class CommentServiceTests {
         timeProvider.advanceTimeTo(commentDocument2.date)
 
         // when
-        commentsService.addComment(aToken, collectionKey2, AddComment(commentDocument2.comment))
+        commentService.addComment(aToken, collectionKey2, AddComment(commentDocument2.comment))
 
         // then
         assertEquals(commentDocument2, commentsRepository.getComment(commentDocument2._id))
@@ -70,7 +69,7 @@ class CommentServiceTests {
         )
 
         // when
-        val result: CommentsCollection = commentsService.getComments(collectionKey1)
+        val result: CommentsCollection = commentService.getComments(collectionKey1)
 
         // then
         with(result) {
@@ -96,7 +95,7 @@ class CommentServiceTests {
         userService.findUserDelay = 1000
 
         // when
-        commentsService.getComments(collectionKey1)
+        commentService.getComments(collectionKey1)
 
         // then
         assertEquals(1000, currentTime)

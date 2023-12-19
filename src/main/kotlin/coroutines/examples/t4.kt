@@ -27,7 +27,7 @@ class FetchUserUseCase(
     }
 }
 
-class FetchUserDataTest {
+class FetchNewsTest {
 
     @Test
     fun `should load data concurrently`() = runTest {

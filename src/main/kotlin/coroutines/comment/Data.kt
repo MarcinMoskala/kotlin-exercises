@@ -2,7 +2,7 @@ package domain.comment
 
 import java.time.Instant
 
-interface CommentsRepository {
+interface CommentRepository {
     suspend fun getComments(collectionKey: String): List<CommentDocument>
     suspend fun getComment(id: String): CommentDocument?
     suspend fun addComment(comment: CommentDocument)

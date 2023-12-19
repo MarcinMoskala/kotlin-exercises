@@ -1,18 +1,21 @@
-package request
+package coroutines.starting
 
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.*
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
+import kotlinx.coroutines.test.currentTime
+import kotlinx.coroutines.test.runTest
 import org.junit.Test
 import kotlin.system.measureTimeMillis
 import kotlin.test.assertEquals
 
-/*
-   TODO: This function should return the best student on the [semester].
- */
-suspend fun getBestStudent(semester: String, repo: StudentsRepository): Student = TODO()
+class BestStudentUseCase(
+    private val repo: StudentsRepository
+) {
+    suspend fun getBestStudent(
+        semester: String
+    ): Student = TODO()
+}
 
 data class Student(val id: Int, val result: Double, val semester: String)
 
@@ -24,7 +27,7 @@ interface StudentsRepository {
 class RequestTest {
 
     @Test
-    fun `Function does return the best student in the semester`() = runBlocking {
+    fun `Function does return the best student in the semester`() = runTest {
         // given
         val semester = "19L"
         val best = Student(2, 95.0, semester)
@@ -35,45 +38,50 @@ class RequestTest {
                 Student(3, 50.0, semester)
             )
         )
+        val useCase = BestStudentUseCase(repo)
 
         // when
-        val chosen = getBestStudent(semester, repo)
+        val chosen = useCase.getBestStudent(semester)
 
         // then
         assertEquals(best, chosen)
     }
 
     @Test
-    fun `When no students, correct error is thrown`() = runBlocking {
+    fun `When no students, correct error is thrown`() = runTest {
         // given
         val semester = "19L"
         val repo = ImmediateFakeStudentRepo(listOf())
+        val useCase = BestStudentUseCase(repo)
 
         // when and then
         assertThrowsError<IllegalStateException> {
-            getBestStudent(semester, repo)
+            useCase.getBestStudent(semester)
         }
     }
 
     @Test
-    fun `Requests do not wait for each other`() = runBlocking {
+    fun `Requests do not wait for each other`() = runTest {
         // given
         val repo = WaitingFakeStudentRepo()
+        val useCase = BestStudentUseCase(repo)
 
-        // when and then
-        assertTimeAround(1200) {
-            getBestStudent("AAA", repo)
-        }
+        // when
+        useCase.getBestStudent("AAA")
+        
+        // then
+        assertEquals(1200, currentTime)
     }
 
     @Test
-    fun `Cancellation works fine`() = runBlocking {
+    fun `Cancellation works fine`() = runTest {
         // given
         val repo = WaitingFakeStudentRepo()
+        val useCase = BestStudentUseCase(repo)
 
         // when
         val job = launch {
-            getBestStudent("AAA", repo)
+            useCase.getBestStudent("AAA")
         }
         delay(300)
         job.cancel()
@@ -83,13 +91,14 @@ class RequestTest {
     }
 
     @Test
-    fun `When one request has error, all are stopped and error is thrown`() = runBlocking {
+    fun `When one request has error, all are stopped and error is thrown`() = runTest {
         // given
         val repo = FirstFailingFakeStudentRepo()
+        val useCase = BestStudentUseCase(repo)
 
         // when and then
         assertThrowsError<FirstFailingFakeStudentRepo.FirstFailingError> {
-            getBestStudent("AAA", repo)
+            useCase.getBestStudent("AAA")
         }
 
         // then

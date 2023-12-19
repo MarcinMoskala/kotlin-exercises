@@ -1,7 +1,9 @@
-import kotlinx.coroutines.*
-import kotlin.concurrent.thread
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.async
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.runBlocking
 
-fun main() {
+suspend fun main() = runBlocking{ 
     val value1 = GlobalScope.async {
         delay(2000L)
         1
@@ -15,9 +17,7 @@ fun main() {
         3
     }
     println("Calculating")
-    runBlocking {
-        print(value1.await())
-        print(value2.await())
-        print(value3.await())
-    }
+    print(value1.await())
+    print(value2.await())
+    print(value3.await())
 }

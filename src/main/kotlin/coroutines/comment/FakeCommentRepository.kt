@@ -1,9 +1,9 @@
 package comment
 
 import domain.comment.CommentDocument
-import domain.comment.CommentsRepository
+import domain.comment.CommentRepository
 
-class FakeCommentsRepository: CommentsRepository {
+class FakeCommentRepository: CommentRepository {
     private var comments = listOf<CommentDocument>()
 
     fun has(vararg comment: CommentDocument) {

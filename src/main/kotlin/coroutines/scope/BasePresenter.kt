@@ -1,4 +1,4 @@
-package ui
+package coroutines.scope
 
 import kotlinx.coroutines.*
 import kotlinx.coroutines.test.setMain
@@ -10,9 +10,17 @@ import kotlin.test.assertTrue
 abstract class BasePresenter(
     private val onError: (Throwable) -> Unit = {}
 ) {
-    val scope: CoroutineScope = TODO()
+    private val exceptionHandler =
+        CoroutineExceptionHandler { _, throwable ->
+            onError(throwable)
+        }
+    val scope: CoroutineScope = CoroutineScope(
+        SupervisorJob() + Dispatchers.Main + exceptionHandler
+    )
 
-    fun onDestroy() {}
+    fun onDestroy() {
+        scope.coroutineContext.cancelChildren()
+    }
 }
 
 @Suppress("FunctionName")

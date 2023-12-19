@@ -4,29 +4,38 @@ package notification
 
 import kotlinx.coroutines.*
 import kotlinx.coroutines.test.StandardTestDispatcher
-import kotlinx.coroutines.test.TestScope
 import org.junit.Test
 import kotlin.test.assertEquals
 
-class NotificationsSender(
-    private val client: NotificationsClient,
+class NotificationSender(
+    private val client: NotificationClient,
     private val exceptionCollector: ExceptionCollector,
     dispatcher: CoroutineDispatcher,
 ) {
-    val scope: CoroutineScope = TODO()
+    private val exceptionHandler =
+        CoroutineExceptionHandler { _, throwable ->
+            exceptionCollector.collectException(throwable)
+        }
+    val scope: CoroutineScope = CoroutineScope(
+        SupervisorJob() + dispatcher + exceptionHandler
+    )
 
     fun sendNotifications(notifications: List<Notification>) {
-        // TODO
+        notifications.forEach { notification ->
+            scope.launch {
+                client.send(notification)
+            }
+        }
     }
 
     fun cancel() {
-        // TODO
+        scope.coroutineContext.cancelChildren()
     }
 }
 
 data class Notification(val id: String)
 
-interface NotificationsClient {
+interface NotificationClient {
     suspend fun send(notification: Notification)
 }
 
@@ -34,14 +43,14 @@ interface ExceptionCollector {
     fun collectException(throwable: Throwable)
 }
 
-class NotificationsSenderTest {
+class NotificationSenderTest {
 
     @Test
     fun `should send 20 notifications concurrently`() {
-        val fakeNotificationsClient = FakeNotificationsClient(delayTime = 200)
+        val fakeNotificationsClient = FakeNotificationClient(delayTime = 200)
         val fakeExceptionCollector = FakeExceptionCollector()
         val testDispatcher = StandardTestDispatcher()
-        val sender = NotificationsSender(fakeNotificationsClient, fakeExceptionCollector, testDispatcher)
+        val sender = NotificationSender(fakeNotificationsClient, fakeExceptionCollector, testDispatcher)
         val notifications = List(20) { Notification("ID$it") }
 
         // when
@@ -55,10 +64,10 @@ class NotificationsSenderTest {
 
     @Test
     fun `should support cancellation`() {
-        val fakeNotificationsClient = FakeNotificationsClient(delayTime = 1000)
+        val fakeNotificationsClient = FakeNotificationClient(delayTime = 1000)
         val fakeExceptionCollector = FakeExceptionCollector()
         val testDispatcher = StandardTestDispatcher()
-        val sender = NotificationsSender(fakeNotificationsClient, fakeExceptionCollector, testDispatcher)
+        val sender = NotificationSender(fakeNotificationsClient, fakeExceptionCollector, testDispatcher)
         val notifications = List(20) { Notification("ID$it") }
 
         // when
@@ -75,10 +84,10 @@ class NotificationsSenderTest {
 
     @Test
     fun `should not cancel other notifications, when one has exception`() {
-        val fakeNotificationsClient = FakeNotificationsClient(delayTime = 100, failEvery = 10)
+        val fakeNotificationsClient = FakeNotificationClient(delayTime = 100, failEvery = 10)
         val fakeExceptionCollector = FakeExceptionCollector()
         val testDispatcher = StandardTestDispatcher()
-        val sender = NotificationsSender(fakeNotificationsClient, fakeExceptionCollector, testDispatcher)
+        val sender = NotificationSender(fakeNotificationsClient, fakeExceptionCollector, testDispatcher)
         val notifications = List(100) { Notification("ID$it") }
 
         // when
@@ -91,10 +100,10 @@ class NotificationsSenderTest {
 
     @Test
     fun `should send info about failed notifications`() {
-        val fakeNotificationsClient = FakeNotificationsClient(delayTime = 100, failEvery = 10)
+        val fakeNotificationsClient = FakeNotificationClient(delayTime = 100, failEvery = 10)
         val fakeExceptionCollector = FakeExceptionCollector()
         val testDispatcher = StandardTestDispatcher()
-        val sender = NotificationsSender(fakeNotificationsClient, fakeExceptionCollector, testDispatcher)
+        val sender = NotificationSender(fakeNotificationsClient, fakeExceptionCollector, testDispatcher)
         val notifications = List(100) { Notification("ID$it") }
 
         // when
@@ -106,10 +115,10 @@ class NotificationsSenderTest {
     }
 }
 
-class FakeNotificationsClient(
+class FakeNotificationClient(
     val delayTime: Long = 0L,
     val failEvery: Int = Int.MAX_VALUE
-) : NotificationsClient {
+) : NotificationClient {
     var sent = emptyList<Notification>()
     var counter = 0
     var usedThreads = emptyList<String>()

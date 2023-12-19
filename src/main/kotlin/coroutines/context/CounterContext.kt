@@ -1,14 +1,3 @@
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.runBlocking
-import org.junit.Test
-import ui.BasePresenter
-import kotlin.coroutines.AbstractCoroutineContextElement
-import kotlin.coroutines.CoroutineContext
-import kotlin.coroutines.coroutineContext
-import kotlin.test.assertEquals
-import kotlin.test.assertTrue
-
 // TODO: Implement CounterContext
 
 //fun main(): Unit = runBlocking(CounterContext()) {

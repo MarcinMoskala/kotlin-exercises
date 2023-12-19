@@ -1,4 +1,4 @@
-package ui
+package coroutines.scope
 
 import kotlinx.coroutines.launch
 import java.util.*

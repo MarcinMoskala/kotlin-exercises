@@ -1,51 +1,53 @@
 package domain.comment
 
+import kotlinx.coroutines.async
+import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.coroutineScope
 
-class CommentsService(
-    private val commentsRepository: CommentsRepository,
+class CommentService(
+    private val commentRepository: CommentRepository,
     private val userService: UserService,
     private val commentFactory: CommentFactory
 ) {
-    // TODO: Should read user id from token, transform body to comment document, and add it to comments repository
-    suspend fun addComment(token: String, collectionKey: String, body: AddComment) {
-        TODO()
-    }
-
-    // TODO: Should get comments with users and return them as a collection
-    suspend fun getComments(collectionKey: String): CommentsCollection {
-        TODO()
-    }
-
-    suspend fun deleteComment(token: String, commentId: String) = coroutineScope {
+    suspend fun addComment(
+        token: String,
+        collectionKey: String,
+        body: AddComment
+    ) {
         val userId = userService.readUserId(token)
-
-        val comment = commentsRepository.getComment(commentId)
-        requireNotNull(comment) { "Comment does not exist" }
-        require(comment.userId == userId) { "Not an owner" }
-
-        commentsRepository.deleteComment(commentId)
+        val commentDocument = commentFactory
+            .toCommentDocument(userId, collectionKey, body)
+        commentRepository.addComment(commentDocument)
     }
 
-    private suspend fun makeCommentsCollection(
-        commentDocuments: List<CommentDocument>,
+    suspend fun getComments(
         collectionKey: String
-    ): CommentsCollection = coroutineScope {
+    ) = coroutineScope {
+        val commentDocuments = commentRepository
+            .getComments(collectionKey)
+        val users: Map<String, User> = commentDocuments
+            .map { it.userId }
+            .toSet()
+            .map { async { userService.findUserById(it) } }
+            .awaitAll()
+            .associateBy { it.id }
+
         CommentsCollection(
             collectionKey = collectionKey,
-            elements = makeCommentsElements(commentDocuments)
+            elements = commentDocuments.map {
+                val user = users[it.userId]
+                makeCommentElement(it, user)
+            }
         )
     }
 
-    // TODO: Should concurrently transform comment documents to comment elements
-    private suspend fun makeCommentsElements(commentDocuments: List<CommentDocument>) =
-        commentDocuments
-            .map { makeCommentElement(it) }
-
-    private suspend fun makeCommentElement(commentDocument: CommentDocument) = CommentElement(
+    private fun makeCommentElement(
+        commentDocument: CommentDocument,
+        user: User?,
+    ) = CommentElement(
         id = commentDocument._id,
         collectionKey = commentDocument.collectionKey,
-        user = userService.findUserById(commentDocument.userId),
+        user = user,
         comment = commentDocument.comment,
         date = commentDocument.date,
     )

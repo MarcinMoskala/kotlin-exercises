@@ -33,7 +33,7 @@ class InMemoryUserRepository {
     data class User(val id: Int, val name: String, var surname: String)
 }
 
-class InMemoryUserRepositoryTest {
+class InMemoryNewsRepositoryTest {
 
     lateinit var repo: InMemoryUserRepository
 
