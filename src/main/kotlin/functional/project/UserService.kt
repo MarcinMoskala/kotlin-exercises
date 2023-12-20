@@ -60,7 +60,7 @@ class UserService(
     }
 }
 
-class UserServiceTest {
+class AllUsersTest {
     private val userRepository = FakeUserRepository()
     private val timeProvider = FakeTimeProvider()
     private val uuidGenerator = FakeUuidGenerator()

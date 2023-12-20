@@ -24,13 +24,6 @@ fun <T> Flow<T>.delayEach(timeMillis: Long): Flow<T> = TODO()
 // flowOf("A", "B").mapIndexed { index, value -> "$index$value" } -> ["0A", "0B"]
 fun <T, R> Flow<T>.mapIndexed(transformation: suspend (index: Int, T) -> R): Flow<R> = TODO()
 
-// Should transform Unit's to toggled boolean value starting from true
-// For instance flowOf(Unit, Unit, Unit, Unit).toNextNumbers() -> [true, false, true, false]
-// Example:
-// Input   --------U------UU---------U------
-// Result  --------t------ft---------f------
-fun Flow<*>.toToggle(): Flow<Boolean> = TODO()
-
 // Should transform Unit's to next numbers startling from 1
 // For instance flowOf(Unit, Unit, Unit, Unit).toNextNumbers() -> [1, 2, 3, 4]
 // Example:
@@ -143,15 +136,6 @@ class FlowTests {
             ValueAndTime(Pair(2, 'C'), 1110),
         )
         assertEquals(expected, actual)
-    }
-
-    @Test()
-    fun toToggleTests() = runTest {
-        assertEquals(listOf(), producingUnits(0).toToggle().toList())
-        assertEquals(listOf(true), producingUnits(1).toToggle().toList())
-        assertEquals(listOf(true, false), producingUnits(2).toToggle().toList())
-        assertEquals(listOf(true, false, true), producingUnits(3).toToggle().toList())
-        assertEquals(listOf(true, false, true, false), producingUnits(4).toToggle().toList())
     }
 
     @Test()

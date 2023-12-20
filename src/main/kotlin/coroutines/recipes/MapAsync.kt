@@ -1,13 +1,10 @@
-package coroutines.starting
+package coroutines.recipes
 
 import kotlinx.coroutines.*
-import kotlinx.coroutines.sync.Mutex
-import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.test.currentTime
 import kotlinx.coroutines.test.runTest
 import org.junit.Test
 import kotlin.coroutines.CoroutineContext
-import kotlin.system.measureTimeMillis
 import kotlin.test.assertEquals
 
 suspend fun <T, R> Iterable<T>.mapAsync(

@@ -2,6 +2,7 @@ package sequence
 
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.count
+import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.test.runTest
 import org.junit.Test
 import kotlin.test.assertEquals
@@ -9,15 +10,14 @@ import kotlin.test.assertEquals
 data class User(val name: String)
 
 interface UserRepository {
-    fun takePage(pageNumber: Int): List<User>
+    fun fetchUsers(pageNumber: Int): List<User>
 }
 
-class UserService(private val repository: UserRepository) {
-    fun getUsers(): Flow<User> = TODO()
+class AllUsers(private val repository: UserRepository) {
+    fun getAllUsers(): Flow<User> = TODO()
 }
 
-@Suppress("FunctionName")
-internal class UsersSequenceTests {
+internal class AllUsersTests {
 
     @Test
     fun test() = runTest {
@@ -27,13 +27,13 @@ internal class UsersSequenceTests {
             val users = List(size) { User("User$it") }
             var timesUsed = 0
 
-            override fun takePage(pageNumber: Int): List<User> =
+            override fun fetchUsers(pageNumber: Int): List<User> =
                 users.drop(pageSize * pageNumber)
                     .take(pageSize)
                     .also { timesUsed++ }
         }
-        val service = UserService(repo)
-        val s = service.getUsers()
+        val service = AllUsers(repo)
+        val s = service.getAllUsers()
         assertEquals(size, s.count())
         assertEquals(size / pageSize + 1, repo.timesUsed)
     }

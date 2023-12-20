@@ -1,4 +1,4 @@
-package coroutines.state
+package coroutines.recipes
 
 import kotlinx.coroutines.*
 import kotlinx.coroutines.sync.Semaphore
