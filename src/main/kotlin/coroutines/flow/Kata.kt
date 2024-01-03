@@ -72,7 +72,6 @@ fun polonaisePairing(track1: Flow<Person>, track2: Flow<Person>): Flow<Pair<Pers
 
 data class Person(val name: String)
 
-@OptIn(ExperimentalCoroutinesApi::class)
 @Suppress("FunctionName")
 class FlowTests {
 

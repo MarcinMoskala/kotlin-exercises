@@ -1,5 +1,3 @@
-@file:OptIn(ExperimentalCoroutinesApi::class)
-
 package advanced.contract
 
 import kotlinx.coroutines.ExperimentalCoroutinesApi

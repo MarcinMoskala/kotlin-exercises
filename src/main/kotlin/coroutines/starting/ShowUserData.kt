@@ -57,7 +57,6 @@ class TestUserDataView : UserDataView {
     }
 }
 
-@OptIn(ExperimentalCoroutinesApi::class)
 @Suppress("FunctionName")
 class ShowNewsTest {
 

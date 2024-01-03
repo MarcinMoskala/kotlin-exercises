@@ -28,7 +28,6 @@ fun interface Cancellable {
 data class Task(val name: String, val priority: Int)
 class ApiException(val code: Int, message: String): Throwable(message)
 
-@OptIn(ExperimentalCoroutinesApi::class)
 class FetchTasksTests {
     val someTasks = listOf(Task("1", 123), Task("2", 456))
     val someException = ApiException(500, "Some exception")

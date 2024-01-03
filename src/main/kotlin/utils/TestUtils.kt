@@ -13,7 +13,6 @@ inline fun <reified T: Throwable> assertThrows(operation: () -> Unit) {
     assert(exception is T) { "Incorrect exception type, it should be ${T::class}, but it is $exception" }
 }
 
-@OptIn(ExperimentalCoroutinesApi::class)
 fun <T> Flow<T>.withVirtualTime(testScope: TestScope): Flow<ValueAndTime<T>> =
     map { ValueAndTime(it, testScope.currentTime) }
 

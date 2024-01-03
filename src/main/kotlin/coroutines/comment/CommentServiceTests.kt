@@ -1,5 +1,3 @@
-@file:OptIn(ExperimentalCoroutinesApi::class)
-
 package domain.comment
 
 import comment.FakeCommentRepository

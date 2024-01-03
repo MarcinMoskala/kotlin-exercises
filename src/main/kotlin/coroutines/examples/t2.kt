@@ -1,5 +1,3 @@
-@file:OptIn(ExperimentalCoroutinesApi::class)
-
 package examples.t2
 
 import kotlinx.coroutines.CoroutineScope
