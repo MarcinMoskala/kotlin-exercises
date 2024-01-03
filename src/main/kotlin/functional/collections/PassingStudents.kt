@@ -1,4 +1,5 @@
 package functional.collections.passingstudents
+
 import org.junit.Test
 import kotlin.test.assertEquals
 
@@ -45,7 +46,7 @@ class PassingStudentsListTest {
             Student("James", "Johnson", 85.2, 31),
             Student("Jack", "Johnson", 85.3, 31)
     )
-    
+
     @Test
     fun `Single student that matches criteria is displayed`() {
         val text = listOf(internshipStudent).makePassingStudentsListText()

@@ -116,13 +116,13 @@ object LowerCaseName : NameMapper {
 class SnakeCaseName : NameMapper {
     val pattern = "(?<=.)[A-Z]".toRegex()
 
-    override fun map(name: String): String = 
+    override fun map(name: String): String =
         name.replace(pattern, "_$0").lowercase()
 }
 object UpperSnakeCaseName : NameMapper {
     val pattern = "(?<=.)[A-Z]".toRegex()
 
-    override fun map(name: String): String = 
+    override fun map(name: String): String =
         name.replace(pattern, "_$0").uppercase()
 }
 
