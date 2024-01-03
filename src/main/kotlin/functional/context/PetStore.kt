@@ -1,4 +1,4 @@
-package functional.context
+package functional.context.petstore
 
 import org.junit.After
 import org.junit.Test
@@ -51,13 +51,13 @@ class PetStoreTest {
     private val database = FakeDatabase()
     private val petStore = PetStore(database)
     private val logger = FakeLogger()
-    
+
     @After
     fun tearDown() {
         database.clear()
         logger.clear()
     }
-    
+
     @Test
     fun `should add pet`() {
         val pet = with(logger) {
@@ -67,7 +67,7 @@ class PetStoreTest {
         assertEquals(expected, pet)
         assertEquals(expected, database.getPets().single())
     }
-    
+
     @Test
     fun `should return null when database failing`() {
         database.startFailing()
@@ -77,7 +77,7 @@ class PetStoreTest {
         assertEquals(null, pet)
         assertEquals(emptyList<Pet>(), database.getPets())
     }
-    
+
     @Test
     fun `should return null when conflict`() {
         database.addPet(AddPetRequest("Fluffy"))
@@ -86,8 +86,8 @@ class PetStoreTest {
         }
         assertEquals(null, pet)
     }
-    
-    @Test 
+
+    @Test
     fun `should log info when added pet`() {
         with(logger) {
             petStore.addPet(AddPetRequest("Fluffy"))
@@ -100,7 +100,7 @@ class PetStoreTest {
             logger.getMessages()
         )
     }
-    
+
     @Test
     fun `should log warning when adding conflict`() {
         database.addPet(AddPetRequest("Fluffy"))
@@ -115,7 +115,7 @@ class PetStoreTest {
             logger.getMessages()
         )
     }
-    
+
     @Test
     fun `should log error when database error`() {
         database.startFailing()
@@ -148,11 +148,11 @@ class ConsoleLogger : Logger {
 
 class FakeLogger : Logger {
     private val messages = mutableListOf<Pair<Level, String>>()
-    
+
     fun clear() {
         messages.clear()
     }
-    
+
     fun getMessages(): List<Pair<Level, String>> = messages.toList()
 
     override fun logInfo(message: String) {
@@ -200,6 +200,6 @@ class FakeDatabase : Database {
         pets.add(pet)
         return pet
     }
-    
+
     fun getPets(): List<Pet> = pets.toList()
 }

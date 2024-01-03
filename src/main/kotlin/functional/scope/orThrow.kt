@@ -1,4 +1,4 @@
-package functional.scope.orThrow
+package functional.scope.orthrow
 
 import org.junit.Before
 import org.junit.Test
@@ -16,17 +16,17 @@ class OrThrowTest {
 //        val result = runCatching { value.orThrow { exception } }
 //        assertEquals(exception, result.exceptionOrNull())
 //    }
-//    
+//
 //    @Test
 //    fun `should return value for non-null value`() {
 //        val value: String? = "Hello"
 //        val result = value.orThrow { RuntimeException("Value is null") }
 //        assertEquals("Hello", result)
 //    }
-//    
+//
 //    private val value: String? = "Hello"
 //    val result = value.orThrow { RuntimeException("Value is null") }
-//    
+//
 //    @Test
 //    fun `should specify result type as non-nullable`() {
 //        assertFalse(::result.returnType.isMarkedNullable)

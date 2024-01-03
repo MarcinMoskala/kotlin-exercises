@@ -1,4 +1,4 @@
-package essentials.operators
+package essentials.operators.money
 
 import org.junit.Test
 import utils.assertThrows

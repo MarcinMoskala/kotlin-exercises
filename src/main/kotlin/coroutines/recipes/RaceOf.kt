@@ -1,4 +1,4 @@
-package coroutines.recipes
+package coroutines.recipes.raceof
 
 import kotlinx.coroutines.*
 import kotlinx.coroutines.selects.select

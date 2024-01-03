@@ -1,4 +1,4 @@
-package functional.base
+package functional.base.inline
 
 import org.junit.Test
 import kotlin.reflect.typeOf
@@ -19,7 +19,7 @@ class InlineTest {
 //        }
 //        assertEquals(typeOf<Boolean>(), o::result.returnType)
 //    }
-//    
+//
 //    @Test
 //    fun firstOfOrNullTest() {
 //        assertEquals(1, listOf(1, 2, 3, "4").firstOfOrNull<Int>())
@@ -32,7 +32,7 @@ class InlineTest {
 //        }
 //        assertEquals(typeOf<Int?>(), o::result.returnType)
 //    }
-//    
+//
 //    @Test
 //    fun filterValuesInstanceOfTest() {
 //        assertEquals(

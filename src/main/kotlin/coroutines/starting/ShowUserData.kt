@@ -1,4 +1,4 @@
-package coroutines.starting
+package coroutines.starting.showuserdata
 
 import kotlinx.coroutines.*
 import kotlinx.coroutines.test.currentTime
@@ -140,7 +140,7 @@ class ShowNewsTest {
             printed = printed + user
         }
     }
-    
+
     companion object {
         const val FETCH_TIMEOUT = 1234L
         const val NOTIFY_TIMEOUT = 2345L

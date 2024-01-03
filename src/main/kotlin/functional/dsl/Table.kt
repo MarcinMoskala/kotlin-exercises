@@ -1,4 +1,4 @@
-package functional.dsl
+package functional.dsl.table
 
 import org.junit.Test
 import kotlin.test.assertEquals

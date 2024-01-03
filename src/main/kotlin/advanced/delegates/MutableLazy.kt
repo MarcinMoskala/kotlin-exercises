@@ -1,5 +1,4 @@
-@file:JvmName("Mutable")
-package advanced.delegates
+package advanced.delegates.mutablelazy
 
 import org.junit.Assert
 import org.junit.Test

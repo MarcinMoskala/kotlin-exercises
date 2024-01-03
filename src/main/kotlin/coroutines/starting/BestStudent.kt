@@ -1,4 +1,4 @@
-package coroutines.starting
+package coroutines.starting.beststudent
 
 import kotlinx.coroutines.*
 import kotlinx.coroutines.sync.Mutex
@@ -68,7 +68,7 @@ class RequestTest {
 
         // when
         useCase.getBestStudent("AAA")
-        
+
         // then
         assertEquals(1200, currentTime)
     }

@@ -1,4 +1,4 @@
-package safe
+package effective.safe.nameandset
 
 data class Name(var name: String)
 

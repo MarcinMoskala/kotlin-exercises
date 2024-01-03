@@ -1,4 +1,4 @@
-package flow
+package coroutines.flow.kata
 
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.delay

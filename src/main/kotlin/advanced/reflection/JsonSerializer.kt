@@ -1,6 +1,7 @@
-package advanced.reflection
+package advanced.reflection.jsonserializer
 
 import org.junit.Test
+import kotlin.reflect.KClass
 import kotlin.reflect.full.findAnnotation
 import kotlin.reflect.full.hasAnnotation
 import kotlin.reflect.full.memberProperties
@@ -21,10 +22,43 @@ fun main() {
         isSpecial = true,
     )
     println(serializeToJson(creature))
-    // {"att": 2, "def": 4, 
-    // "element_cost": {"ANY": 3, "FOREST": 2}, 
-    // "isspecial": true, "name": "Cockatrice", 
+    // {"att": 2, "def": 4,
+    // "element_cost": {"ANY": 3, "FOREST": 2},
+    // "isspecial": true, "name": "Cockatrice",
     // "traits": ["FLYING"]}
+}
+
+@Target(AnnotationTarget.PROPERTY)
+annotation class SerializationName(val name: String)
+
+@Target(AnnotationTarget.PROPERTY)
+annotation class SerializationIgnore
+
+@Target(AnnotationTarget.PROPERTY, AnnotationTarget.CLASS)
+annotation class SerializationNameMapper(val mapper: KClass<out NameMapper>)
+
+@Target(AnnotationTarget.CLASS)
+annotation class SerializationIgnoreNulls
+
+interface NameMapper {
+    fun map(name: String): String
+}
+
+object LowerCaseName : NameMapper {
+    override fun map(name: String): String = name.lowercase()
+}
+
+class SnakeCaseName : NameMapper {
+    val pattern = "(?<=.)[A-Z]".toRegex()
+
+    override fun map(name: String): String = 
+        name.replace(pattern, "_$0").lowercase()
+}
+object UpperSnakeCaseName : NameMapper {
+    val pattern = "(?<=.)[A-Z]".toRegex()
+
+    override fun map(name: String): String = 
+        name.replace(pattern, "_$0").uppercase()
 }
 
 @SerializationNameMapper(SnakeCaseName::class)
@@ -181,7 +215,7 @@ class JsonSerializerTest {
             serializeToJson(creature)
         )
     }
-    
+
     @Test
     fun `should use class mapper`() {
         @SerializationNameMapper(SnakeCaseName::class)
@@ -192,7 +226,7 @@ class JsonSerializerTest {
             val isSpecial: Boolean,
             var isUserAlready: Boolean = false,
         )
-        
+
         val creature = Creature(
             longName = "Cockatrice",
             traitsList = listOf(Trait.FLYING),
@@ -207,7 +241,7 @@ class JsonSerializerTest {
             serializeToJson(creature)
         )
     }
-    
+
     @Test
     fun `should use property mapper`() {
         class Creature(
@@ -222,7 +256,7 @@ class JsonSerializerTest {
             @SerializationNameMapper(SnakeCaseName::class)
             var isUserAlready: Boolean = false,
         )
-        
+
         val creature = Creature(
             longName = "Cockatrice",
             traitsList = listOf(Trait.FLYING),
@@ -237,7 +271,7 @@ class JsonSerializerTest {
             serializeToJson(creature)
         )
     }
-    
+
     @Test
     fun `should override class mapper with property mapper`() {
         @SerializationNameMapper(SnakeCaseName::class)
@@ -250,7 +284,7 @@ class JsonSerializerTest {
             val isSpecial: Boolean,
             var isUsedAlready: Boolean = false,
         )
-        
+
         val creature = Creature(
             longName = "Cockatrice",
             traitsList = listOf(Trait.FLYING),
@@ -265,7 +299,7 @@ class JsonSerializerTest {
             serializeToJson(creature)
         )
     }
-    
+
     @Test
     fun `should override mappers with property name`() {
         @SerializationNameMapper(SnakeCaseName::class)
@@ -278,7 +312,7 @@ class JsonSerializerTest {
             val isSpecial: Boolean,
             var isUserAlready: Boolean = false,
         )
-        
+
         val creature = Creature(
             longName = "Cockatrice",
             traitsList = listOf(Trait.FLYING),
@@ -288,13 +322,13 @@ class JsonSerializerTest {
             ),
             isSpecial = true,
         )
-        
+
         assertEquals(
             "{\"element_cost\": {\"ANY\": 3, \"FOREST\": 2}, \"special\": true, \"is_user_already\": false, \"name\": \"Cockatrice\", \"traits_list\": [\"FLYING\"]}",
             serializeToJson(creature)
         )
     }
-    
+
     @Test
     fun `should ignore nulls if annotation used`() {
         @SerializationIgnoreNulls
@@ -310,7 +344,7 @@ class JsonSerializerTest {
             val defence: Int?,
             val extraDetails: String?,
         )
-        
+
         val creatureIgnoring = CreatureIgnoringNulls(
             name = "Cockatrice",
             attack = null,
@@ -321,14 +355,14 @@ class JsonSerializerTest {
             "{\"defence\": 4, \"name\": \"Cockatrice\"}",
             serializeToJson(creatureIgnoring)
         )
-        
+
         val creature = Creature(
             name = "Cockatrice",
             attack = null,
             defence = 4,
             extraDetails = null,
         )
-        
+
         assertEquals(
             "{\"attack\": null, \"defence\": 4, \"extraDetails\": null, \"name\": \"Cockatrice\"}",
             serializeToJson(creature)

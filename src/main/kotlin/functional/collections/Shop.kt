@@ -1,4 +1,4 @@
-package functional.collections
+package functional.collections.shop
 
 import org.junit.Test
 import kotlin.test.assertEquals
@@ -93,7 +93,7 @@ class ShopFunctionsTests {
         )
         assertEquals(expected, result)
     }
-    
+
     @Test
     fun `getWaitingCustomers should not return customers with no orders`() {
         // given
@@ -156,8 +156,8 @@ class ShopFunctionsTests {
         )
         assertEquals(expected, result)
     }
-    
-    
+
+
     @Test
     fun `getWaitingCustomers should not return customers all orders delivered`() {
         // given
@@ -213,7 +213,7 @@ class ShopFunctionsTests {
         // then
         assertEquals(listOf(), result)
     }
-    
+
     @Test
     fun `countProductSales should count repeating sales`() {
         // given
@@ -259,7 +259,7 @@ class ShopFunctionsTests {
         assertEquals(2, shop.countProductSales(p2))
         assertEquals(2, shop.countProductSales(p3))
     }
-    
+
     @Test
     fun `countProductSales should count sales with exactly the same product`() {
         // given
@@ -285,7 +285,7 @@ class ShopFunctionsTests {
         assertEquals(1, shop.countProductSales(Product("Product 1", 2.0)))
         assertEquals(0, shop.countProductSales(Product("Product 2", 2.0)))
     }
-    
+
     @Test
     fun `getCustomers should get customers with orders with total price greater than minAmount`() {
         // given

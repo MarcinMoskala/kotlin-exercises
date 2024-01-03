@@ -1,4 +1,4 @@
-package coroutines.recipes
+package coroutines.recipes.mapasync
 
 import kotlinx.coroutines.*
 import kotlinx.coroutines.test.currentTime
@@ -51,7 +51,7 @@ class MapAsyncTest {
 
         val name1 = CoroutineName("Name 1")
         withContext(name1) {
-            listOf("A").mapAsync { 
+            listOf("A").mapAsync {
                 ctx = currentCoroutineContext()
                 it
             }

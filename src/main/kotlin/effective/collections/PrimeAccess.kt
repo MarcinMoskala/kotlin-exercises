@@ -1,4 +1,4 @@
-package collections
+package effective.collections.primeaccess
 
 import kotlin.random.Random
 import kotlin.system.measureTimeMillis

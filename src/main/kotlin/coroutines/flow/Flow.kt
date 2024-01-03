@@ -1,4 +1,4 @@
-package coroutines.flow
+package coroutines.flow.flow
 
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.*

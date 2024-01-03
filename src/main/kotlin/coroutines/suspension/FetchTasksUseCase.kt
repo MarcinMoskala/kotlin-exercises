@@ -1,4 +1,4 @@
-package coroutines.suspension
+package coroutines.suspension.fetchtasksusecase
 
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.launch

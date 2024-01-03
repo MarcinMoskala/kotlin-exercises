@@ -1,4 +1,4 @@
-package essentials.generics
+package essentials.generics.stack
 
 import junit.framework.TestCase.*
 import org.junit.Before
@@ -25,7 +25,7 @@ fun main() {
 //
 //    println(stringStack.size()) // 3
 //    while (!stringStack.isEmpty()) { // C, B, A
-//        println(stringStack.pop()) 
+//        println(stringStack.pop())
 //    }
 }
 

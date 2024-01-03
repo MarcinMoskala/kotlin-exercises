@@ -1,4 +1,4 @@
-package functional.collections.student_grades_intenship
+package functional.collections.studentgradesintenship
 
 import org.junit.Test
 import java.util.Collections
@@ -34,8 +34,8 @@ fun List<StudentGrades>.getBestForScholarship(
         }
     }
     Collections.sort(candidates, { s1, s2 ->
-        val difference = 
-            averageGradeFromSemester(s2, semester) - 
+        val difference =
+            averageGradeFromSemester(s2, semester) -
                     averageGradeFromSemester(s1, semester)
         if (difference > 0) 1 else -1
     })
@@ -81,18 +81,18 @@ class StudentGradesIntenshipTest {
                 }
             )
         }
-        
+
         val res1 = grades.getBestForScholarship("Semester 0")
         assertEquals(
-            listOf("S83", "S47", "S26", "S53", "S4", "S29", "S50", "S34", "S44", "S59"), 
+            listOf("S83", "S47", "S26", "S53", "S4", "S29", "S50", "S34", "S44", "S59"),
             res1.map { it.studentId },
         )
         assertEquals(
-            listOf("S30", "S66", "S49", "S14", "S6", "S12", "S25", "S99", "S7", "S40"), 
+            listOf("S30", "S66", "S49", "S14", "S6", "S12", "S25", "S99", "S7", "S40"),
             grades.getBestForScholarship("Semester 1").map { it.studentId }
         )
     }
-    
+
     @Test
     fun `should return empty list if no students passed`() {
         val grades = listOf(
@@ -127,13 +127,13 @@ class StudentGradesIntenshipTest {
                 )
             ),
         )
-        
+
         assertEquals(
-            emptyList<String>(), 
+            emptyList<String>(),
             grades.getBestForScholarship("Semester 0").map { it.studentId }
         )
     }
-    
+
     @Test
     fun `should sort by average grade for semester`() {
         val grades = listOf(
@@ -155,13 +155,13 @@ class StudentGradesIntenshipTest {
             ),
             StudentGrades("S3", listOf(Grade(true, 50, "Semester 1", 5.0),)),
         )
-        
+
         assertEquals(
-            listOf("S3", "S2", "S1"), 
+            listOf("S3", "S2", "S1"),
             grades.getBestForScholarship("Semester 1").map { it.studentId }
         )
     }
-    
+
     @Test
     fun `should return 10 best students`() {
         val grades = List(100) {
@@ -177,17 +177,17 @@ class StudentGradesIntenshipTest {
                 )
             )
         }
-        
+
         assertEquals(
-            List(10) { "S${99 - it}" }, 
+            List(10) { "S${99 - it}" },
             grades.getBestForScholarship("Semester 0").map { it.studentId }
         )
     }
-    
+
     @Test
     fun `should calculate average grade from semester`() {
         assertEquals(
-            3.0, 
+            3.0,
             averageGradeFromSemester(StudentGrades(
                 "S1",
                 listOf(
@@ -197,7 +197,7 @@ class StudentGradesIntenshipTest {
             ), "Semester 1")
         )
         assertEquals(
-            3.0, 
+            3.0,
             averageGradeFromSemester(StudentGrades(
                 "S1",
                 listOf(
@@ -207,7 +207,7 @@ class StudentGradesIntenshipTest {
             ), "Semester 1")
         )
         assertEquals(
-            2.0, 
+            2.0,
             averageGradeFromSemester(StudentGrades(
                 "S1",
                 listOf(

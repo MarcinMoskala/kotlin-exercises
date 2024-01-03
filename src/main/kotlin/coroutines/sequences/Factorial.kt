@@ -1,4 +1,4 @@
-package coroutines.sequences
+package coroutines.sequences.factorial
 
 import org.junit.Test
 import java.math.BigDecimal
@@ -27,7 +27,7 @@ class FactorialTest {
         )
         assertEquals(expected, factorials)
     }
-    
+
     @Test(timeout = 1000)
     fun `should calculate factorial of 1000'th number`() {
         val factorial = factorial.drop(1000).first()

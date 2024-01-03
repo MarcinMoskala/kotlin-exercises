@@ -1,4 +1,4 @@
-package advanced.reflection
+package advanced.reflection.dependencyinjection
 
 import org.junit.Test
 import utils.assertThrows

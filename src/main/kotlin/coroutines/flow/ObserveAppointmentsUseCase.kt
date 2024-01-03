@@ -1,4 +1,4 @@
-package coroutines.flow.appointments
+package coroutines.flow.observeappointmentsusecase
 
 import kotlinx.coroutines.flow.*
 import java.time.Instant

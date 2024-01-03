@@ -1,4 +1,4 @@
-package coroutines.sequences
+package coroutines.sequences.prime
 
 import org.junit.Test
 import java.math.BigInteger
@@ -26,7 +26,7 @@ class PrimesTest {
         )
         assertEquals(expected, primes)
     }
-    
+
     @Test(timeout = 1000)
     fun `should calculate 1000'th prime number`() {
         val prime = primes.drop(1000).first()

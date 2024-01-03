@@ -1,4 +1,4 @@
-package essentials.exceptions
+package essentials.exceptions.handleexceptions
 
 fun handleInput() {
     print("Enter the first number: ")

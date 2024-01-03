@@ -1,4 +1,4 @@
-package coroutines.recipes
+package coroutines.recipes.mapasynclimited
 
 import kotlinx.coroutines.*
 import kotlinx.coroutines.sync.Semaphore

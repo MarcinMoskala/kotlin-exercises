@@ -1,4 +1,4 @@
-package effective.safe
+package effective.safe.flowhistory
 
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow

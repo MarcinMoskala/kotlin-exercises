@@ -1,4 +1,4 @@
-package effective.safe
+package effective.safe.chunked
 
 import junit.framework.TestCase.assertEquals
 import kotlinx.coroutines.delay

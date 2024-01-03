@@ -1,4 +1,4 @@
-package advanced.delegates
+package advanced.delegates.lazy
 
 data class BlogPost(
     val title: String,
@@ -41,7 +41,7 @@ data class Author(
 )
 
 class BlogPostTest {
-    
+
     fun main() {
         val post = BlogPost(
             title = "Hello, World!",

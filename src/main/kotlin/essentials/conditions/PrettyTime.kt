@@ -1,4 +1,4 @@
-package essentials.conditions
+package essentials.conditions.prettytime
 
 import org.junit.Test
 import kotlin.test.assertEquals

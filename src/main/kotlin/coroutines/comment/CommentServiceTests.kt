@@ -2,6 +2,7 @@ package domain.comment
 
 import comment.FakeCommentRepository
 import comment.FakeUserService
+import coroutines.comment.commentservice.CommentService
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.currentTime
 import kotlinx.coroutines.test.runTest

@@ -1,12 +1,15 @@
-package functional.dsl
+package functional.dsl.userstable
 
+import functional.dsl.table.TableBuilder
+import functional.dsl.table.TdBuilder
+import functional.dsl.table.TrBuilder
 import org.junit.Test
 import kotlin.test.assertEquals
 
 data class User(val id: String, val name: String, val points: Int, val category: String)
 
 fun userTable(users: List<User>): TableBuilder = TODO()
-//table { 
+//table {
 //    tr {
 //        td { +"Id" }
 //        td { +"Name" }

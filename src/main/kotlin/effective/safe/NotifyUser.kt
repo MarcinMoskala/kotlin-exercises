@@ -1,6 +1,5 @@
-package creation
+package effective.safe.notifyuser
 
-import creation.RequirementsChecks.FakeNotifier.Companion.INCORRECT_ID
 import org.junit.Assert.assertThrows
 import org.junit.Test
 import java.lang.AssertionError
@@ -109,9 +108,9 @@ class RequirementsChecks {
             usersNotified = usersNotified + id
             return true
         }
-        
-        companion object {
-            const val INCORRECT_ID = -100
-        }
+    }
+    
+    companion object {
+        const val INCORRECT_ID = -100
     }
 }

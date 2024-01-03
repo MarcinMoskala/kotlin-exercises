@@ -1,4 +1,4 @@
-package functional.base
+package functional.base.functional
 
 import org.junit.Test
 import kotlin.reflect.KClass
@@ -63,9 +63,9 @@ class LambdaFunctionalTypeInferred {
 class LambdaUsingImplicitParameter {
     val add: (Int, Int) -> Int = { num1, num2 -> num1 + num2 }
 
-    // TODO: Implement printNum, triple, produceName and longestOf properties, 
-    //  just like in LambdaFunctionalTypeSpecified, but this time, whenever possible, 
-    //  use implicit parameter `it`. 
+    // TODO: Implement printNum, triple, produceName and longestOf properties,
+    //  just like in LambdaFunctionalTypeSpecified, but this time, whenever possible,
+    //  use implicit parameter `it`.
 }
 
 class FunctionReference {
@@ -90,14 +90,14 @@ class FunctionMemberReference {
     }
 
     private fun triple(num: Int): Int = num * 3
-    
+
     private fun produceName(name: String): Name = Name(name)
 
     private fun longestOf(
-        str1: String, 
-        str2: String, 
+        str1: String,
+        str2: String,
         str3: String
-    ): String = 
+    ): String =
         maxOf(str1, str2, str3, compareBy { it.length })
 }
 

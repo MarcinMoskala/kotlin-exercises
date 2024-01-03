@@ -1,4 +1,4 @@
-package coffee.channel
+package coroutines.channel.cafeteria
 
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.channels.Channel

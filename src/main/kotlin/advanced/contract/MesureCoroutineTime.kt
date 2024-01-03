@@ -1,4 +1,4 @@
-package advanced.contract
+package advanced.contract.mesurecoroutinetime
 
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.delay
@@ -35,7 +35,7 @@ suspend fun main() {
 //        println(duration) // 1000 ms
 //        println(result) // OK
 //    }
-//    
+//
 //    runBlocking {
 //        val result: String
 //        val duration = measureCoroutine {

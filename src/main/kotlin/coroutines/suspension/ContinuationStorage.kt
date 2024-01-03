@@ -1,4 +1,4 @@
-package coroutines.suspension
+package coroutines.suspension.continuationstorage
 
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch

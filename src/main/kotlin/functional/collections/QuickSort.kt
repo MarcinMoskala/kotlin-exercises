@@ -1,4 +1,4 @@
-package collections
+package functional.collections.quicksort
 
 import org.junit.Test
 import java.util.*

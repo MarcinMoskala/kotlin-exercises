@@ -1,4 +1,4 @@
-package functional.scope.scope_practice
+package functional.scope.scope
 
 import junit.framework.TestCase.assertEquals
 import org.junit.After
@@ -20,9 +20,9 @@ class StudentService(
     }
 
     fun getStudent(studentId: String): ExposedStudent? {
-        val student = studentRepository.getStudent(studentId) 
+        val student = studentRepository.getStudent(studentId)
             ?: return null
-        
+
         logger.log("Student found: $student")
         return studentFactory.produceExposed(student)
     }
@@ -182,7 +182,7 @@ class StudentServiceTest {
             AddStudentRequest("Ester", "Semester2", 3.0),
             AddStudentRequest("Fiona", "Semester1", 4.0),
             AddStudentRequest("Gina", "Semester2", 2.9),
-            AddStudentRequest("Helen", "Semester1", 3.0), 
+            AddStudentRequest("Helen", "Semester1", 3.0),
             AddStudentRequest("Irene", "Semester1", 4.0),
             AddStudentRequest("Jack", "Semester2", 4.0),
             AddStudentRequest("Kate", "Semester1", 5.0),
@@ -206,7 +206,7 @@ class StudentServiceTest {
             ), result1
         )
         assertEquals(listOf("7 students in Semester1"), logger.messages)
-        
+
         // Given
         logger.cleanup()
 

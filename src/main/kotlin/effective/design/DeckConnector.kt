@@ -1,4 +1,4 @@
-package effective.design
+package effective.design.deckconnector
 
 import org.junit.Test
 import java.util.*
@@ -15,7 +15,7 @@ class DeckConnector(
     }
 
     enum class ConnectionState {
-        Initial, 
+        Initial,
         Connected,
         Disconnected
     }
@@ -28,7 +28,7 @@ class DeckConnectorTest {
         val deckConnector2 = DeckConnector("deck1")
         assertEquals(deckConnector1, deckConnector2)
     }
-    
+
     @Test
     fun `should not equal when deck name or state are different`() {
         val deckConnector1 = DeckConnector("deck1")
@@ -41,7 +41,7 @@ class DeckConnectorTest {
         deckConnector2.state = DeckConnector.ConnectionState.Connected
         assertEquals(deckConnector1, deckConnector2)
     }
-    
+
     @Test
     fun `should have equal hash code for equal objects`() {
         val deckConnector1 = DeckConnector("deck1")
@@ -54,7 +54,7 @@ class DeckConnectorTest {
         deckConnector2.state = DeckConnector.ConnectionState.Connected
         assertEquals(deckConnector1.hashCode(), deckConnector2.hashCode())
     }
-    
+
     @Test
     fun `should compare objects by deck name and state`() {
         val deck1 = DeckConnector("deck1").apply { state = DeckConnector.ConnectionState.Connected }

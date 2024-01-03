@@ -1,4 +1,4 @@
-package advanced.delegates
+package advanced.delegates.applicationscope
 
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -34,12 +34,12 @@ class ApplicationScopeTest {
 //        applicationScope = fakeApplicationScope,
 //        loggingScope = fakeLoggingScope,
 //    )
-//    
+//
 //    @Test
 //    fun `should use coroutine scope`() {
 //        assert(applicationScope.coroutineContext == coroutineScope.coroutineContext)
 //    }
-//    
+//
 //    @Test
 //    fun `should use application scope`() {
 //        assert(applicationScope.application.name == "Test")
@@ -48,7 +48,7 @@ class ApplicationScopeTest {
 //        applicationScope.stop()
 //        assert(!fakeApplicationScope.isRunning())
 //    }
-//    
+//
 //    @Test
 //    fun `should use logging scope`() {
 //        applicationScope.logInfo("Info")
@@ -66,7 +66,7 @@ class FakeApplicationControlScope(
     override val application: Application,
 ) : ApplicationControlScope {
     private var started = false
-    
+
     override fun start() {
         started = true
     }
@@ -74,13 +74,13 @@ class FakeApplicationControlScope(
     override fun stop() {
         started = false
     }
-    
+
     override fun isRunning(): Boolean = started
 }
 
 class FakeLoggingScope : LoggingScope {
     val messages = mutableListOf<String>()
-    
+
     override fun logInfo(message: String) {
         messages += "INFO: $message"
     }

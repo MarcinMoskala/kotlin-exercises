@@ -1,7 +1,7 @@
-package cheap
+package effective.efficient.eventlistenerrepository
 
-import cheap.EventListenerRepositoryTest.Event
-import cheap.EventListenerRepositoryTest.Event.*
+import effective.efficient.eventlistenerrepository.EventListenerRepositoryTest.*
+import effective.efficient.eventlistenerrepository.EventListenerRepositoryTest.Event.*
 import org.junit.Test
 import java.util.concurrent.ConcurrentHashMap
 import kotlin.test.assertEquals

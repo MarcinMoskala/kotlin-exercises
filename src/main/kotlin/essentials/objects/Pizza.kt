@@ -1,4 +1,4 @@
-package essentials.objects
+package essentials.objects.pizza
 
 import org.junit.Test
 import kotlin.test.assertEquals

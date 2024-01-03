@@ -1,4 +1,4 @@
-package functional.collections
+package functional.collections.plusat
 
 import org.junit.Test
 import utils.assertThrows

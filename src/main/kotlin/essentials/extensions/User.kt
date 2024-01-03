@@ -1,4 +1,4 @@
-package essentials.e17
+package essentials.extensions.user
 
 import org.junit.Test
 import java.time.LocalDateTime
@@ -22,7 +22,7 @@ data class UserJson(
     val heightCm: Int,
 )
 
-// TODO: Implement extensions to convert User to UserJson and vice versa, 
+// TODO: Implement extensions to convert User to UserJson and vice versa,
 //  and to create Centimeters from Int
 
 fun main() {
@@ -35,12 +35,12 @@ fun main() {
 //    )
 //    val userJson = user.toUserJson()
 //    println(userJson)
-//    // UserJson(username=alex, email=alex@example.com, 
+//    // UserJson(username=alex, email=alex@example.com,
 //    // registrationDate=1410-07-15T10:13, heightCm=170)
 //    val user2 = userJson.toUser()
-//    println(user2) // User(username=alex, 
-//    // email=Email(value=alex@example.com), 
-//    // registrationDate=1410-07-15T10:13, 
+//    println(user2) // User(username=alex,
+//    // email=Email(value=alex@example.com),
+//    // registrationDate=1410-07-15T10:13,
 //    // height=Centimeters(value=170))
 }
 

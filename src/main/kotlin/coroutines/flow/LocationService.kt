@@ -1,4 +1,4 @@
-package coroutines.flow
+package coroutines.flow.locationservice
 
 import junit.framework.TestCase.assertEquals
 import kotlinx.coroutines.CoroutineScope
@@ -49,7 +49,7 @@ class LocationObserverTest {
         runCurrent()
         kotlin.test.assertEquals(1, locationRepository.observersCount())
     }
-    
+
     @Test
     fun `should provide current location`() = runTest {
         val locationRepository = FakeLocationRepository()
@@ -57,17 +57,17 @@ class LocationObserverTest {
         assertEquals(null, locationService.currentLocation())
         runCurrent()
         assertEquals(null, locationService.currentLocation())
-        
+
         val l1 = Location()
         locationRepository.emitLocation(l1)
         runCurrent()
         assertEquals(l1, locationService.currentLocation())
-        
+
         val l2 = Location()
         locationRepository.emitLocation(l2)
         runCurrent()
         assertEquals(l2, locationService.currentLocation())
-        
+
         val l3 = Location()
         locationRepository.emitLocation(l3)
         runCurrent()

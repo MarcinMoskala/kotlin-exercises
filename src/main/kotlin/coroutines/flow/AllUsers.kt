@@ -1,4 +1,4 @@
-package sequence
+package coroutines.flow.allusers
 
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.count

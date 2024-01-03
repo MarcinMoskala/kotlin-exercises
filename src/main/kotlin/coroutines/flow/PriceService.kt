@@ -1,4 +1,4 @@
-package coroutines.flow
+package coroutines.flow.priceservice
 
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.delay

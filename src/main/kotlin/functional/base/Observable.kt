@@ -1,4 +1,4 @@
-package functional.base
+package functional.base.observable
 
 import junit.framework.TestCase.assertTrue
 import org.junit.Test

@@ -1,4 +1,4 @@
-package user
+package coroutines.dispatcher.discnewsrepository
 
 import kotlinx.coroutines.*
 import org.junit.Test

@@ -1,4 +1,4 @@
-package coroutines.recipes
+package coroutines.recipes.suspendlazy
 
 import kotlinx.coroutines.*
 import kotlinx.coroutines.test.advanceTimeBy

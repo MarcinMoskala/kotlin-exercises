@@ -1,4 +1,4 @@
-package coroutines.flow
+package coroutines.flow.newsviewmodel
 
 import junit.framework.TestCase.assertEquals
 import kotlinx.coroutines.*

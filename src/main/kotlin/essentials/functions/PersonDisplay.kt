@@ -1,4 +1,4 @@
-package essentials.functions
+package essentials.functions.persondisplay
 
 import org.junit.Test
 import kotlin.test.assertEquals
@@ -23,7 +23,7 @@ class PersonDisplayTest {
 //        val expected = "John Smith (42)"
 //        assertEquals(expected, formatPersonDisplay(name, surname, age))
 //    }
-//    
+//
 //    @Test
 //    fun testFormatPersonDisplayWithoutAge() {
 //        val name = "Alex"
@@ -31,7 +31,7 @@ class PersonDisplayTest {
 //        val expected = "Alex Simonson"
 //        assertEquals(expected, formatPersonDisplay(name, surname))
 //    }
-//    
+//
 //    @Test
 //    fun testFormatPersonDisplayWithoutSurname() {
 //        val name = "Peter"
@@ -39,7 +39,7 @@ class PersonDisplayTest {
 //        val expected = "Peter (25)"
 //        assertEquals(expected, formatPersonDisplay(name = name, age = age))
 //    }
-//    
+//
 //    @Test
 //    fun testFormatPersonDisplayWithoutName() {
 //        val surname = "Johnson"
@@ -47,20 +47,20 @@ class PersonDisplayTest {
 //        val expected = "Johnson (18)"
 //        assertEquals(expected, formatPersonDisplay(surname = surname, age = age))
 //    }
-//    
+//
 //    @Test
 //    fun testFormatPersonDisplayWithoutNameAndSurname() {
 //        val age = 18
 //        val expected = "(18)"
 //        assertEquals(expected, formatPersonDisplay(age = age))
 //    }
-//    
+//
 //    @Test
 //    fun testFormatPersonDisplayWithoutParameters() {
 //        val expected = ""
 //        assertEquals(expected, formatPersonDisplay())
 //    }
-//    
+//
 //    @Test
 //    fun testFormatPersonDisplayWithNullName() {
 //        val name: String? = null
@@ -69,7 +69,7 @@ class PersonDisplayTest {
 //        val expected = "Smith (42)"
 //        assertEquals(expected, formatPersonDisplay(name, surname, age))
 //    }
-//    
+//
 //    @Test
 //    fun testFormatPersonDisplayWithNullSurname() {
 //        val name = "John"

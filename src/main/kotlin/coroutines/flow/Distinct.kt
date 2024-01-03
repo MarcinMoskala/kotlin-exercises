@@ -1,4 +1,4 @@
-package coroutines.flow
+package coroutines.flow.distinct
 
 import junit.framework.TestCase.assertEquals
 import kotlinx.coroutines.delay

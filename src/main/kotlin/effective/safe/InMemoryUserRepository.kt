@@ -1,4 +1,4 @@
-package safe
+package effective.safe.inmemoryuserrepository
 
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.coroutineScope

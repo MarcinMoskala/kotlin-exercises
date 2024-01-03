@@ -1,4 +1,4 @@
-package essentials.classes
+package essentials.classes.gui
 
 import junit.framework.TestCase.assertFalse
 import junit.framework.TestCase.assertTrue
@@ -15,7 +15,7 @@ fun main() {
 //    textView.text = "Welcome to Kotlin!"
 //    println(textView.text) // Welcome to Kotlin!
 //    println(textView.isVisible) // true
-//    
+//
 //    textView.hide()
 //    println(textView.isVisible) // false
 //
@@ -27,7 +27,7 @@ fun main() {
 //    println(toggle.isOn) // false
 //    toggle.click()
 //    println(toggle.isOn) // true
-//    
+//
 //    println(toggle.isVisible) // true
 //    toggle.hide()
 //    println(toggle.isVisible) // false

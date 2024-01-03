@@ -1,4 +1,4 @@
-package collections.less
+package functional.collections.passingsurnames
 
 import junit.framework.TestCase.assertEquals
 import org.junit.Test

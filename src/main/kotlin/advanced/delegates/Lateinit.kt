@@ -1,6 +1,4 @@
-@file:JvmName("Mutable")
-
-package advanced.delegates
+package advanced.delegates.lateinit
 
 import org.junit.Test
 import kotlin.properties.Delegates
