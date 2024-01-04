@@ -72,7 +72,7 @@ class MapTest {
 //
 //        assertEquals(listOf("MIKE", "JANE", "MARCIN", "JOHN", "JAMES"), upper)
 //        assertEquals(listOf(2, 4, 6, 8, 10), doubled)
-//        
+//
 //        val list = listOf(1, 2, 3)
 //        assertEquals(list.map { it * 2 }, listOf(2, 4, 6))
 //        assertEquals(list.map { "$it!" }, listOf("1!", "2!", "3!"))

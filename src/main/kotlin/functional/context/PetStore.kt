@@ -50,9 +50,9 @@ fun main(): Unit = with(ConsoleLogger()) {
 class RandomDatabase : Database {
     override fun addPet(addPetRequest: AddPetRequest): Pet =
         when {
-            Random.nextBoolean() -> 
+            Random.nextBoolean() ->
                 Pet(1234, addPetRequest.name)
-            Random.nextBoolean() -> 
+            Random.nextBoolean() ->
                 throw InsertionConflictException()
             else -> throw Exception()
         }

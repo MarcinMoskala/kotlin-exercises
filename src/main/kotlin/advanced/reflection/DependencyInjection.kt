@@ -7,7 +7,7 @@ import kotlin.reflect.typeOf
 import kotlin.test.assertEquals
 import kotlin.test.assertSame
 
-// TODO: Implement Registry class and registry function here
+// TODO
 
 //data class UserConfiguration(val url: String)
 //

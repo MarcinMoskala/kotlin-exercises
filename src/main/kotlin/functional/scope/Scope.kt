@@ -24,7 +24,7 @@ class StudentService(
     fun getStudent(studentId: String): ExposedStudent? {
         val student = studentRepository.getStudent(studentId)
             ?: return null
-        
+
         logger.log("Student found: $student")
         return studentFactory.produceExposed(student)
     }

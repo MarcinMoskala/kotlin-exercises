@@ -22,8 +22,8 @@ fun List<StudentGrades>.getBestForScholarship(
         }
     }
     Collections.sort(candidates, { s1, s2 ->
-        val difference = 
-            averageGradeFromSemester(s2, semester) - 
+        val difference =
+            averageGradeFromSemester(s2, semester) -
                     averageGradeFromSemester(s1, semester)
         if (difference > 0) 1 else -1
     })

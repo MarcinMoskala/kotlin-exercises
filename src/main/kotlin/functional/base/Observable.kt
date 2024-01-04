@@ -8,6 +8,9 @@ class Observable<T>(initial: T) {
     var value: T = initial
 }
 
+// TODO
+
+
 //fun main() {
 //    val observable = Observable(1)
 //    println(observable.value) // 1

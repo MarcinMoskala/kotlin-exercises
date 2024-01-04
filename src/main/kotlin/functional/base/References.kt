@@ -73,7 +73,7 @@ class BoundedFunctionReference {
 }
 
 class ReferencesTest {
-    
+
     @Test
     fun `FunctionReference has correct property signatures`() {
         checkPropertySignatures(FunctionReference::class, expectLongestOf = false)

@@ -10,6 +10,8 @@ data class StudentJson(
     val pointsInSemester: Int
 )
 
+// TODO
+
 fun List<StudentJson>.getPassingSurnames(): List<String> =
     this.filter { it.result >= 50 }
         .filter { it.pointsInSemester >= 15 }

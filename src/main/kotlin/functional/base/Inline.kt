@@ -4,7 +4,7 @@ import org.junit.Test
 import kotlin.reflect.typeOf
 import kotlin.test.assertEquals
 
-// TODO: Implement anyOf, firstOfOrNull and filterValuesInstanceOf functions
+// TODO
 
 //fun main() {
 //    val list = listOf(1, "A", 3, "B")
