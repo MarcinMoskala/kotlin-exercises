@@ -45,4 +45,3 @@ fun processResponseString(response: Response<String, Throwable>) {
 //    val e1: Failure<Throwable> = e
 //    val e2: Failure<Any> = e
 //}
-

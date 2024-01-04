@@ -1,6 +1,6 @@
 package coroutines.context.countercontext
 
-// TODO: Implement CounterContext
+// TODO
 
 //fun main(): Unit = runBlocking(CounterContext()) {
 //    println(coroutineContext[CounterContext]?.next()) // 0
@@ -18,7 +18,7 @@ package coroutines.context.countercontext
 @Suppress("FunctionName")
 class CounterContextTests {
 
-// TODO: Uncomment
+// TODO
 //
 //    @Test
 //    fun `should return next numbers in the same coroutine`() = runBlocking<Unit>(CounterContext()) {

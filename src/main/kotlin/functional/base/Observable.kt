@@ -10,7 +10,6 @@ class Observable<T>(initial: T) {
 
 // TODO
 
-
 //fun main() {
 //    val observable = Observable(1)
 //    println(observable.value) // 1

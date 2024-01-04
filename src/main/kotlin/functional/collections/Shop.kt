@@ -174,7 +174,6 @@ class ShopFunctionsTests {
         assertEquals(expected, result)
     }
 
-
     @Test
     fun `getWaitingCustomers should not return customers all orders delivered`() {
         // given

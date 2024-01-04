@@ -62,7 +62,6 @@ suspend fun brewMilk(baristaName: String): Milk {
     return Milk()
 }
 
-
 suspend fun makeEspresso(ground: GroundCoffee, baristaName: String): Espresso {
     println("$baristaName: Making espresso...")
     delay(3000)
