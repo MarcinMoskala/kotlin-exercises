@@ -34,6 +34,8 @@ inline fun <T> Iterable<T>.filter(predicate: (T) -> Boolean): List<T> {
     return list
 }
 
+// TODO
+
 fun main() {
     val numbers = 1..10
     val names = listOf("Mike", "Jane", "Marcin", "John", "James")
