@@ -8,7 +8,7 @@ import kotlin.coroutines.CoroutineContext
 import kotlin.test.assertEquals
 
 suspend fun <T, R> Iterable<T>.mapAsync(
-    transform: suspend (T) -> R
+    transformation: suspend (T) -> R
 ): List<R> = TODO()
 
 class MapAsyncTest {

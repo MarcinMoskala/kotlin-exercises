@@ -5,7 +5,7 @@ import org.junit.Before
 import org.junit.Test
 import kotlin.test.assertEquals
 
-fun main() {
+//fun main() {
 //    val intStack = Stack<Int>()
 //    intStack.push(1)
 //    intStack.push(2)
@@ -27,7 +27,7 @@ fun main() {
 //    while (!stringStack.isEmpty()) { // C, B, A
 //        println(stringStack.pop())
 //    }
-}
+//}
 
 class StackTest {
 

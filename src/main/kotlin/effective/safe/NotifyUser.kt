@@ -28,12 +28,12 @@ interface Notifier {
     /**
      * Notifies person
      * @param id Is an id of user we want to notify
-     * @return Was operation successful
+     * @return Was the operation successful
      */
     fun notifyPerson(id: Int): Boolean
 
     /**
-     * Checks if we can send message to the following `id`
+     * Checks if we can send message to the following id
      */
     fun checkId(id: Int): Boolean
 }

@@ -1,5 +1,6 @@
-package functional.base.functional
+package functional.base.references
 
+import functional.base.functional.FunctionsClassic
 import org.junit.Test
 import kotlin.reflect.KClass
 import kotlin.reflect.typeOf
@@ -28,96 +29,79 @@ class FunctionsClassic {
 
 data class Name(val name: String)
 
-class AnonymousFunctionalTypeSpecified {
-    val add: (Int, Int) -> Int = fun(num1, num2) = num1 + num2
+class FunctionReference {
+    val add: (Int, Int) -> Int = Int::plus
 
-    // TODO: Implement printNum, triple, produceName and longestOf properties using anonymous functions
-    //  their type should be specified explicitly
+    // TODO: Implement printNum, triple and produceName properties using function references
+    //  to functions from the Kotlin stdlib or from the Name class
     //  See add property for example
 }
 
-class AnonymousFunctionalTypeInferred {
-    val add = fun(num1: Int, num2: Int) = num1 + num2
+class FunctionMemberReference {
+    val add: (Int, Int) -> Int = this::add
 
-    // TODO: Implement printNum, triple, produceName and longestOf properties using anonymous functions
-    //  their type should be inferred by compiler
+    // TODO: Implement printNum, triple, produceName and longestOf properties using function references
+    //  to functions from the current class
+    //  See add property for example
+
+    private fun add(num1: Int, num2: Int): Int = num1 + num2
+
+    private fun printNum(num: Int) {
+        print(num)
+    }
+
+    private fun triple(num: Int): Int = num * 3
+
+    private fun produceName(name: String): Name = Name(name)
+
+    private fun longestOf(
+        str1: String,
+        str2: String,
+        str3: String
+    ): String =
+        maxOf(str1, str2, str3, compareBy { it.length })
+}
+
+class BoundedFunctionReference {
+    private val classic = FunctionsClassic()
+
+    val add: (Int, Int) -> Int = classic::add
+
+    // TODO: Implement printNum, triple, produceName and longestOf properties using function references
+    //  to functions from the `classic` object
     //  See add property for example
 }
 
-class LambdaFunctionalTypeSpecified {
-    val add: (Int, Int) -> Int = { num1, num2 -> num1 + num2 }
-
-    // TODO: Implement printNum, triple, produceName and longestOf properties using lambda functions
-    //  their type should be specified explicitly
-    //  See add property for example
-}
-
-class LambdaFunctionalTypeInferred {
-    val add = { num1: Int, num2: Int -> num1 + num2 }
-
-    // TODO: Implement printNum, triple, produceName and longestOf properties using lambda functions
-    //  their type should be inferred by compiler
-    //  See add property for example
-}
-
-class LambdaUsingImplicitParameter {
-    val add: (Int, Int) -> Int = { num1, num2 -> num1 + num2 }
-
-    // TODO: Implement printNum, triple, produceName and longestOf properties,
-    //  just like in LambdaFunctionalTypeSpecified, but this time, whenever possible,
-    //  use implicit parameter `it`.
-}
-
-class FunctionalTest {
-
+class ReferencesTest {
+    
     @Test
-    fun `AnonymousFunctionalTypeSpecified has correct property signatures`() {
-        checkPropertySignatures(AnonymousFunctionalTypeSpecified::class)
+    fun `FunctionReference has correct property signatures`() {
+        checkPropertySignatures(FunctionReference::class, expectLongestOf = false)
     }
 
     @Test
-    fun `AnonymousFunctionalTypeSpecified has correct property behavior`() {
-        checkPropertyBehavior(AnonymousFunctionalTypeSpecified())
+    fun `FunctionReference has correct property behavior`() {
+        checkPropertyBehavior(FunctionReference(), expectLongestOf = false)
     }
 
     @Test
-    fun `AnonymousFunctionalTypeInferred has correct property signatures`() {
-        checkPropertySignatures(AnonymousFunctionalTypeInferred::class)
+    fun `FunctionMemberReference has correct property signatures`() {
+        checkPropertySignatures(FunctionMemberReference::class)
     }
 
     @Test
-    fun `AnonymousFunctionalTypeInferred has correct property behavior`() {
-        checkPropertyBehavior(AnonymousFunctionalTypeInferred())
+    fun `FunctionMemberReference has correct property behavior`() {
+        checkPropertyBehavior(FunctionMemberReference())
     }
 
     @Test
-    fun `LambdaFunctionalTypeSpecified has correct property signatures`() {
-        checkPropertySignatures(LambdaFunctionalTypeSpecified::class)
+    fun `BoundedFunctionReference has correct property signatures`() {
+        checkPropertySignatures(BoundedFunctionReference::class)
     }
 
     @Test
-    fun `LambdaFunctionalTypeSpecified has correct property behavior`() {
-        checkPropertyBehavior(LambdaFunctionalTypeSpecified())
-    }
-
-    @Test
-    fun `LambdaFunctionalTypeInferred has correct property signatures`() {
-        checkPropertySignatures(LambdaFunctionalTypeInferred::class)
-    }
-
-    @Test
-    fun `LambdaFunctionalTypeInferred has correct property behavior`() {
-        checkPropertyBehavior(LambdaFunctionalTypeInferred())
-    }
-
-    @Test
-    fun `LambdaUsingImplicitParameter has correct property signatures`() {
-        checkPropertySignatures(LambdaUsingImplicitParameter::class)
-    }
-
-    @Test
-    fun `LambdaUsingImplicitParameter has correct property behavior`() {
-        checkPropertyBehavior(LambdaUsingImplicitParameter())
+    fun `BoundedFunctionReference has correct property behavior`() {
+        checkPropertyBehavior(BoundedFunctionReference())
     }
 
     private fun checkPropertySignatures(

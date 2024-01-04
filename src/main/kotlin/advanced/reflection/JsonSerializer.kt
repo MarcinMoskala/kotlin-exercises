@@ -9,6 +9,42 @@ import kotlin.test.assertEquals
 
 fun serializeToJson(value: Any): String = TODO()
 
+@SerializationNameMapper(SnakeCaseName::class)
+@SerializationIgnoreNulls
+class Creature(
+    val name: String,
+    @SerializationName("att")
+    val attack: Int,
+    @SerializationName("def")
+    val defence: Int,
+    val traits: List<Trait>,
+    val elementCost: Map<Element, Int>,
+    @SerializationNameMapper(LowerCaseName::class)
+    val isSpecial: Boolean,
+    @SerializationIgnore
+    var used: Boolean = false,
+    val extraDetails: String? = null,
+)
+
+object LowerCaseName : NameMapper {
+    override fun map(name: String): String = name.lowercase()
+}
+
+class SnakeCaseName : NameMapper {
+    val pattern = "(?<=.)[A-Z]".toRegex()
+
+    override fun map(name: String): String =
+        name.replace(pattern, "_$0").lowercase()
+}
+
+enum class Element {
+    FOREST, ANY,
+}
+
+enum class Trait {
+    FLYING
+}
+
 fun main() {
     val creature = Creature(
         name = "Cockatrice",
@@ -42,48 +78,6 @@ annotation class SerializationIgnoreNulls
 
 interface NameMapper {
     fun map(name: String): String
-}
-
-object LowerCaseName : NameMapper {
-    override fun map(name: String): String = name.lowercase()
-}
-
-class SnakeCaseName : NameMapper {
-    val pattern = "(?<=.)[A-Z]".toRegex()
-
-    override fun map(name: String): String =
-        name.replace(pattern, "_$0").lowercase()
-}
-object UpperSnakeCaseName : NameMapper {
-    val pattern = "(?<=.)[A-Z]".toRegex()
-
-    override fun map(name: String): String =
-        name.replace(pattern, "_$0").uppercase()
-}
-
-@SerializationNameMapper(SnakeCaseName::class)
-@SerializationIgnoreNulls
-class Creature(
-    val name: String,
-    @SerializationName("att")
-    val attack: Int,
-    @SerializationName("def")
-    val defence: Int,
-    val traits: List<Trait>,
-    val elementCost: Map<Element, Int>,
-    @SerializationNameMapper(LowerCaseName::class)
-    val isSpecial: Boolean,
-    @SerializationIgnore
-    var used: Boolean = false,
-    val extraDetails: String? = null,
-)
-
-enum class Element {
-    FOREST, ANY,
-}
-
-enum class Trait {
-    FLYING
 }
 
 class JsonSerializerTest {

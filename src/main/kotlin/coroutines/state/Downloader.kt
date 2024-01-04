@@ -19,17 +19,12 @@ class FakeNetworkService : NetworkService {
 
 class UserDownloader(private val api: NetworkService) {
     private val users = mutableListOf<User>()
-    private val lock = Any()
 
-    suspend fun downloaded(): List<User> = synchronized(lock) {
-        users.toList()
-    }
+    fun downloaded(): List<User> = users.toList()
 
     suspend fun getUser(id: Int) {
         val newUser = api.getUser(id)
-        synchronized(lock) {
-            users += newUser
-        }
+        users += newUser
     }
 }
 

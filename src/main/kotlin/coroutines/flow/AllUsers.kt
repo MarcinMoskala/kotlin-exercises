@@ -7,15 +7,15 @@ import kotlinx.coroutines.test.runTest
 import org.junit.Test
 import kotlin.test.assertEquals
 
-data class User(val name: String)
+class AllUsers(private val repository: UserRepository) {
+    fun getAllUsers(): Flow<User> = TODO()
+}
 
 interface UserRepository {
     fun fetchUsers(pageNumber: Int): List<User>
 }
 
-class AllUsers(private val repository: UserRepository) {
-    fun getAllUsers(): Flow<User> = TODO()
-}
+data class User(val name: String)
 
 internal class AllUsersTests {
 

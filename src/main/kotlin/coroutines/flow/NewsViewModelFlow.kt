@@ -1,4 +1,4 @@
-package coroutines.flow.newsviewmodel
+package coroutines.flow.newsviewmodelflow
 
 import junit.framework.TestCase.assertEquals
 import kotlinx.coroutines.*
@@ -11,7 +11,7 @@ import org.junit.After
 import org.junit.Before
 import org.junit.Test
 
-class NewsViewModel(
+class NewsViewModelFlow(
     newsRepository: NewsRepository
 ) : BaseViewModel() {
     private val _progressVisible = MutableStateFlow(false)
@@ -63,7 +63,7 @@ class FakeNewsRepository : NewsRepository {
     }
 }
 
-class NewsViewModelTest {
+class NewsViewModelFlowTest {
     lateinit var dispatcher: TestDispatcher
     lateinit var newsRepository: FakeNewsRepository
 
@@ -81,7 +81,7 @@ class NewsViewModelTest {
 
     @Test
     fun `should show all news`() {
-        val viewModel = NewsViewModel(newsRepository)
+        val viewModel = NewsViewModelFlow(newsRepository)
         newsRepository.fetchNewsDelay = 1000
         var newsShown = listOf<News>()
         viewModel.newsToShow.onEach {
@@ -94,7 +94,7 @@ class NewsViewModelTest {
 
     @Test
     fun `should show progress bar when loading news`() {
-        val viewModel = NewsViewModel(newsRepository)
+        val viewModel = NewsViewModelFlow(newsRepository)
         newsRepository.fetchNewsDelay = 1000
         var progressChanges = listOf<Pair<Long, Boolean>>()
         viewModel.progressVisible.onEach {
@@ -113,7 +113,7 @@ class NewsViewModelTest {
         val exceptionsNum = 10
         newsRepository.failWith.addAll(List(exceptionsNum) { ApiException() })
         newsRepository.fetchNewsStartDelay = 1000
-        val viewModel = NewsViewModel(newsRepository)
+        val viewModel = NewsViewModelFlow(newsRepository)
         var errors = listOf<Throwable>()
         viewModel.errors.onEach {
             errors += it
@@ -133,7 +133,7 @@ class NewsViewModelTest {
         val exception = Exception()
         newsRepository.failWith.add(exception)
         newsRepository.fetchNewsStartDelay = 1000
-        val viewModel = NewsViewModel(newsRepository)
+        val viewModel = NewsViewModelFlow(newsRepository)
         var errors = listOf<Throwable>()
         viewModel.errors.onEach {
             errors += it

@@ -1,6 +1,6 @@
 package essentials.classes.product
 
-fun main() {
+//fun main() {
 //    val laptop = Product("Laptop", 999.99, 5)
 //
 //    println(laptop.name) // Laptop
@@ -21,4 +21,4 @@ fun main() {
 //
 //    println(laptop.quantity) // 10
 //    println(laptop.calculateTotalValue()) // 9999.9
-}
+//}

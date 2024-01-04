@@ -25,7 +25,7 @@ data class UserJson(
 // TODO: Implement extensions to convert User to UserJson and vice versa,
 //  and to create Centimeters from Int
 
-fun main() {
+//fun main() {
 //    val user = User(
 //        username = "alex",
 //        email = Email("alex@example.com"),
@@ -42,7 +42,7 @@ fun main() {
 //    // email=Email(value=alex@example.com),
 //    // registrationDate=1410-07-15T10:13,
 //    // height=Centimeters(value=170))
-}
+//}
 
 class DataConversionTest {
 

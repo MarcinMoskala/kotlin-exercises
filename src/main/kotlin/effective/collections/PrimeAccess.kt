@@ -4,14 +4,14 @@ import kotlin.random.Random
 import kotlin.system.measureTimeMillis
 
 class PrimeAccessRepository(
-    private val primeAccessList: PrimeAccessList,
+    private val primeAccessList: PrimeAccessList
 ) {
     fun isOnAllowList(userId: String): Boolean = TODO()
     fun isOnDenyList(userId: String): Boolean = TODO()
 }
 
 class PrimeAccessList(
-    val entries: List<PrimeAccessEntry>,
+    val entries: List<PrimeAccessEntry>
 )
 
 class PrimeAccessEntry(

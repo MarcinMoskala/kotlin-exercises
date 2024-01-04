@@ -9,32 +9,31 @@ import kotlin.test.assertSame
 
 // TODO: Implement Registry class and registry function here
 
-data class UserConfiguration(val url: String)
-
-interface UserRepository {
-    fun get(): String
-}
-
-class RealUserRepository(
-    private val userConfiguration: UserConfiguration,
-) : UserRepository {
-    override fun get(): String =
-        "User from ${userConfiguration.url}"
-}
-
-class UserService(
-    private val userRepository: UserRepository,
-    private val userConfiguration: UserConfiguration,
-) {
-    fun get(): String = "Got ${userRepository.get()}"
-}
-
-fun main() {
+//data class UserConfiguration(val url: String)
+//
+//interface UserRepository {
+//    fun get(): String
+//}
+//class RealUserRepository(
+//    private val userConfiguration: UserConfiguration,
+//) : UserRepository {
+//    override fun get(): String =
+//        "User from ${userConfiguration.url}"
+//}
+//
+//class UserService(
+//    private val userRepository: UserRepository,
+//    private val userConfiguration: UserConfiguration,
+//) {
+//    fun get(): String = "Got ${userRepository.get()}"
+//}
+//
+//fun main() {
 //    val registry: Registry = registry {
 //        singleton<UserConfiguration> {
 //            UserConfiguration("http://localhost:8080")
 //        }
-//        register<UserService> {
+//        normal<UserService> {
 //            UserService(
 //                userRepository = get(),
 //                userConfiguration = get(),
@@ -58,7 +57,7 @@ fun main() {
 //    val uc1 = registry.get<UserService>()
 //    val uc2 = registry.get<UserService>()
 //    println(uc1 === uc2) // false
-}
+//}
 
 class RegistryTest {
 

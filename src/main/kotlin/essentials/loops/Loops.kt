@@ -7,7 +7,11 @@ fun calculateSumOfSquares(n: Int): Int = TODO()
 
 fun calculateSumOfEven(n: Int): Int = TODO()
 
-fun countDownByStep(start: Int, end: Int, step: Int): String = TODO()
+fun countDownByStep(
+    start: Int,
+    end: Int,
+    step: Int
+): String = TODO()
 
 fun main() {
     // Examples for calculateSumOfSquares

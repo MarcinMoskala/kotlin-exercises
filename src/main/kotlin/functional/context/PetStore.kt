@@ -47,6 +47,31 @@ fun main(): Unit = with(ConsoleLogger()) {
     // [ERROR] - Failed to add pet with name Fluffy
 }
 
+class RandomDatabase : Database {
+    override fun addPet(addPetRequest: AddPetRequest): Pet =
+        when {
+            Random.nextBoolean() -> 
+                Pet(1234, addPetRequest.name)
+            Random.nextBoolean() -> 
+                throw InsertionConflictException()
+            else -> throw Exception()
+        }
+}
+
+class ConsoleLogger : Logger {
+    override fun logInfo(message: String) {
+        println("[INFO] - $message")
+    }
+
+    override fun logWarning(message: String) {
+        println("[WARNING] - $message")
+    }
+
+    override fun logError(message: String) {
+        println("[ERROR] - $message")
+    }
+}
+
 class PetStoreTest {
     private val database = FakeDatabase()
     private val petStore = PetStore(database)
@@ -132,20 +157,6 @@ class PetStoreTest {
     }
 }
 
-class ConsoleLogger : Logger {
-    override fun logInfo(message: String) {
-        println("[INFO] - $message")
-    }
-
-    override fun logWarning(message: String) {
-        println("[WARNING] - $message")
-    }
-
-    override fun logError(message: String) {
-        println("[ERROR] - $message")
-    }
-}
-
 class FakeLogger : Logger {
     private val messages = mutableListOf<Pair<Level, String>>()
 
@@ -169,14 +180,6 @@ class FakeLogger : Logger {
 
     enum class Level {
         INFO, WARNING, ERROR
-    }
-}
-
-class RandomDatabase : Database {
-    override fun addPet(addPetRequest: AddPetRequest): Pet = when {
-        Random.nextBoolean() -> Pet(1234, addPetRequest.name)
-        Random.nextBoolean() -> throw InsertionConflictException()
-        else -> throw Exception()
     }
 }
 

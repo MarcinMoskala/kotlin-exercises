@@ -11,8 +11,6 @@ data class ArticleStatistics(
 class TopArticlesGenerator(
     private val articles: List<ArticleStatistics>,
 ) {
-    // Should return top num articles according to their views,
-    // but keep the original order of articles in the list
     fun topArticles(n: Int): List<ArticleStatistics> = TODO()
 }
 

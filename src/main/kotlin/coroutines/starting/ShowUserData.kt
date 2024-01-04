@@ -26,7 +26,11 @@ interface UserDataView {
     fun show(user: User)
 }
 
-data class User(val name: String, val friends: List<Friend>, val profile: Profile)
+data class User(
+    val name: String,
+    val friends: List<Friend>,
+    val profile: Profile
+)
 data class Friend(val id: String)
 data class Profile(val description: String)
 

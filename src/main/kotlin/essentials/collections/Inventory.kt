@@ -7,7 +7,8 @@ import kotlin.test.assertEquals
 
 class Inventory {
     private val products = mutableListOf<Product>()
-    private val productIdToProducer = mutableMapOf<String, String>()
+    private val productIdToProducer =
+        mutableMapOf<String, String>()
     private val sellers = mutableSetOf<String>()
 
     fun addProduct(product: Product, producer: String) {

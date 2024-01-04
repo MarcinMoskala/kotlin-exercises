@@ -7,7 +7,7 @@ import kotlin.test.assertNotEquals
 
 class DeckConnector(
     val deckName: String
-): Comparable<DeckConnector> {
+) : Comparable<DeckConnector> {
     var state: ConnectionState = ConnectionState.Initial
 
     override fun compareTo(other: DeckConnector): Int {

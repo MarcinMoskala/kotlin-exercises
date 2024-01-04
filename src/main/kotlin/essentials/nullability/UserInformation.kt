@@ -5,7 +5,12 @@ import org.junit.Test
 import kotlin.test.assertEquals
 
 data class EmailAddress(val email: String?)
-data class User(val name: String?, val age: Int?, val email: EmailAddress?)
+
+data class User(
+    val name: String?,
+    val age: Int?,
+    val email: EmailAddress?
+)
 
 fun processUserInformation(user: User?): String {
     return ""

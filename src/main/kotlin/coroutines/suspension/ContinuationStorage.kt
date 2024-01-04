@@ -15,9 +15,7 @@ var continuation: Continuation<String>? = null
 
 suspend fun continuationSteal(console: Console) {
     console.println("Before")
-    // TODO: Suspend in here and store continuation in the `continuation` variable.
-    // USE suspendCancellableCoroutine instead of suspendCoroutine
-    // TODO: After continuation resume, print using `console` the value that was passed.
+    // TODO
     console.println("After")
 }
 
@@ -36,6 +34,10 @@ fun main(): Unit = runBlocking<Unit> {
     delay(1000)
     continuation?.resume("This is some text")
 }
+// Before
+// (1 sec)
+// This is some text
+// After
 
 @Suppress("FunctionName")
 class ContinuationStealTests {

@@ -11,18 +11,20 @@ class StudentService(
     private val studentFactory: StudentFactory,
     private val logger: Logger,
 ) {
-    fun addStudent(addStudentRequest: AddStudentRequest): Student? {
-        val student = studentFactory.produceStudent(addStudentRequest)
-        if (student != null) {
-            studentRepository.addStudent(student)
-        }
+    fun addStudent(
+        addStudentRequest: AddStudentRequest
+    ): Student? {
+        val student = studentFactory
+            .produceStudent(addStudentRequest)
+            ?: return null
+        studentRepository.addStudent(student)
         return student
     }
 
     fun getStudent(studentId: String): ExposedStudent? {
         val student = studentRepository.getStudent(studentId)
             ?: return null
-
+        
         logger.log("Student found: $student")
         return studentFactory.produceExposed(student)
     }

@@ -8,14 +8,9 @@ import kotlin.test.assertEquals
 class DiscNewsRepository(
     private val discReader: DiscReader
 ) : NewsRepository {
-    private val dispatcher = Dispatchers.IO
-        .limitedParallelism(200)
-
-    override suspend fun getNews(
-        newsId: String
-    ): News = withContext(dispatcher) {
+    override suspend fun getNews(newsId: String): News {
         val (title, content) = discReader.read("user/$newsId")
-        News(title, content)
+        return News(title, content)
     }
 }
 

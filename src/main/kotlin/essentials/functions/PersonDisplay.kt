@@ -3,7 +3,7 @@ package essentials.functions.persondisplay
 import org.junit.Test
 import kotlin.test.assertEquals
 
-fun main() {
+//fun main() {
 //    println(formatPersonDisplay("John", "Smith", 42))
 //    // John Smith (42)
 //    println(formatPersonDisplay("Alex", "Simonson"))
@@ -12,7 +12,7 @@ fun main() {
 //    // Peter (25)
 //    println(formatPersonDisplay(surname="Johnson", age=18))
 //    // Johnson (18)
-}
+//}
 
 class PersonDisplayTest {
 //    @Test

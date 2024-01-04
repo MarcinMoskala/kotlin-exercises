@@ -5,18 +5,6 @@ import java.util.Collections
 import kotlin.random.Random
 import kotlin.test.assertEquals
 
-data class Grade(
-    val passing: Boolean,
-    var ects: Int,
-    var semester: String,
-    var grade: Double
-)
-
-data class StudentGrades(
-    val studentId: String,
-    val grades: List<Grade>
-)
-
 fun List<StudentGrades>.getBestForScholarship(
     semester: String
 ): List<StudentGrades> {
@@ -34,8 +22,8 @@ fun List<StudentGrades>.getBestForScholarship(
         }
     }
     Collections.sort(candidates, { s1, s2 ->
-        val difference =
-            averageGradeFromSemester(s2, semester) -
+        val difference = 
+            averageGradeFromSemester(s2, semester) - 
                     averageGradeFromSemester(s1, semester)
         if (difference > 0) 1 else -1
     })
@@ -63,6 +51,18 @@ private fun averageGradeFromSemester(
     }
     return sum / count
 }
+
+data class Grade(
+    val passing: Boolean,
+    var ects: Int,
+    var semester: String,
+    var grade: Double
+)
+
+data class StudentGrades(
+    val studentId: String,
+    val grades: List<Grade>
+)
 
 class StudentGradesIntenshipTest {
     @Test

@@ -30,7 +30,11 @@ class InMemoryUserRepository {
         users.forEach { it.surname = newSurname }
     }
 
-    data class User(val id: Int, val name: String, var surname: String)
+    data class User(
+        val id: Int,
+        val name: String,
+        var surname: String
+    )
 }
 
 class InMemoryNewsRepositoryTest {

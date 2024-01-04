@@ -19,7 +19,6 @@ data class Student(
     val pointsInSemester: Int
 )
 
-
 class BestStudentsListTest {
     val internshipStudent = Student("Marc", "Smith", 87.0, 32)
     val studentWithTooLowResultToInternship = Student("Marcus", "Smith", 37.0, 32)

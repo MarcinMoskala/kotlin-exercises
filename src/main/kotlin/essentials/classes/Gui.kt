@@ -5,7 +5,7 @@ import junit.framework.TestCase.assertTrue
 import org.junit.Test
 import kotlin.test.assertEquals
 
-fun main() {
+//fun main() {
 //    val textView = TextView(
 //        id = "tv1",
 //        text = "Hello, World!",
@@ -31,7 +31,7 @@ fun main() {
 //    println(toggle.isVisible) // true
 //    toggle.hide()
 //    println(toggle.isVisible) // false
-}
+//}
 
 class GuiTests {
 

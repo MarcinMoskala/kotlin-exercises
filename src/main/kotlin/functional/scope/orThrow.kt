@@ -5,7 +5,7 @@ import org.junit.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
 
-// Implement orThrow extension function for nullable values.
+// TODO
 
 @Suppress("RedundantNullableReturnType")
 class OrThrowTest {
