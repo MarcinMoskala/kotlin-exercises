@@ -6,7 +6,6 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.currentTime
 import kotlinx.coroutines.test.runTest
 import org.junit.Test
-import utils.assertThrows
 import kotlin.test.assertEquals
 
 @ObsoleteCoroutinesApi
@@ -220,4 +219,11 @@ class ActorsTests {
 
         assertEquals(20, control.codesStored.size)
     }
+}
+
+inline fun <reified T: Throwable> assertThrows(operation: () -> Unit) {
+    val result = runCatching { operation() }
+    assert(result.isFailure) { "Operation has not failed with exception" }
+    val exception = result.exceptionOrNull()
+    assert(exception is T) { "Incorrect exception type, it should be ${T::class}, but it is $exception" }
 }
