@@ -1,6 +1,8 @@
-package functional.base
+package functional.base.centimeter
 
 import kotlin.math.abs
+
+// TODO
 
 class Centimeter(val value: Double) {
     fun plus(other: Centimeter): Centimeter =
@@ -13,6 +15,7 @@ class Centimeter(val value: Double) {
 }
 
 val Int.cm get() = Centimeter(this.toDouble())
+
 fun distance(from: Centimeter, to: Centimeter): Centimeter =
     Centimeter(abs(to.value - from.value))
 

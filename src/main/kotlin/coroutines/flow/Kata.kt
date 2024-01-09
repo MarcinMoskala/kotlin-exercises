@@ -8,8 +8,6 @@ import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.test.*
 import org.junit.Test
-import utils.ValueAndTime
-import utils.withVirtualTime
 import java.util.concurrent.atomic.AtomicInteger
 import kotlin.test.assertEquals
 
@@ -433,3 +431,8 @@ class FlowTests {
         assertEquals(Person("C") to Person("3"), lastPair)
     }
 }
+
+fun <T> Flow<T>.withVirtualTime(testScope: TestScope): Flow<ValueAndTime<T>> =
+    map { ValueAndTime(it, testScope.currentTime) }
+
+data class ValueAndTime<T>(val value: T, val timeMillis: Long)

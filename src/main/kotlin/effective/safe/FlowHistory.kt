@@ -1,21 +1,16 @@
 package effective.safe.flowhistory
 
 import kotlinx.coroutines.delay
-import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.flow
-import kotlinx.coroutines.flow.flowOf
-import kotlinx.coroutines.flow.toList
-import kotlinx.coroutines.test.runTest
+import kotlinx.coroutines.flow.*
+import kotlinx.coroutines.test.*    
 import org.junit.Test
-import utils.ValueAndTime
-import utils.withVirtualTime
 import kotlin.test.assertEquals
 
 fun <T> Flow<T>.withHistory(): Flow<List<T>> = flow {
     val history = mutableListOf<T>()
     emit(history)
     collect {
-        history.add(it)
+        history += it
         emit(history)
     }
 }
@@ -61,3 +56,8 @@ class FlowHistoryTests {
         )
     }
 }
+
+fun <T> Flow<T>.withVirtualTime(testScope: TestScope): Flow<ValueAndTime<T>> =
+    map { ValueAndTime(it, testScope.currentTime) }
+
+data class ValueAndTime<T>(val value: T, val timeMillis: Long)

@@ -7,33 +7,33 @@ import kotlin.test.assertEquals
 
 // TODO
 
-//fun main() {
-//    val textView = TextView(
-//        id = "tv1",
-//        text = "Hello, World!",
-//    )
-//    println(textView.id) // tv1
-//
-//    textView.text = "Welcome to Kotlin!"
-//    println(textView.text) // Welcome to Kotlin!
-//    println(textView.isVisible) // true
-//
-//    textView.hide()
-//    println(textView.isVisible) // false
-//
-//    val toggle = Toggle(
-//        id = "toggle1",
-//    )
-//    println(toggle.id) // toggle1
-//
-//    println(toggle.isOn) // false
-//    toggle.click()
-//    println(toggle.isOn) // true
-//
-//    println(toggle.isVisible) // true
-//    toggle.hide()
-//    println(toggle.isVisible) // false
-//}
+fun main() {
+    //val textView = TextView(
+    //    id = "tv1",
+    //    text = "Hello, World!",
+    //)
+    //println(textView.id) // tv1
+    //
+    //textView.text = "Welcome to Kotlin!"
+    //println(textView.text) // Welcome to Kotlin!
+    //println(textView.isVisible) // true
+    //
+    //textView.hide()
+    //println(textView.isVisible) // false
+    //
+    //val toggle = Toggle(
+    //    id = "toggle1",
+    //)
+    //println(toggle.id) // toggle1
+    //
+    //println(toggle.isOn) // false
+    //toggle.click()
+    //println(toggle.isOn) // true
+    //
+    //println(toggle.isVisible) // true
+    //toggle.hide()
+    //println(toggle.isVisible) // false
+}
 
 class GuiTests {
 

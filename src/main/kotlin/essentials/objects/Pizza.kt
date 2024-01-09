@@ -9,12 +9,12 @@ class Pizza(
     // Class body
 }
 
-//fun main() {
-//    val hawaiian = Pizza.hawaiian()
-//    println(hawaiian.toppings) // [ham, pineapple]
-//    val margherita = Pizza.margherita()
-//    println(margherita.toppings) // [tomato, mozzarella]
-//}
+fun main() {
+    //val hawaiian = Pizza.hawaiian()
+    //println(hawaiian.toppings) // [ham, pineapple]
+    //val margherita = Pizza.margherita()
+    //println(margherita.toppings) // [tomato, mozzarella]
+}
 
 class PizzaTest {
 //    @Test

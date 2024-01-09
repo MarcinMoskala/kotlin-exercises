@@ -2,11 +2,10 @@ package coroutines.flow.flow
 
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.*
+import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.currentTime
 import kotlinx.coroutines.test.runTest
 import org.junit.Test
-import utils.ValueAndTime
-import utils.withVirtualTime
 import kotlin.test.assertEquals
 
 val infiniteFlow: Flow<Unit> = TODO()
@@ -17,7 +16,9 @@ fun everyFlow(timeMillis: Long): Flow<Unit> = TODO()
 
 fun <T> flowOf(lambda: suspend () -> T): Flow<T> = TODO()
 
-fun <T> flowOfFlatten(lambda: suspend () -> Flow<T>): Flow<T> = TODO()
+fun <T> flowOfFlatten(
+    lambda: suspend () -> Flow<T>
+): Flow<T> = TODO()
 
 class FlowUtilsTest {
     @Test
@@ -88,3 +89,8 @@ class FlowUtilsTest {
         )
     }
 }
+
+fun <T> Flow<T>.withVirtualTime(testScope: TestScope): Flow<ValueAndTime<T>> =
+    map { ValueAndTime(it, testScope.currentTime) }
+
+data class ValueAndTime<T>(val value: T, val timeMillis: Long)

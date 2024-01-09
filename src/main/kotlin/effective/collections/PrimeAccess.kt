@@ -29,18 +29,18 @@ fun main() {
         )
     }.shuffled()
     val accessList = PrimeAccessList(entries)
-
+    
     val repo: PrimeAccessRepository
     measureTimeMillis {
         repo = PrimeAccessRepository(accessList)
     }.also { println("Class creation took $it ms") }
-
+    
     measureTimeMillis {
         for (userId in 1L..10_000L) {
             repo.isOnAllowList(userId.toString())
         }
     }.also { println("Operation took $it ms") }
-
+    
     measureTimeMillis {
         for (userId in 1L..10_000L) {
             repo.isOnDenyList(userId.toString())

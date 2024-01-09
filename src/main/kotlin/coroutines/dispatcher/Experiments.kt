@@ -1,4 +1,4 @@
-package coffee.dispatchers
+package coroutines.dispatcher.experiments
 
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.coroutineScope
@@ -11,9 +11,9 @@ val dispatcher = Dispatchers.IO.limitedParallelism(1)
 //val dispatcher = Dispatchers.IO
 //val dispatcher = Dispatchers.IO.limitedParallelism(100)
 
-//val operation = ::cpu1
+val operation = ::cpu1
 //val operation = ::blocking
-val operation = ::suspending
+//val operation = ::suspending
 
 fun cpu1() {
     var i = Int.MAX_VALUE
@@ -29,7 +29,7 @@ suspend fun suspending() {
 }
 
 suspend fun main() = measureTimeMillis {
-    coroutineScope {    
+    coroutineScope {
         repeat(100) {
             launch(dispatcher) {
                 operation()

@@ -31,16 +31,16 @@ fun main() {
     )
     val table = userTable(users)
     println(table)
+    // <table>
+    // <tr><td>Id</td><td>Name</td>
+    // <td>Points</td><td>Category</td></tr>
+    // <tr><td>1</td><td>Randy</td><td>2</td><td>A</td></tr>
+    // <tr><td>4</td><td>Andy</td><td>4</td><td>B</td></tr>
+    // <tr><td>3</td><td>Mandy</td><td>1</td><td>C</td></tr>
+    // <tr><td>5</td><td>Cindy</td><td>5</td><td>A</td></tr>
+    // <tr><td>2</td><td>Lindy</td><td>3</td><td>B</td></tr>
+    // </table>
 }
-// <table>
-// <tr><td>Id</td><td>Name</td>
-// <td>Points</td><td>Category</td></tr>
-// <tr><td>1</td><td>Randy</td><td>2</td><td>A</td></tr>
-// <tr><td>4</td><td>Andy</td><td>4</td><td>B</td></tr>
-// <tr><td>3</td><td>Mandy</td><td>1</td><td>C</td></tr>
-// <tr><td>5</td><td>Cindy</td><td>5</td><td>A</td></tr>
-// <tr><td>2</td><td>Lindy</td><td>3</td><td>B</td></tr>
-// </table>
 
 class StudentTableTest {
     @Test

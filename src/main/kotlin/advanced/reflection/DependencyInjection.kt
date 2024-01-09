@@ -1,7 +1,6 @@
 package advanced.reflection.dependencyinjection
 
 import org.junit.Test
-import utils.assertThrows
 import kotlin.reflect.KType
 import kotlin.reflect.typeOf
 import kotlin.test.assertEquals
@@ -195,4 +194,11 @@ class RegistryTest {
 //        val uc2 = registry.get<UserService>()
 //        assert(uc1 !== uc2)
 //    }
+}
+
+inline fun <reified T: Throwable> assertThrows(operation: () -> Unit) {
+    val result = runCatching { operation() }
+    assert(result.isFailure) { "Operation has not failed with exception" }
+    val exception = result.exceptionOrNull()
+    assert(exception is T) { "Incorrect exception type, it should be ${T::class}, but it is $exception" }
 }

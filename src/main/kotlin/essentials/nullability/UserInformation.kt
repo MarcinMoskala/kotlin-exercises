@@ -19,7 +19,7 @@ fun processUserInformation(user: User?): String {
 fun main() {
     println(processUserInformation(null))
     // Missing user information
-
+    
     val user1 = User(
         "John",
         30,
@@ -27,7 +27,7 @@ fun main() {
     )
     println(processUserInformation(user1))
     // User John is 30 years old, email: john@example.com
-
+    
     val user2 = User(
         "Alice",
         null,
@@ -35,7 +35,7 @@ fun main() {
     )
     println(processUserInformation(user2))
     // User Alice is 0 years old, email: alice@example.com
-
+    
     val user3 = User(
         "Bob",
         25,
@@ -43,7 +43,7 @@ fun main() {
     )
     println(processUserInformation(user3))
     // Missing email
-
+    
     val user6 = User(
         null,
         40,

@@ -24,7 +24,7 @@ class Latte(milk: Milk, espresso: Espresso) : Coffee() {
 
 suspend fun main() = coroutineScope {
     // TODO
-
+    
     println("Hello in Dream Coffee!")
     println("Press E to get espresso, L to get late.")
     while (true) {

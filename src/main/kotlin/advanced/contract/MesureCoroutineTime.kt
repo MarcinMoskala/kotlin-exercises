@@ -27,24 +27,24 @@ suspend fun measureCoroutine(
     }.milliseconds
 }
 
-//suspend fun main() {
-//    runTest {
-//        val result: String
-//        val duration = measureCoroutine {
-//            delay(1000)
-//            result = "OK"
-//        }
-//        println(duration) // 1000 ms
-//        println(result) // OK
-//    }
-//
-//    runBlocking {
-//        val result: String
-//        val duration = measureCoroutine {
-//            delay(1000)
-//            result = "OK"
-//        }
-//        println(duration) // 1000 ms
-//        println(result) // OK
-//    }
-//}
+suspend fun main() {
+    //runTest {
+    //    val result: String
+    //    val duration = measureCoroutine {
+    //        delay(1000)
+    //        result = "OK"
+    //    }
+    //    println(duration) // 1000 ms
+    //    println(result) // OK
+    //}
+    //
+    //runBlocking {
+    //    val result: String
+    //    val duration = measureCoroutine {
+    //        delay(1000)
+    //        result = "OK"
+    //    }
+    //    println(duration) // 1000 ms
+    //    println(result) // OK
+    //}
+}

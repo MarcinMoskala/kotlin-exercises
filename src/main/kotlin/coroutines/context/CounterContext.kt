@@ -17,9 +17,6 @@ package coroutines.context.countercontext
 
 @Suppress("FunctionName")
 class CounterContextTests {
-
-// TODO
-//
 //    @Test
 //    fun `should return next numbers in the same coroutine`() = runBlocking<Unit>(CounterContext()) {
 //        assertEquals(0, coroutineContext[CounterContext]?.next())

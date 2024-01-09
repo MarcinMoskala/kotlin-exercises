@@ -168,7 +168,6 @@ class FirstFailingFakeStudentRepo : StudentsRepository {
     override suspend fun getStudent(id: Int): Student {
         delay(100)
         mutex.withLock {
-            // To prevent more than one throwing
             if (first) {
                 first = false
                 throw FirstFailingError()
