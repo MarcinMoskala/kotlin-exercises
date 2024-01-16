@@ -1,11 +1,13 @@
 package coroutines.recipes.mapasync
 
+import coroutines.test.mapasync.mapAsync
 import kotlinx.coroutines.*
 import kotlinx.coroutines.test.currentTime
 import kotlinx.coroutines.test.runTest
 import org.junit.Test
 import kotlin.coroutines.CoroutineContext
 import kotlin.test.assertEquals
+import kotlin.test.assertTrue
 
 suspend fun <T, R> Iterable<T>.mapAsync(
     transformation: suspend (T) -> R
@@ -82,5 +84,25 @@ class MapAsyncTest {
         delay(1000)
         parentJob.cancel()
         assertEquals(true, job?.isCancelled)
+    }
+    
+    @Test
+    fun should_propagate_exceptions() = runTest {
+        // given
+        val e = object : Throwable() {}
+        val bodies = listOf(
+            suspend { "A" },
+            suspend { delay(1000); "B" },
+            suspend { delay(500); throw e },
+            suspend { "C" }
+        )
+        
+        // when
+        val result = runCatching { bodies.mapAsync { it() } }
+        
+        // then
+        assertTrue(result.isFailure)
+        assertEquals(e, result.exceptionOrNull())
+        assertEquals(500, currentTime)
     }
 }

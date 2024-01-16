@@ -6,10 +6,11 @@ import kotlinx.coroutines.test.runTest
 import org.junit.Test
 import kotlin.coroutines.CoroutineContext
 import kotlin.test.assertEquals
+import kotlin.test.assertTrue
 
 suspend fun <T, R> Iterable<T>.mapAsync(
     transformation: suspend (T) -> R
-): List<R> = coroutineScope { 
+): List<R> = supervisorScope { 
     this@mapAsync.map { async { transformation(it) } }
         .awaitAll()
 }
@@ -32,6 +33,11 @@ class MapAsyncTest {
 
     @Test
     fun should_support_cancellation() = runTest {
+        
+    }
+    
+    @Test
+    fun should_propagate_exceptions() = runTest {
         
     }
 }
