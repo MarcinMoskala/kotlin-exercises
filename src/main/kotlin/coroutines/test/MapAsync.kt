@@ -10,7 +10,7 @@ import kotlin.test.assertTrue
 
 suspend fun <T, R> Iterable<T>.mapAsync(
     transformation: suspend (T) -> R
-): List<R> = supervisorScope { 
+): List<R> = coroutineScope { 
     this@mapAsync.map { async { transformation(it) } }
         .awaitAll()
 }
