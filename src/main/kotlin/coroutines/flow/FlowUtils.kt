@@ -23,8 +23,7 @@ fun <T> flowOfFlatten(
 class FlowUtilsTest {
     @Test
     fun `should create infinite flow`() = runTest {
-        val flow = infiniteFlow
-        val result = flow.take(10).onEach { delay(1000) }.toList()
+        val result = infiniteFlow.take(10).onEach { delay(1000) }.toList()
         assertEquals(listOf(Unit, Unit, Unit, Unit, Unit, Unit, Unit, Unit, Unit, Unit), result)
         assertEquals(10_000, currentTime)
     }
@@ -32,18 +31,21 @@ class FlowUtilsTest {
     @Test
     fun `should create never flow`() = runTest {
         var emitted = false
+        var completed = false
         neverFlow.onEach {
             emitted = true
+        }.onCompletion { 
+            completed = true
         }.launchIn(backgroundScope)
         delay(Long.MAX_VALUE - 1)
         assertEquals(false, emitted)
+        assertEquals(false, completed)
         assertEquals(Long.MAX_VALUE - 1, currentTime)
     }
 
     @Test
     fun `should create every flow`() = runTest {
-        val flow = everyFlow(1000)
-        val result = flow.take(10).toList()
+        val result = everyFlow(1000).take(10).toList()
         assertEquals(listOf(Unit, Unit, Unit, Unit, Unit, Unit, Unit, Unit, Unit, Unit), result)
         assertEquals(10_000, currentTime)
     }
