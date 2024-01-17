@@ -1,14 +1,12 @@
 package functional.dsl.userstable
 
-import functional.dsl.table.TableBuilder
-import functional.dsl.table.TdBuilder
-import functional.dsl.table.TrBuilder
 import org.junit.Test
 import kotlin.test.assertEquals
 
 data class User(val id: String, val name: String, val points: Int, val category: String)
 
 fun userTable(users: List<User>): TableBuilder = TODO()
+
 //table {
 //    tr {
 //        td { +"Id" }
@@ -40,6 +38,39 @@ fun main() {
     // <tr><td>5</td><td>Cindy</td><td>5</td><td>A</td></tr>
     // <tr><td>2</td><td>Lindy</td><td>3</td><td>B</td></tr>
     // </table>
+}
+
+fun table(init: TableBuilder.() -> Unit): TableBuilder =
+    TableBuilder().apply(init)
+
+data class TableBuilder(
+    var trs: List<TrBuilder> = emptyList()
+) {
+    fun tr(init: TrBuilder.() -> Unit) {
+        trs += TrBuilder().apply(init)
+    }
+
+    override fun toString(): String =
+        "<table>${trs.joinToString(separator = "")}</table>"
+}
+
+data class TrBuilder(
+    var tds: List<TdBuilder> = emptyList()
+) {
+    fun td(init: TdBuilder.() -> Unit) {
+        tds += TdBuilder().apply(init)
+    }
+
+    override fun toString(): String =
+        "<tr>${tds.joinToString(separator = "")}</tr>"
+}
+
+data class TdBuilder(var text: String = "") {
+    operator fun String.unaryPlus() {
+        text += this
+    }
+
+    override fun toString(): String = "<td>$text</td>"
 }
 
 class StudentTableTest {

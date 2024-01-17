@@ -3,16 +3,16 @@ package functional.collections.toparticles
 import junit.framework.TestCase.assertEquals
 import org.junit.Test
 
-data class ArticleStatistics(
-    val title: String,
-    val views: Long,
-)
-
 class TopArticlesGenerator(
     private val articles: List<ArticleStatistics>,
 ) {
     fun topArticles(n: Int): List<ArticleStatistics> = TODO()
 }
+
+data class ArticleStatistics(
+    val title: String,
+    val views: Long,
+)
 
 fun main() {
     val generator = TopArticlesGenerator(

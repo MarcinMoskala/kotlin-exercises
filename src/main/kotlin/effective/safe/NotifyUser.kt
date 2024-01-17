@@ -6,15 +6,15 @@ import java.lang.AssertionError
 import java.lang.IllegalStateException
 import kotlin.test.assertEquals
 
+fun Notifier.notifyUser(user: User?) {
+    TODO()
+}
+
 data class User(
     val id: Int,
     val name: String?,
     var surname: String?
 )
-
-fun Notifier.notifyUser(user: User?) {
-    TODO()
-}
 
 class IncorrectId : Error()
 

@@ -1,4 +1,4 @@
-package coroutines.starting.articleservice
+package coroutines.test.articleservice
 
 import kotlinx.coroutines.async
 import kotlinx.coroutines.coroutineScope

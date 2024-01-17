@@ -1,5 +1,11 @@
 package coroutines.context.countercontext
 
+import kotlinx.coroutines.*
+import org.junit.Test
+import java.util.concurrent.atomic.AtomicInteger
+import kotlin.coroutines.*
+import kotlin.test.assertEquals
+
 // TODO
 
 //fun main(): Unit = runBlocking(CounterContext()) {

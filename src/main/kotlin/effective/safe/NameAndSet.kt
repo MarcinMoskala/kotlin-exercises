@@ -1,7 +1,5 @@
 package effective.safe.nameandset
 
-data class Name(var name: String)
-
 fun main() {
     val set = mutableSetOf<Name>()
     val name = Name("AAA")
@@ -9,3 +7,5 @@ fun main() {
     // ???
     print(set.contains(name))
 }
+
+data class Name(var name: String)

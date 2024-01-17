@@ -4,17 +4,17 @@ import org.junit.Assert.assertThrows
 import org.junit.Test
 import kotlin.test.assertEquals
 
+fun processUserInformation(user: User?): String {
+    return ""
+}
+
 data class EmailAddress(val email: String?)
 
 data class User(
     val name: String?,
     val age: Int?,
     val email: EmailAddress?
-)
-
-fun processUserInformation(user: User?): String {
-    return ""
-}
+)    
 
 fun main() {
     println(processUserInformation(null))

@@ -1,5 +1,13 @@
 package essentials.exceptions.handleexceptions
 
+fun main() {
+    while (true) {
+        // Wrap below function call with try-catching block,
+        // and handle possible exceptions.
+        handleInput()
+    }
+}
+
 fun handleInput() {
     print("Enter the first number: ")
     val num1 = readln().toInt()
@@ -21,11 +29,3 @@ fun handleInput() {
 
 class IllegalOperatorException(val operator: String) :
     Exception("Unknown operator: $operator")
-
-fun main() {
-    while (true) {
-        // Wrap below function call with try-catching block,
-        // and handle possible exceptions.
-        handleInput()
-    }
-}

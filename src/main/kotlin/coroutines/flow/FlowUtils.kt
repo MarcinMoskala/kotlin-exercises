@@ -1,4 +1,4 @@
-package coroutines.flow.flow
+package coroutines.flow.flowutils
 
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.*
@@ -23,7 +23,8 @@ fun <T> flowOfFlatten(
 class FlowUtilsTest {
     @Test
     fun `should create infinite flow`() = runTest {
-        val result = infiniteFlow.take(10).onEach { delay(1000) }.toList()
+        val flow = infiniteFlow
+        val result = flow.take(10).onEach { delay(1000) }.toList()
         assertEquals(listOf(Unit, Unit, Unit, Unit, Unit, Unit, Unit, Unit, Unit, Unit), result)
         assertEquals(10_000, currentTime)
     }
@@ -45,7 +46,8 @@ class FlowUtilsTest {
 
     @Test
     fun `should create every flow`() = runTest {
-        val result = everyFlow(1000).take(10).toList()
+        val flow = everyFlow(1000)
+        val result = flow.take(10).toList()
         assertEquals(listOf(Unit, Unit, Unit, Unit, Unit, Unit, Unit, Unit, Unit, Unit), result)
         assertEquals(10_000, currentTime)
     }

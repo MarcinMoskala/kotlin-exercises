@@ -1,6 +1,5 @@
 package functional.base.references
 
-import functional.base.functional.FunctionsClassic
 import org.junit.Test
 import kotlin.reflect.KClass
 import kotlin.reflect.typeOf

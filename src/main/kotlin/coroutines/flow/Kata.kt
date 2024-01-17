@@ -22,7 +22,7 @@ fun <T> Flow<T>.delayEach(timeMillis: Long): Flow<T> = TODO()
 // flowOf("A", "B").mapIndexed { index, value -> "$index$value" } -> ["0A", "0B"]
 fun <T, R> Flow<T>.mapIndexed(transformation: suspend (index: Int, T) -> R): Flow<R> = TODO()
 
-// Should transform Unit's to next numbers startling from 1
+// Should transform Unit's to next numbers starting from 1
 // For instance flowOf(Unit, Unit, Unit, Unit).toNextNumbers() -> [1, 2, 3, 4]
 // Example:
 // Input   --------U------UU---------U------
@@ -32,21 +32,6 @@ fun Flow<*>.toNextNumbers(): Flow<Int> = TODO()
 // Produces not only elements, but the whole history till now
 // For instance flowOf(1, "A", 'C').withHistory() -> [[], [1], [1, A], [1, A, C]]
 fun <T> Flow<T>.withHistory(): Flow<List<T>> = TODO()
-
-// Should create a flow that every `tickEveryMillis` should emit next numbers from `startNum` to `endNum`.
-// The first number should be emitted immediately, each next one after `tickEveryMillis` delay.
-// Should be conflated.
-// Example:
-// makeTimer(1000, 5, 8).collect { println("$currentTime ms -> $it") }
-// 0 ms -> 5
-// 1000 ms -> 6
-// 2000 ms -> 7
-// 3000 ms -> 8
-// makeTimer(1000, 5, 9).collect { delay(2500); println("$currentTime ms -> $it") }
-// 2500 ms -> 5
-// 5000 ms -> 7
-// 7500 ms -> 9
-fun makeTimer(tickEveryMillis: Long, startNum: Int, endNum: Int): Flow<Int> = TODO()
 
 // Based on two light switches, should decide if the general light should be switched on.
 // Should be if one is true and another is false.
@@ -182,45 +167,6 @@ class FlowTests {
                 .withVirtualTime(this)
                 .toList()
         )
-    }
-
-    @Test()
-    fun makeTimerTests() = runTest(UnconfinedTestDispatcher()) {
-        val mutex = Mutex()
-        var ticked = listOf<Int>()
-        makeTimer(1000, 10, 20)
-            .onEach {
-                mutex.withLock { ticked += it }
-            }
-            .launchIn(this)
-
-        assertEquals(listOf(10), mutex.withLock { ticked })
-
-        // After 1 500ms there should be one element
-        delay(1_500)
-        assertEquals(listOf(10, 11), mutex.withLock { ticked })
-
-        // After another 2 000ms there should be two more elements
-        delay(2_000)
-        assertEquals(listOf(10, 11, 12, 13), mutex.withLock { ticked })
-
-        // After another 12 000ms there should be twelve more elements
-        delay(12_000)
-        assertEquals((10..20).toList(), mutex.withLock { ticked })
-    }
-
-    @Test()
-    fun `makeTimer if delayed in between, do not provide old values but only shows the last one`() = runTest {
-        val maxValue = 20
-        val res = makeTimer(100, 1, maxValue)
-            .onEach {
-                if (it == 1) delay(50) // To make it clearly after timer delay
-                // We don't need to check more often than every 0.5s
-                delay(500)
-            }
-            .toList()
-
-        assertEquals(listOf(1, 6, 11, 16, 20), res)
     }
 
     @Test()

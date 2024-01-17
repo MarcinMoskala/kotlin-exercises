@@ -54,10 +54,10 @@ fun main() {
 //    println(names.map { it.toUpperCase() }) // [MIKE, JANE, MARCIN, JOHN, JAMES]
 //    println(numbers.map { it * 10 }) // [10, 20, 30, 40, 50, 60, 70, 80, 90, 100]
 
-//val list = listOf(1, 2, 3)
-//println(list.map { it * 2 }) // [2, 4, 6]
-//println(list.map { "$it!" }) // [1!, 2!, 3!]
-//println(list.map { it % 2 == 0 }) // [false, true, false]
+    //val list = listOf(1, 2, 3)
+    //println(list.map { it * 2 }) // [2, 4, 6]
+    //println(list.map { "$it!" }) // [1!, 2!, 3!]
+    //println(list.map { it % 2 == 0 }) // [false, true, false]
 }
 
 class MapTest {

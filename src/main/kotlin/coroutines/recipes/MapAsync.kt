@@ -1,6 +1,5 @@
 package coroutines.recipes.mapasync
 
-import coroutines.test.mapasync.mapAsync
 import kotlinx.coroutines.*
 import kotlinx.coroutines.test.currentTime
 import kotlinx.coroutines.test.runTest
@@ -85,7 +84,7 @@ class MapAsyncTest {
         parentJob.cancel()
         assertEquals(true, job?.isCancelled)
     }
-    
+
     @Test
     fun should_propagate_exceptions() = runTest {
         // given
