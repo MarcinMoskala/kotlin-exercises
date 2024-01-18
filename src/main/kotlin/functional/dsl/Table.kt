@@ -3,30 +3,16 @@ package functional.dsl.table
 import org.junit.Test
 import kotlin.test.assertEquals
 
-fun createTable(): TableBuilder {
-    val td1 = TdBuilder()
-    td1.text = "A"
-    val td2 = TdBuilder()
-    td2.text = "B"
-
-    val tr1 = TrBuilder()
-    tr1.tds += td1
-    tr1.tds += td2
-
-    val td3 = TdBuilder()
-    td3.text = "C"
-    val td4 = TdBuilder()
-    td4.text = "D"
-
-    val tr2 = TrBuilder()
-    tr2.tds += td3
-    tr2.tds += td4
-
-    val html = TableBuilder()
-    html.trs += tr1
-    html.trs += tr2
-    return html
-}
+//fun createTable(): TableBuilder = table {
+//    tr {
+//        td { +"A" }
+//        td { +"B" }
+//    }
+//    tr {
+//        td { +"C" }
+//        td { +"D" }
+//    }
+//}
 
 data class TableBuilder(
     var trs: List<TrBuilder> = emptyList()
@@ -47,26 +33,25 @@ data class TdBuilder(
 }
 
 fun main() {
-    println(createTable()) //<table><tr><td>This is row 1</td><td>This is row 2</td></tr></table>
+    // println(createTable()) //<table><tr><td>This is row 1</td><td>This is row 2</td></tr></table>
 }
 
 class HtmlDslTest {
-
-    @Test
-    fun createTableTest() {
-        val html = TableBuilder().apply {
-            trs += TrBuilder().apply {
-                tds += TdBuilder().apply { text = "A" }
-                tds += TdBuilder().apply { text = "B" }
-            }
-            trs += TrBuilder().apply {
-                tds += TdBuilder().apply { text = "C" }
-                tds += TdBuilder().apply { text = "D" }
-            }
-        }
-        assertEquals(html, createTable())
-    }
-
+//    @Test
+//    fun createTableTest() {
+//        val html = TableBuilder().apply {
+//            trs += TrBuilder().apply {
+//                tds += TdBuilder().apply { text = "A" }
+//                tds += TdBuilder().apply { text = "B" }
+//            }
+//            trs += TrBuilder().apply {
+//                tds += TdBuilder().apply { text = "C" }
+//                tds += TdBuilder().apply { text = "D" }
+//            }
+//        }
+//        assertEquals(html, createTable())
+//    }
+//
 //    @Test
 //    fun `Table can be created and it is empty by default`() {
 //        val expected = TableBuilder()

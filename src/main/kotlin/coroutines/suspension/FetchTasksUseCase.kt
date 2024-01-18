@@ -1,10 +1,12 @@
 package coroutines.suspension.fetchtasksusecase
 
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.suspendCancellableCoroutine
 import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
-import kotlin.test.Test
+import org.junit.Test
+import kotlin.coroutines.resume
+import kotlin.coroutines.resumeWithException
 import kotlin.test.assertEquals
 import kotlin.test.assertNotNull
 import kotlin.test.assertTrue

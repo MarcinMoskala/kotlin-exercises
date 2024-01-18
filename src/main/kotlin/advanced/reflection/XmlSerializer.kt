@@ -2,6 +2,7 @@ package advanced.reflection.xmlserializer
 
 import org.junit.Test
 import kotlin.reflect.KClass
+import kotlin.reflect.full.*
 import kotlin.test.assertEquals
 
 fun serializeToXml(value: Any): String = TODO()

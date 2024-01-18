@@ -233,7 +233,6 @@ interface StudentRepository {
     fun getStudents(request: GetStudentsRequest): List<Student>
 }
 
-// Poor practice: Constructor parameters with default values would be better.
 class GetStudentsRequest {
     var minResult: Double? = null
     var expectedSemester: String? = null

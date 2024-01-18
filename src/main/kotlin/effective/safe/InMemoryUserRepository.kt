@@ -4,8 +4,10 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
+import org.junit.Assert.assertEquals
 import org.junit.Assert.assertThrows
 import org.junit.Before
+import org.junit.Test
 import java.lang.reflect.InvocationTargetException
 import kotlin.reflect.full.memberFunctions
 import kotlin.reflect.typeOf
@@ -111,7 +113,6 @@ class InMemoryNewsRepositoryTest {
             launch {
                 repeat(1000) {
                     val users = repo.getUsers()
-                    // The expected problem here is ConcurrentModificationException from inside count or sumOf
                     assertTrue(users.count() >= 1000, "Problem with $users, size ${users.size}")
                     assertTrue(users.sumOf { it.id } > 500_000)
                 }
@@ -151,12 +152,9 @@ class GettingUserTest {
         val method = repoClass.memberFunctions.singleOrNull { it.name == "getById" }
         assertNotNull(method, "Method getById needs to be implemented")
 
-        // Check return type
         assertFalse(method.returnType.isMarkedNullable, "Return type should not be nullable")
         assertEquals(typeOf<InMemoryUserRepository.User>(), method.returnType, "Function should return User")
-        // Check parameter
         assertTrue(method.parameters.size == 2, "There is only a single expected argument (+ dispatch receiver)")
-        // The first parameter is dispatch receiver - reference to the class
         assertEquals(typeOf<InMemoryUserRepository>(), method.parameters[0].type, "Parameter type should be Int")
         assertEquals(typeOf<Int>(), method.parameters[1].type, "Parameter type should be Int")
         assertTrue(method.typeParameters.isEmpty(), "There should be no type parameters")
@@ -169,12 +167,10 @@ class GettingUserTest {
         val method = repoClass.memberFunctions.singleOrNull { it.name == "getById" }
         assertNotNull(method, "Method getById needs to be implemented")
 
-        // Works for correct user
         val user = InMemoryUserRepository.User(10, "A", "B")
         repo.addUser(user)
         assertEquals(user, method.call(repo, user.id))
 
-        // Throws a correct error for lack of user with given id
         val exception =
             assertThrows(InvocationTargetException::class.java) { // All errors should be wrapped into this type by reflection
                 method.call(repo, 0)
@@ -190,12 +186,9 @@ class GettingUserTest {
         val method = repoClass.memberFunctions.singleOrNull { it.name == "getByIdOrNull" }
         assertNotNull(method, "Method getByIdOrNull needs to be implemented")
 
-        // Check return type
         assertTrue(method.returnType.isMarkedNullable, "Return type should be nullable")
         assertEquals(typeOf<InMemoryUserRepository.User?>(), method.returnType, "Function should return User")
-        // Check parameter
         assertTrue(method.parameters.size == 2, "There is only a single expected argument (+ dispatch receiver)")
-        // The first parameter is dispatch receiver - reference to the class
         assertEquals(typeOf<InMemoryUserRepository>(), method.parameters[0].type, "Parameter type should be Int")
         assertEquals(typeOf<Int>(), method.parameters[1].type, "Parameter type should be Int")
         assertTrue(method.typeParameters.isEmpty(), "There should be no type parameters")
@@ -207,13 +200,9 @@ class GettingUserTest {
         val repoClass = repo::class
         val method = repoClass.memberFunctions.singleOrNull { it.name == "getByIdOrNull" }
         assertNotNull(method, "Method getByIdOrNull needs to be implemented")
-
-        // Works for correct user
         val user = InMemoryUserRepository.User(10, "A", "B")
         repo.addUser(user)
         assertEquals(user, method.call(repo, user.id))
-
-        // Returns a null lack of user with given id
         val result = method.call(repo, 0)
         assertNull(result, "Function should return null when no user with given id")
     }
@@ -224,11 +213,8 @@ class GettingUserTest {
         val repoClass = InMemoryUserRepository::class
         val method = repoClass.memberFunctions.singleOrNull { it.name == "getByIdOrDefault" }
         assertNotNull(method, "Method getByIdOrDefault needs to be implemented")
-
-        // Check return type
         assertFalse(method.returnType.isMarkedNullable, "Return type should not be nullable")
         assertEquals(typeOf<InMemoryUserRepository.User>(), method.returnType, "Function should return User")
-        // Check parameter
         assertTrue(method.parameters.size == 3, "There are two parameters in this function (+ dispatch receiver)")
         val (dispatchReceiver, param1, param2) = method.parameters
         assertEquals(typeOf<InMemoryUserRepository>(), dispatchReceiver.type)
@@ -248,13 +234,9 @@ class GettingUserTest {
         val method = repoClass.memberFunctions.singleOrNull { it.name == "getByIdOrDefault" }
         assertNotNull(method, "Method getByIdOrDefault needs to be implemented")
         val default = InMemoryUserRepository.User(100, "C", "D")
-
-        // Works for correct user
         val user = InMemoryUserRepository.User(10, "A", "B")
         repo.addUser(user)
         assertEquals(user, method.call(repo, user.id, default))
-
-        // Returns a null lack of user with given id
         val result = method.call(repo, 0, default)
         assertEquals(default, result, "Function should return null when no user with given id")
     }

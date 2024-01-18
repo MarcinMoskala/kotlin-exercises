@@ -5,7 +5,7 @@ import kotlinx.coroutines.selects.select
 import kotlinx.coroutines.test.currentTime
 import kotlinx.coroutines.test.runTest
 import kotlin.coroutines.CoroutineContext
-import kotlin.test.Test
+import org.junit.Test
 import kotlin.test.assertEquals
 
 suspend fun <T> raceOf(

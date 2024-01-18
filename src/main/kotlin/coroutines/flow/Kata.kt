@@ -80,15 +80,12 @@ class FlowTests {
 
         assertEquals(0, emittedNum.get())
 
-        // After 1 500ms there should be one element
         delay(1_500)
         assertEquals(1, emittedNum.get())
 
-        // After another 2 000ms there should be two more elements
         delay(2_000)
         assertEquals(3, emittedNum.get())
 
-        // After another 12 000ms there should be twelve more elements
         delay(12_000)
         assertEquals(15, emittedNum.get())
     }
@@ -207,10 +204,6 @@ class FlowTests {
         assertEquals(false, lightOn)
     }
 
-    // Example:
-    // switch1 -------t-----f----------t-t-------
-    // switch2 ----------------f-t-f--------t-f-t
-    // Result  f------t-----f--f-t-f---t-t--f-t-f
     @Test()
     fun makeLightSwitchExampleTests() = runTest {
         val switch1 = flow {
@@ -295,9 +288,6 @@ class FlowTests {
         assertEquals(true, lightOn)
     }
 
-    // switch1 -------U-----U--------------------------U---------------UU-----
-    // switch2 ----------------U-------------------U-------------U------------
-    // Result  -------t-----f--t-------------------f---t---------f-----tf-----
     @Test()
     fun makeLightSwitchToggleExampleTests() = runTest {
         val switch1 = flow {

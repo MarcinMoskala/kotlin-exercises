@@ -2,8 +2,6 @@ package functional.base.centimeter
 
 import kotlin.math.abs
 
-// TODO
-
 class Centimeter(val value: Double) {
     fun plus(other: Centimeter): Centimeter =
         Centimeter(value + other.value)

@@ -1,7 +1,5 @@
 package effective.efficient.eventlistenerrepository
 
-import effective.efficient.eventlistenerrepository.EventListenerRepositoryTest.*
-import effective.efficient.eventlistenerrepository.EventListenerRepositoryTest.Event.*
 import org.junit.Test
 import java.util.concurrent.ConcurrentHashMap
 import kotlin.test.assertEquals
@@ -20,7 +18,7 @@ class EventListenerRepository<E> {
         listener
     }
 
-    fun invokeListeners(event: Event) {
+    fun invokeListeners(event: E) {
         val eventListeners = listeners
             .filter { it.event == event }
         for (listener in eventListeners) {
@@ -50,9 +48,9 @@ class EventListener<E>(
     }
 }
 
-class EventListenerRepositoryTest {
-    enum class Event { A, B, C }
+enum class Event { A, B, C }
 
+class EventListenerRepositoryTest {
     @Test
     fun `should invoke proper handlers`() {
         val eventListenerRepository = EventListenerRepository<Event>()
@@ -60,30 +58,30 @@ class EventListenerRepositoryTest {
         var b = 0
         var c = 0
 
-        eventListenerRepository.addEventListener(A) { a++ }
-        eventListenerRepository.addEventListener(B) { b++ }
-        eventListenerRepository.addEventListener(C) { c++ }
+        eventListenerRepository.addEventListener(Event.A) { a++ }
+        eventListenerRepository.addEventListener(Event.B) { b++ }
+        eventListenerRepository.addEventListener(Event.C) { c++ }
 
         assertEquals(0, a)
         assertEquals(0, b)
         assertEquals(0, c)
 
-        eventListenerRepository.invokeListeners(A)
+        eventListenerRepository.invokeListeners(Event.A)
 
         assertEquals(1, a)
         assertEquals(0, b)
         assertEquals(0, c)
 
-        eventListenerRepository.invokeListeners(B)
-        eventListenerRepository.invokeListeners(B)
+        eventListenerRepository.invokeListeners(Event.B)
+        eventListenerRepository.invokeListeners(Event.B)
 
         assertEquals(1, a)
         assertEquals(2, b)
         assertEquals(0, c)
 
-        eventListenerRepository.invokeListeners(C)
-        eventListenerRepository.invokeListeners(C)
-        eventListenerRepository.invokeListeners(C)
+        eventListenerRepository.invokeListeners(Event.C)
+        eventListenerRepository.invokeListeners(Event.C)
+        eventListenerRepository.invokeListeners(Event.C)
 
         assertEquals(1, a)
         assertEquals(2, b)
@@ -97,11 +95,11 @@ class EventListenerRepositoryTest {
         var b = 0
         var c = 0
 
-        eventListenerRepository.addEventListener(A) { a++ }
-        eventListenerRepository.addEventListener(A) { b++ }
-        eventListenerRepository.addEventListener(A) { c++ }
+        eventListenerRepository.addEventListener(Event.A) { a++ }
+        eventListenerRepository.addEventListener(Event.A) { b++ }
+        eventListenerRepository.addEventListener(Event.A) { c++ }
 
-        eventListenerRepository.invokeListeners(A)
+        eventListenerRepository.invokeListeners(Event.A)
 
         assertEquals(1, a)
         assertEquals(1, b)
@@ -113,10 +111,10 @@ class EventListenerRepositoryTest {
         val eventListenerRepository = EventListenerRepository<Event>()
         var a = 0
 
-        val listener = eventListenerRepository.addEventListener(A) { a++ }
+        val listener = eventListenerRepository.addEventListener(Event.A) { a++ }
         listener.cancel()
 
-        eventListenerRepository.invokeListeners(A)
+        eventListenerRepository.invokeListeners(Event.A)
 
         assertEquals(0, a)
     }

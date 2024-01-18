@@ -7,7 +7,7 @@ import kotlin.test.assertEquals
 // who have got more than 15 points in the semester and a result of at least 50.
 // Display in alphabetical order (surname then name), in the format:
 // “{name} {surname}, {result}”
-fun List<Student>.makePassingStudentList(): String = TODO()
+fun List<Student>.makePassingStudentsList(): String = TODO()
 
 data class Student(
     val name: String,
@@ -49,28 +49,28 @@ class PassingStudentsListTest {
 
     @Test
     fun `Single student that matches criteria is displayed`() {
-        val text = listOf(internshipStudent).makePassingStudentList()
+        val text = listOf(internshipStudent).makePassingStudentsList()
         val expected = "Marc Smith, 87.0"
         assertEquals(expected, text)
     }
 
     @Test
     fun `Single student with too low result doesn't get internship`() {
-        val text = listOf(studentNotPassingBecauseOfResult).makePassingStudentList()
+        val text = listOf(studentNotPassingBecauseOfResult).makePassingStudentsList()
         assertEquals("", text)
     }
 
     @Test
     fun `15 points is not acceptable`() {
         val student = Student("Noely", "Peterson", 81.0, 15)
-        val text = listOf(student).makePassingStudentList()
+        val text = listOf(student).makePassingStudentsList()
         assertEquals("", text)
     }
 
     @Test
     fun `result 50 points is acceptable`() {
         val student = Student("Noely", "Peterson", 50.0, 25)
-        val text = listOf(student).makePassingStudentList()
+        val text = listOf(student).makePassingStudentsList()
         assertEquals("Noely Peterson, 50.0", text)
     }
 
@@ -84,7 +84,7 @@ class PassingStudentsListTest {
         )
 
         // When
-        val text = students.makePassingStudentList()
+        val text = students.makePassingStudentsList()
 
         // Then
         val expected = """
@@ -98,13 +98,13 @@ class PassingStudentsListTest {
 
     @Test
     fun `Single student with not enough doesn't get internship`() {
-        val text = listOf(studentNotPassingBecauseOfPoints).makePassingStudentList()
+        val text = listOf(studentNotPassingBecauseOfPoints).makePassingStudentsList()
         assertEquals("", text)
     }
 
     @Test
     fun `Complex test`() {
-        val text = allStudents.makePassingStudentList()
+        val text = allStudents.makePassingStudentsList()
         val expected = """
             Ester Adams, 81.0
             Dior Angel, 88.5

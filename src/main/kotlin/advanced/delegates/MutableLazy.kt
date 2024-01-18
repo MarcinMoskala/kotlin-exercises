@@ -3,6 +3,7 @@ package advanced.delegates.mutablelazy
 import org.junit.Assert
 import org.junit.Test
 import kotlin.properties.ReadWriteProperty
+import kotlin.reflect.KProperty
 import kotlin.system.measureTimeMillis
 
 fun <T> mutableLazy(
