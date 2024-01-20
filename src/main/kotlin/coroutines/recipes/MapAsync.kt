@@ -95,10 +95,10 @@ class MapAsyncTest {
             suspend { delay(500); throw e },
             suspend { "C" }
         )
-        
+
         // when
         val result = runCatching { bodies.mapAsync { it() } }
-        
+
         // then
         assertTrue(result.isFailure)
         assertEquals(e, result.exceptionOrNull())

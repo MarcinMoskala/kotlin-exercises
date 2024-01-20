@@ -2,7 +2,7 @@ package effective.safe.flowhistory
 
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.*
-import kotlinx.coroutines.test.*    
+import kotlinx.coroutines.test.*
 import org.junit.Test
 import kotlin.test.assertEquals
 

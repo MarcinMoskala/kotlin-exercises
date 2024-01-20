@@ -14,7 +14,7 @@ data class User(
     val name: String?,
     val age: Int?,
     val email: EmailAddress?
-)    
+)
 
 fun main() {
     println(processUserInformation(null))

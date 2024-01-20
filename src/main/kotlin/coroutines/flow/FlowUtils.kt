@@ -1,6 +1,6 @@
 package coroutines.flow.flowutils
 
-import kotlinx.coroutines.*    
+import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.currentTime
@@ -35,7 +35,7 @@ class FlowUtilsTest {
         var completed = false
         neverFlow.onEach {
             emitted = true
-        }.onCompletion { 
+        }.onCompletion {
             completed = true
         }.launchIn(backgroundScope)
         delay(Long.MAX_VALUE - 1)

@@ -90,7 +90,7 @@ class StudentTableTest {
 //    fun `should work for empty list`() {
 //        // when
 //        val result = userTable(listOf())
-//    
+//
 //        // then
 //        val expected = TableBuilder().apply {
 //            trs += TrBuilder().apply {
@@ -102,17 +102,17 @@ class StudentTableTest {
 //        }
 //        assertEquals(expected, result)
 //    }
-//    
+//
 //    @Test
 //    fun `should work for a list with a single element`() {
 //        // given
 //        val users = listOf(
 //            User("1", "Randy", 2, "A"),
 //        )
-//    
+//
 //        // when
 //        val result = userTable(users)
-//    
+//
 //        // then
 //        val expected = TableBuilder().apply {
 //            trs += TrBuilder().apply {
@@ -130,7 +130,7 @@ class StudentTableTest {
 //        }
 //        assertEquals(expected, result)
 //    }
-//    
+//
 //    @Test
 //    fun `should work for a list with multiple users`() {
 //        // given
@@ -141,10 +141,10 @@ class StudentTableTest {
 //            User("5", "Cindy", 5, "A"),
 //            User("2", "Lindy", 3, "B"),
 //        )
-//    
+//
 //        // when
 //        val result = userTable(users)
-//    
+//
 //        // then
 //        val expected = TableBuilder().apply {
 //            trs += TrBuilder().apply {
