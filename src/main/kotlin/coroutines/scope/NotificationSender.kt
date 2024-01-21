@@ -34,7 +34,7 @@ interface ExceptionCollector {
 class NotificationSenderTest {
 
     @Test
-    fun `should send 20 notifications concurrently`() {
+    fun `should send notifications concurrently`() {
         val fakeNotificationsClient = FakeNotificationClient(delayTime = 200)
         val fakeExceptionCollector = FakeExceptionCollector()
         val testDispatcher = StandardTestDispatcher()
@@ -51,7 +51,7 @@ class NotificationSenderTest {
     }
 
     @Test
-    fun `should support cancellation`() {
+    fun `should cancel all coroutines when cancel is called`() {
         val fakeNotificationsClient = FakeNotificationClient(delayTime = 1000)
         val fakeExceptionCollector = FakeExceptionCollector()
         val testDispatcher = StandardTestDispatcher()
@@ -71,7 +71,7 @@ class NotificationSenderTest {
     }
 
     @Test
-    fun `should not cancel other notifications, when one has exception`() {
+    fun `should not cancel other sending processes when one of them fails`() {
         val fakeNotificationsClient = FakeNotificationClient(delayTime = 100, failEvery = 10)
         val fakeExceptionCollector = FakeExceptionCollector()
         val testDispatcher = StandardTestDispatcher()
@@ -87,7 +87,7 @@ class NotificationSenderTest {
     }
 
     @Test
-    fun `should send info about failed notifications`() {
+    fun `should collect exceptions from all coroutines`() {
         val fakeNotificationsClient = FakeNotificationClient(delayTime = 100, failEvery = 10)
         val fakeExceptionCollector = FakeExceptionCollector()
         val testDispatcher = StandardTestDispatcher()

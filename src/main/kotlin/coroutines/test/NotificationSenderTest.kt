@@ -1,4 +1,4 @@
-package coroutines.test.notificationsender
+package coroutines.test.notificationsendertest
 
 import kotlinx.coroutines.*
 import kotlinx.coroutines.test.StandardTestDispatcher
@@ -10,14 +10,19 @@ class NotificationSender(
     private val exceptionCollector: ExceptionCollector,
     dispatcher: CoroutineDispatcher,
 ) {
-    private val handler = CoroutineExceptionHandler { _, throwable -> 
-        exceptionCollector.collectException(throwable)
-    }
-    val scope: CoroutineScope = CoroutineScope(dispatcher + SupervisorJob() + handler)
+    private val exceptionHandler =
+        CoroutineExceptionHandler { _, throwable ->
+            exceptionCollector.collectException(throwable)
+        }
+    val scope: CoroutineScope = CoroutineScope(
+        SupervisorJob() + dispatcher + exceptionHandler
+    )
 
     fun sendNotifications(notifications: List<Notification>) {
-        for (notification in notifications) {
-            scope.launch { client.send(notification) }
+        notifications.forEach { notification ->
+            scope.launch {
+                client.send(notification)
+            }
         }
     }
 
@@ -39,23 +44,23 @@ interface ExceptionCollector {
 class NotificationSenderTest {
 
     @Test
-    fun `should send 20 notifications concurrently`() {
-        
+    fun `should send notifications concurrently`() {
+        // TODO            
     }
 
     @Test
-    fun `should support cancellation`() {
-        
+    fun `should cancel all coroutines when cancel is called`() {
+        // TODO            
     }
 
     @Test
-    fun `should not cancel other notifications, when one has exception`() {
-        
+    fun `should not cancel other sending processes when one of them fails`() {
+        // TODO            
     }
 
     @Test
-    fun `should send info about failed notifications`() {
-        
+    fun `should collect exceptions from all coroutines`() {
+        // TODO
     }
 }
 
