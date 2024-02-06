@@ -114,13 +114,14 @@ class MessageServiceTests {
         val threads = flow {
             repeat(1000) {
                 emit(MessageThread("T$it", "Name$it"))
-                delay(1000)
+                delay(1)
             }
         }
 
         val result = service.subscribeThreads(threads).toList()
 
         assertEquals(2000, result.size)
+        assertEquals(999 + 1000, currentTime)
     }
 
     @Test

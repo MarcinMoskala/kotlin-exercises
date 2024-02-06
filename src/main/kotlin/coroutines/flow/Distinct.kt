@@ -11,14 +11,14 @@ fun <T> Flow<T>.distinct(): Flow<T> = TODO()
 
 class DistinctTest {
     @Test
-    fun `distinct should remove duplicates`() = runTest {
+    fun `should remove duplicates`() = runTest {
         val flow = flowOf(1, 3, 1, 2, 3, 1, 2, 3)
         val distinctFlow = flow.distinct()
         assertEquals(listOf(1, 3, 2), distinctFlow.toList())
     }
 
     @Test
-    fun `distinct should not introduce unnecessary delays`() = runTest {
+    fun `should not introduce unnecessary delays`() = runTest {
         val f = flowOf(1, 1, 3, 1, 2, 3, 1, 2, 3, 1)
         val f1 = f
             .onEach { delay(100) }
@@ -34,4 +34,13 @@ class DistinctTest {
             .toList()
         assertEquals(listOf(1100L to 1, 1200L to 3, 1300L to 2), f2)
     }
+
+    @Test
+    fun `should keep data flow-specific`() = runTest {
+        val f = flowOf(1, 1, 3, 1, 2, 3, 1, 2, 3, 1)
+            .distinct()
+
+        assertEquals(listOf(1, 3, 2), f.toList())
+        assertEquals(listOf(1, 3, 2), f.toList())
+    } 
 }
