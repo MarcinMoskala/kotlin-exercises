@@ -42,5 +42,5 @@ class DistinctTest {
 
         assertEquals(listOf(1, 3, 2), f.toList())
         assertEquals(listOf(1, 3, 2), f.toList())
-    } 
+    }
 }

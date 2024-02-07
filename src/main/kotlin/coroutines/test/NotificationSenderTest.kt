@@ -45,17 +45,17 @@ class NotificationSenderTest {
 
     @Test
     fun `should send notifications concurrently`() {
-        // TODO            
+        // TODO
     }
 
     @Test
     fun `should cancel all coroutines when cancel is called`() {
-        // TODO            
+        // TODO
     }
 
     @Test
     fun `should not cancel other sending processes when one of them fails`() {
-        // TODO            
+        // TODO
     }
 
     @Test
