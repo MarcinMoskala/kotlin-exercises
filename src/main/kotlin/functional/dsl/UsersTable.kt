@@ -19,18 +19,6 @@ data class User(val id: String, val name: String, val points: Int, val category:
 
 // TODO
 
-//table {
-//    tr {
-//        td { +"Id" }
-//        td { +"Name" }
-//        td { +"Points" }
-//        td { +"Category" }
-//    }
-//    for (user in users) {
-//        userRow(user)
-//    }
-//}
-
 fun main() {
     val users = listOf(
         User("1", "Randy", 2, "A"),
