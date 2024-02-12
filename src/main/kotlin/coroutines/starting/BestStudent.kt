@@ -12,9 +12,7 @@ import kotlin.test.assertEquals
 class BestStudentUseCase(
     private val repo: StudentsRepository
 ) {
-    suspend fun getBestStudent(
-        semester: String
-    ): Student = TODO()
+    suspend fun getBestStudent(semester: String): Student = TODO()
 }
 
 data class Student(val id: Int, val result: Double, val semester: String)

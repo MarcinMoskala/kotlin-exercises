@@ -25,9 +25,17 @@ class MessageService(
 }
 
 interface MessageRepository {
-    suspend fun searchThreads(query: String): List<MessageThread>
-    fun subscribeThread(threadId: String): Flow<MessageThreadUpdate>
-    suspend fun sendMessage(message: Message): MessageSendingResponse
+    suspend fun searchThreads(
+        query: String
+    ): List<MessageThread>
+
+    fun subscribeThread(
+        threadId: String
+    ): Flow<MessageThreadUpdate>
+    
+    suspend fun sendMessage(
+        message: Message
+    ): MessageSendingResponse
 }
 
 data class MessageThread(val id: String, val name: String)

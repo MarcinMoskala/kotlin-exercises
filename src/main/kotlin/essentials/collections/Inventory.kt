@@ -104,7 +104,6 @@ fun main() {
 }
 
 class InventoryTest {
-
     private lateinit var inventory: Inventory
     private val apple = Product("1", "Apple", 0.5, "Fruit")
     private var banana = Product("2", "Banana", 0.3, "Fruit")

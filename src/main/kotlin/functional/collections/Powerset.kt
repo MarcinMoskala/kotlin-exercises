@@ -42,7 +42,8 @@ class PowersetTest {
                 setOf(1),
                 setOf(2),
                 setOf(3),
-                setOf())
+                setOf()
+        )
         assertEquals(set, setOf(1, 2, 3).powerset())
     }
 

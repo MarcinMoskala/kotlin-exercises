@@ -11,9 +11,7 @@ class StudentService(
     private val studentFactory: StudentFactory,
     private val logger: Logger,
 ) {
-    fun addStudent(
-        addStudentRequest: AddStudentRequest
-    ): Student? {
+    fun addStudent(addStudentRequest: AddStudentRequest):Student?{
         val student = studentFactory
             .produceStudent(addStudentRequest)
             ?: return null

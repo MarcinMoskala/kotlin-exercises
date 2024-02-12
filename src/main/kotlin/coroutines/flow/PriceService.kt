@@ -15,11 +15,9 @@ class PriceService(
     priceRepository: PriceRepository,
     backgroundScope: CoroutineScope,
 ) {
-    fun observePrices(): Flow<Map<ProductId, PriceConfig>> =
-        TODO()
+    fun observePrices(): Flow<Map<ProductId, PriceConfig>> =TODO()
 
-    fun currentPrices(): Map<ProductId, PriceConfig> =
-        TODO()
+    fun currentPrices(): Map<ProductId, PriceConfig> = TODO()
 }
 
 interface PriceRepository {
