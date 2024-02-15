@@ -12,7 +12,7 @@ import org.junit.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
 
-fun <T> suspendLazy(initializer: suspend () -> T): SuspendLazy<T>=
+fun <T> suspendLazy(initializer: suspend () -> T):SuspendLazy<T> =
     TODO()
 
 interface SuspendLazy<T> : suspend () -> T {
