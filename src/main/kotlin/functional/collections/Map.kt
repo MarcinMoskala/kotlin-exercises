@@ -1,4 +1,4 @@
-package functional.collections.collectionprocessingfunctions
+package functional.collections.map
 
 import org.junit.Test
 import kotlin.collections.onEach
