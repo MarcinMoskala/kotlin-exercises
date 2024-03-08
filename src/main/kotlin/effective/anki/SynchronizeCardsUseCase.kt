@@ -22,8 +22,8 @@ class SynchronizeCardsUseCase(
                 okButton = AnkiDialog.Button("OK")
             )
             view.show(dialog)
+        } finally {
+            view.hide(progressBar)
         }
-
-        view.hide(progressBar)
     }
 }

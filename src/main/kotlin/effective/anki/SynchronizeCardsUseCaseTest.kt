@@ -6,6 +6,7 @@ import anki.fakes.InMemoryAnkiCardsRepository
 import anki.fakes.InMemoryAnkiNetworkRepository
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
 import org.junit.Test
 import kotlin.test.assertEquals
@@ -43,6 +44,7 @@ class SynchronizeCardsUseCaseTest {
         launch {
             useCase.start()
         }
+        runCurrent()
 
         // then
         assertEquals(

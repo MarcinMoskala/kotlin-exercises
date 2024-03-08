@@ -5,6 +5,7 @@ import anki.fakes.FakeAnkiView
 import anki.fakes.InMemoryAnkiCardsRepository
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
 import org.junit.Test
 import kotlin.test.assertEquals
@@ -38,6 +39,7 @@ class CorrectCardsUseCaseTest {
         launch {
             useCase.start()
         }
+        runCurrent()
 
         // then
         assertEquals(AnkiProgressBar(size = Small), view.visibleElements.single { it is AnkiProgressBar })

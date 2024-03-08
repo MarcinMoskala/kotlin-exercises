@@ -11,9 +11,11 @@ class CorrectCardsUseCase(
         val progressBar = AnkiProgressBar(size = Small)
         view.show(progressBar)
 
-        cardsRepository.correctCards()
-
-        view.hide(progressBar)
+        try {
+            cardsRepository.correctCards()
+        } finally {
+            view.hide(progressBar)
+        }
 
         val dialog = AnkiDialog(
             title = "Success",
