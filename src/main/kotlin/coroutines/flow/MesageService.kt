@@ -32,7 +32,7 @@ interface MessageRepository {
     fun subscribeThread(
         threadId: String
     ): Flow<MessageThreadUpdate>
-    
+
     suspend fun sendMessage(
         message: Message
     ): MessageSendingResponse
