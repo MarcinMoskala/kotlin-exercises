@@ -4,8 +4,8 @@ import kotlinx.coroutines.*
 import kotlinx.coroutines.test.currentTime
 import kotlinx.coroutines.test.runTest
 import java.math.BigDecimal
-import kotlin.test.Ignore
-import kotlin.test.Test
+import org.junit.Ignore      
+import org.junit.Test
 import kotlin.test.assertEquals
 import kotlin.time.measureTime
 
@@ -31,8 +31,8 @@ class CompanyDetailsRepository(
         details.toMap()
 }
 
-// Stress tests
-suspend fun main(): Unit = coroutineScope {
+// Run in main
+suspend fun performanceTest(): Unit = coroutineScope {
     val companies = (0 until 100_000).map { Company(it.toString()) }
     val client = FakeCompanyDetailsClient(
         details = buildMap {
