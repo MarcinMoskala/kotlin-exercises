@@ -28,7 +28,7 @@ class CompanyDetailsRepository(
         details[company]
 
     fun allDetails(): Map<Company, CompanyDetails> =
-        details.toMap()
+        details
 }
 
 // Run in main
