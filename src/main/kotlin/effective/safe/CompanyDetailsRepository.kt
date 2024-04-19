@@ -1,4 +1,4 @@
-package coroutines.state.companydetailsrepository
+package effective.safe.companydetailsrepository
 
 import kotlinx.coroutines.*
 import kotlinx.coroutines.test.currentTime

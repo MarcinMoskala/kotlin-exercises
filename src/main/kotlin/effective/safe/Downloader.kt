@@ -1,4 +1,4 @@
-package coroutines.state.downloader
+package effective.safe.downloader
 
 import kotlinx.coroutines.*
 import org.junit.Test
