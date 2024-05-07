@@ -15,7 +15,7 @@ import kotlinx.coroutines.withContext
 import org.junit.Test
 import kotlin.test.assertEquals
 
-class UserRefresher(
+class CancellingRefresher(
     private val scope: CoroutineScope,
     private val refreshData: suspend () -> Unit,
 ) {
