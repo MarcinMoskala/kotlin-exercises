@@ -1,4 +1,4 @@
-package effective.safe.coroutinecancel
+package effective.safe.cancellingrefresher
 
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -15,12 +15,24 @@ import kotlinx.coroutines.withContext
 import org.junit.Test
 import kotlin.test.assertEquals
 
+class UserRefresher(
+    private val scope: CoroutineScope,
+    private val refreshData: suspend () -> Unit,
+) {
+    private var refreshJob: Job? = null
 
+    suspend fun refresh() {
+        refreshJob?.cancel()
+        refreshJob = scope.launch {
+            refreshData()
+        }
+    }
+}
 
-class CancellingUserRefresherTest {
+class CancellingRefresherTest {
     @Test
     fun `should cancel previous refresh when starting new one`(): Unit = runTest {
-        val userRefresher = CancellingUserRefresher(
+        val userRefresher = CancellingRefresher(
             scope = backgroundScope,
             refreshData = {
                 delay(1000)
@@ -49,7 +61,7 @@ class CancellingUserRefresherTest {
 
     @Test
     fun `should cancel all previous jobs`(): Unit = runTest {
-        val userRefresher = CancellingUserRefresher(
+        val userRefresher = CancellingRefresher(
             scope = backgroundScope,
             refreshData = { delay(Long.MAX_VALUE) }
         )
@@ -67,7 +79,7 @@ class CancellingUserRefresherTest {
     @Test
     fun `should cancel all previous jobs (real time)`(): Unit = runBlocking(Dispatchers.Default) {
         val backgroundScope = CoroutineScope(Job() + Dispatchers.Default)
-        val userRefresher = CancellingUserRefresher(
+        val userRefresher = CancellingRefresher(
             scope = backgroundScope,
             refreshData = { delay(Long.MAX_VALUE) }
         )
