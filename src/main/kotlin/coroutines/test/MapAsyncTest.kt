@@ -17,7 +17,7 @@ suspend fun <T, R> Iterable<T>.mapAsync(
 
 class MapAsyncTest {
     @Test
-    fun `should behave like a regular map for a list and a set`() = runTest {
+    fun `should behave like a regular map`() = runTest {
         // TODO
     }
 
