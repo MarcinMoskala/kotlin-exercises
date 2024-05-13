@@ -23,13 +23,12 @@ class UserRefresher(
     private val scope: CoroutineScope,
     private val refreshData: suspend (Int) -> Unit,
 ) {
-    private val mutex = Mutex()
+    private var refreshJob: Job? = null
 
-    fun refresh(userId: Int) {
-        scope.launch {
-            mutex.withLock {
-                refreshData(userId)
-            }
+    suspend fun refresh(userId: Int) {
+        refreshJob?.join()
+        refreshJob = scope.launch {
+            refreshData(userId)
         }
     }
 }
