@@ -23,12 +23,13 @@ class UserRefresher(
     private val scope: CoroutineScope,
     private val refreshData: suspend (Int) -> Unit,
 ) {
-    private var refreshJob: Job? = null
+    private val mutex = Mutex()
 
     fun refresh(userId: Int) {
-        refreshJob?.cancel()
-        refreshJob = scope.launch {
-            refreshData(userId)
+        scope.launch {
+            mutex.withLock {
+                refreshData(userId)
+            }
         }
     }
 }
@@ -71,7 +72,7 @@ class UserRefresherTest {
                 launch { userRefresher.refresh(it) }
             }
         }
-        assert(1000 <= currentTime)
+        assert(currentTime <= 1000)
         await { finished.get() >= 1000 }
         assertEquals(1000 * 1000, currentTime)
     }
