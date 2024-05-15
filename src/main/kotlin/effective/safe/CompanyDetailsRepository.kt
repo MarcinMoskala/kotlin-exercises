@@ -15,20 +15,25 @@ class CompanyDetailsRepository(
 ) {
     private val details = mutableMapOf<Company, CompanyDetails>()
 
-    suspend fun fetchDetails(company: Company): CompanyDetails {
-        val current = details[company]
+    suspend fun getDetails(company: Company): CompanyDetails {
+        val current = getDetailsOrNull(company)
         if (current == null) {
-            return client.fetchDetails(company)
-                .also { details[company] = it }
+            val companyDetails = client.fetchDetails(company)
+            details[company] = companyDetails
+            return companyDetails
         }
         return current
     }
 
-    fun detailsOrNull(company: Company): CompanyDetails? = 
+    fun getDetailsOrNull(company: Company): CompanyDetails? = 
         details[company]
 
-    fun allDetails(): Map<Company, CompanyDetails> =
+    fun getReadyDetails(): Map<Company, CompanyDetails> =
         details
+    
+    fun clear() {
+        details.clear()
+    }
 }
 
 // Run in main
@@ -44,7 +49,7 @@ suspend fun performanceTest(): Unit = coroutineScope {
 
     // The time of getting and storing details
     measureTime {
-        companies.map { async(dispatcher) { repository.fetchDetails(it) } }.awaitAll()
+        companies.map { async(dispatcher) { repository.getDetails(it) } }.awaitAll()
     }.also {
         val averageTime = it.inWholeNanoseconds / companies.size
         println("Average time of getting details: $averageTime ns")
@@ -52,7 +57,7 @@ suspend fun performanceTest(): Unit = coroutineScope {
 
     // The time of getting details from cache
     measureTime {
-        companies.map { async(dispatcher) { repository.detailsOrNull(it) } }.awaitAll()
+        companies.map { async(dispatcher) { repository.getDetailsOrNull(it) } }.awaitAll()
     }.also {
         val averageTime = it.inWholeNanoseconds / companies.size
         println("Average time of getting details from cache: $averageTime ns")
@@ -64,7 +69,7 @@ suspend fun performanceTest(): Unit = coroutineScope {
         coroutineScope {
             repeat(repeats) {
                 launch(dispatcher) {
-                    repository.allDetails()
+                    repository.getReadyDetails()
                 }
             }
         }
@@ -75,7 +80,7 @@ suspend fun performanceTest(): Unit = coroutineScope {
 }
 
 interface CompanyDetailsClient {
-    suspend fun fetchDetails(company: Company): CompanyDetails
+    suspend fun getDetails(company: Company): CompanyDetails
 }
 
 data class CompanyDetails(val name: String, val address: String, val revenue: BigDecimal)
@@ -93,7 +98,7 @@ class CompanyDetailsRepositoryTest {
         val repository = CompanyDetailsRepository(client, coroutineContext[CoroutineDispatcher]!!)
 
         // when
-        val result = repository.fetchDetails(company)
+        val result = repository.getDetails(company)
 
         // then
         assertEquals(details, result)
@@ -111,7 +116,7 @@ class CompanyDetailsRepositoryTest {
         val repository = CompanyDetailsRepository(client, coroutineContext[CoroutineDispatcher]!!)
 
         // when
-        val result1 = repository.fetchDetails(company)
+        val result1 = repository.getDetails(company)
 
         // then       
         assertEquals(details, result1)
@@ -121,12 +126,12 @@ class CompanyDetailsRepositoryTest {
         client.clear()
 
         // then
-        val result = repository.fetchDetails(company)
+        val result = repository.getDetails(company)
         assertEquals(details, result)
     }
 
     @Test
-    fun `allDetails should return all details`() = runTest {
+    fun `getReadyDetails should return all details`() = runTest {
         // given
         val company1 = Company("1")
         val company2 = Company("2")
@@ -138,16 +143,16 @@ class CompanyDetailsRepositoryTest {
         val repository = CompanyDetailsRepository(client, coroutineContext[CoroutineDispatcher]!!)
 
         // when
-        repository.fetchDetails(company1)
-        repository.fetchDetails(company2)
-        val result = repository.allDetails()
+        repository.getDetails(company1)
+        repository.getDetails(company2)
+        val result = repository.getReadyDetails()
 
         // then
         assertEquals(mapOf(company1 to details1, company2 to details2), result)
     }
 
     @Test
-    fun `allDetails should fetch details asynchronously`() = runTest {
+    fun `getReadyDetails should fetch details asynchronously`() = runTest {
         // given
         val company1 = Company("1")
         val company2 = Company("2")
@@ -162,15 +167,15 @@ class CompanyDetailsRepositoryTest {
         // when
         coroutineScope {
             launch {
-                repository.fetchDetails(company1)
+                repository.getDetails(company1)
                 assertEquals(1000, currentTime)
             }
             launch {
-                repository.fetchDetails(company2)
+                repository.getDetails(company2)
                 assertEquals(1000, currentTime)
             }
         }
-        val result = repository.allDetails()
+        val result = repository.getReadyDetails()
 
         // then
         assertEquals(mapOf(company1 to details1, company2 to details2), result)
@@ -186,17 +191,17 @@ class CompanyDetailsRepositoryTest {
             details = mapOf(company to details)
         )
         val repository = CompanyDetailsRepository(client, coroutineContext[CoroutineDispatcher]!!)
-        val detailsMap = repository.allDetails()
+        val detailsMap = repository.getReadyDetails()
 
         // when
-        repository.fetchDetails(company)
+        repository.getDetails(company)
 
         // then
         assertEquals(mapOf(), detailsMap)
     }
 
     @Test
-    fun `detailsOrNull should return details if exists`() = runTest {
+    fun `getDetailsOrNull should return details if exists`() = runTest {
         // given
         val company = Company("1")
         val company2 = Company("2")
@@ -207,15 +212,15 @@ class CompanyDetailsRepositoryTest {
         val repository = CompanyDetailsRepository(client, coroutineContext[CoroutineDispatcher]!!)
 
         // then
-        assertEquals(null, repository.detailsOrNull(company))
-        assertEquals(null, repository.detailsOrNull(company2))
+        assertEquals(null, repository.getDetailsOrNull(company))
+        assertEquals(null, repository.getDetailsOrNull(company2))
 
         // when
         repository.fetchDetails(company)
 
         // then
-        assertEquals(details, repository.detailsOrNull(company))
-        assertEquals(null, repository.detailsOrNull(company2))
+        assertEquals(details, repository.getDetailsOrNull(company))
+        assertEquals(null, repository.getDetailsOrNull(company2))
     }
 
     // Synchronization tests
@@ -243,7 +248,7 @@ class CompanyDetailsRepositoryTest {
             }
         }
 
-        assertEquals(parallelCalls, repository.allDetails().size)
+        assertEquals(parallelCalls, repository.getReadyDetails().size)
     }
 
     @Test
@@ -261,7 +266,7 @@ class CompanyDetailsRepositoryTest {
             launch { repository.fetchDetails(company) }
         }
         repeat(1000) {
-            launch { repository.allDetails() }
+            launch { repository.getReadyDetails() }
         }
     }
 

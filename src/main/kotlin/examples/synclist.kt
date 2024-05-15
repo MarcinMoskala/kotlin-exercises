@@ -1,0 +1,4 @@
+package examples
+
+class synclist {
+}

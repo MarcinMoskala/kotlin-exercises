@@ -21,7 +21,7 @@ class CancellingRefresher(
 ) {
     private var refreshJob: Job? = null
 
-    suspend fun refresh() {
+    fun refresh() {
         refreshJob?.cancel()
         refreshJob = scope.launch {
             refreshData()

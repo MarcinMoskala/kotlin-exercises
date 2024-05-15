@@ -19,15 +19,9 @@ class EventListenerRepository<E> {
     }
 
     fun invokeListeners(event: E) {
-        val eventListeners = listeners
-            .filter { it.event == event }
-        for (listener in eventListeners) {
-            if (listener.isActive) {
-                listener.handleEvent()
-            } else {
-                listeners.remove(listener)
-            }
-        }
+        listeners
+            .filter { it.event == event && listener.isActive }
+            .forEach { it.handleEvent() }
     }
 }
 

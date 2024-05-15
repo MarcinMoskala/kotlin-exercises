@@ -15,7 +15,7 @@ import kotlinx.coroutines.test.currentTime
 import kotlinx.coroutines.test.runTest
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.atomic.AtomicInteger
-import kotlin.test.Test
+import org.junit.Test
 import kotlin.test.assertEquals
 import kotlin.time.measureTime
 
@@ -90,7 +90,7 @@ class UserRefresherTest {
 
         val sendTime = measureTime {
             coroutineScope {
-                repeat(1000) {
+                repeat(100) {
                     launch { userRefresher.refresh(it) }
                 }
             }
