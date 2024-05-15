@@ -20,7 +20,7 @@ class EventListenerRepository<E> {
 
     fun invokeListeners(event: E) {
         listeners
-            .filter { it.event == event && listener.isActive }
+            .filter { it.event == event && it.isActive }
             .forEach { it.handleEvent() }
     }
 }
