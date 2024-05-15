@@ -1,4 +1,4 @@
-package examples
+package coroutines.examples
 
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.collect

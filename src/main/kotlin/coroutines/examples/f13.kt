@@ -1,4 +1,4 @@
-package examples
+package coroutines.examples
 
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.*

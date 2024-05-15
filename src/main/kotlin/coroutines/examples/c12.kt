@@ -1,6 +1,6 @@
-package examples.c8
+package coroutines.examples.c8
 
-import examples.massiveRun
+import coroutines.examples.massiveRun
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.channels.SendChannel

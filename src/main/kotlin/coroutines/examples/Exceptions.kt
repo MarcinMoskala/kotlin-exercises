@@ -1,4 +1,4 @@
-package examples
+package coroutines.examples
 
 import kotlinx.coroutines.async
 import kotlinx.coroutines.channels.Channel.Factory.UNLIMITED

@@ -3,9 +3,9 @@ package effective.safe.companydetailsrepository
 import kotlinx.coroutines.*
 import kotlinx.coroutines.test.currentTime
 import kotlinx.coroutines.test.runTest
-import java.math.BigDecimal
-import org.junit.Ignore      
+import org.junit.Ignore
 import org.junit.Test
+import java.math.BigDecimal
 import kotlin.test.assertEquals
 import kotlin.time.measureTime
 
@@ -80,7 +80,7 @@ suspend fun performanceTest(): Unit = coroutineScope {
 }
 
 interface CompanyDetailsClient {
-    suspend fun getDetails(company: Company): CompanyDetails
+    suspend fun fetchDetails(company: Company): CompanyDetails
 }
 
 data class CompanyDetails(val name: String, val address: String, val revenue: BigDecimal)
@@ -216,7 +216,7 @@ class CompanyDetailsRepositoryTest {
         assertEquals(null, repository.getDetailsOrNull(company2))
 
         // when
-        repository.fetchDetails(company)
+        repository.getDetails(company)
 
         // then
         assertEquals(details, repository.getDetailsOrNull(company))
@@ -239,7 +239,7 @@ class CompanyDetailsRepositoryTest {
         coroutineScope {
             for (company in companies) {
                 launch {
-                    val details = repository.fetchDetails(company)
+                    val details = repository.getDetails(company)
                     assertEquals(
                         CompanyDetails("Company${company.id}", "Address${company.id}", BigDecimal.TEN),
                         details
@@ -263,7 +263,7 @@ class CompanyDetailsRepositoryTest {
         val repository = CompanyDetailsRepository(client, coroutineContext[CoroutineDispatcher]!!)
 
         for (company in companies) {
-            launch { repository.fetchDetails(company) }
+            launch { repository.getDetails(company) }
         }
         repeat(1000) {
             launch { repository.getReadyDetails() }
@@ -282,8 +282,8 @@ class CompanyDetailsRepositoryTest {
         val repository = CompanyDetailsRepository(client, coroutineContext[CoroutineDispatcher]!!)
 
         coroutineScope {
-            launch { repository.fetchDetails(company) }
-            launch { repository.fetchDetails(company) }
+            launch { repository.getDetails(company) }
+            launch { repository.getDetails(company) }
         }
 
         assertEquals(1, client.calls)

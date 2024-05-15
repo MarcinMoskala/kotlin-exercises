@@ -1,4 +1,4 @@
-package examples.select2
+package coroutines.examples.select2
 
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.InternalCoroutinesApi

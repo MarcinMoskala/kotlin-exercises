@@ -1,4 +1,4 @@
-package examples.c9
+package coroutines.examples.c9
 
 import kotlinx.coroutines.channels.consumeEach
 import kotlinx.coroutines.channels.produce

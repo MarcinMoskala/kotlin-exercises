@@ -1,4 +1,4 @@
-package examples.sus
+package coroutines.examples.sus
 
 import java.util.concurrent.Executors
 import java.util.concurrent.TimeUnit

@@ -1,6 +1,6 @@
-package examples.n2
+package coroutines.examples.n2
 
-import examples.massiveRun
+import coroutines.examples.massiveRun
 import kotlinx.coroutines.asCoroutineDispatcher
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withContext

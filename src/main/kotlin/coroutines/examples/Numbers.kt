@@ -1,4 +1,4 @@
-package examples
+package coroutines.examples
 
 val childNumbers = sequence {
     println("Um, first number is... one!")

@@ -1,6 +1,6 @@
-package examples.n1
+package coroutines.examples.n1
 
-import examples.massiveRun
+import coroutines.examples.massiveRun
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.runBlocking
 import java.util.concurrent.atomic.AtomicInteger

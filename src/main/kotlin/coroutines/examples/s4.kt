@@ -1,6 +1,6 @@
-package examples.n3
+package coroutines.examples.n3
 
-import examples.massiveRun
+import coroutines.examples.massiveRun
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock

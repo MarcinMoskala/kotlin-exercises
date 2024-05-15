@@ -1,4 +1,4 @@
-package examples
+package coroutines.examples
 
 import kotlin.coroutines.resume
 import kotlin.coroutines.suspendCoroutine

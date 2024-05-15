@@ -1,4 +1,4 @@
-package examples
+package coroutines.examples
 
 import kotlin.concurrent.thread
 import kotlin.coroutines.resume

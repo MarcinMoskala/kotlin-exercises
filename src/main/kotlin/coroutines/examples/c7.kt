@@ -1,4 +1,4 @@
-package examples.c3
+package coroutines.examples.c3
 
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.cancelChildren

@@ -1,4 +1,4 @@
-package examples.c6
+package coroutines.examples.c6
 
 import kotlinx.coroutines.channels.ticker
 import kotlinx.coroutines.delay

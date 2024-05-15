@@ -1,4 +1,4 @@
-package examples.t4
+package coroutines.examples.t4
 
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.async

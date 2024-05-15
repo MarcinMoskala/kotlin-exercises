@@ -1,4 +1,4 @@
-package examples
+package coroutines.examples
 
 import kotlin.coroutines.Continuation
 import kotlin.coroutines.resume

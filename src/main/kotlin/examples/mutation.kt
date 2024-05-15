@@ -3,14 +3,15 @@ package examples.mutation
 data class User(val name: String)
 
 class UserRepository {
-   private val storedUsers: MutableMap<Int, String> = mutableMapOf()
+    private val storedUsers: MutableMap<Int, String> = mutableMapOf()
 
-   fun loadAll() = storedUsers
-  
-   fun add(id: Int, name: String) {
-       storedUsers[id] = name
-   }
-   //...
+    fun loadAll() = storedUsers
+
+    fun add(id: Int, name: String) {
+        storedUsers[id] = name
+    }
+
+    //...
 }
 
 fun main() {

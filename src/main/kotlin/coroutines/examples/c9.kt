@@ -1,4 +1,4 @@
-package examples.c5
+package coroutines.examples.c5
 
 import kotlinx.coroutines.cancelChildren
 import kotlinx.coroutines.channels.Channel

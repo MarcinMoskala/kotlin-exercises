@@ -1,4 +1,4 @@
-package examples.t1
+package coroutines.examples.t1
 
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.TestCoroutineScheduler

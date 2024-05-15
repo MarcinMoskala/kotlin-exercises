@@ -1,4 +1,4 @@
-package examples.t3
+package coroutines.examples.t3
 
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.coroutineScope

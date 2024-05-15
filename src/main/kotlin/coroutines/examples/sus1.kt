@@ -1,4 +1,4 @@
-package examples
+package coroutines.examples
 
 suspend fun main() {
     println("Before")

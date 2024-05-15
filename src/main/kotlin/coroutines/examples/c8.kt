@@ -1,4 +1,4 @@
-package examples.c4
+package coroutines.examples.c4
 
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.channels.ReceiveChannel
