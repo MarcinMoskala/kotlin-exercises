@@ -1,4 +1,4 @@
-package coroutines.flow.mesageservice
+package coroutines.flow.messageservice
 
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.*
@@ -13,29 +13,29 @@ class MessageService(
 ) {
     fun threadsSearch(
         query: Flow<String>
-    ): Flow<List<MessageThread>> = TODO()
+    ): Flow<MessageThread> = TODO()
 
     fun subscribeThreads(
         threads: Flow<MessageThread>
     ): Flow<MessageThreadUpdate> = TODO()
 
     fun sendMessages(
-        messages: Flow<Message>
+        messages: Flow<List<Message>>
     ): Flow<MessageSendingResponse> = TODO()
 }
 
 interface MessageRepository {
-    suspend fun searchThreads(
+    fun searchThreads(
         query: String
-    ): List<MessageThread>
+    ): Flow<MessageThread>
 
     fun subscribeThread(
         threadId: String
     ): Flow<MessageThreadUpdate>
 
-    suspend fun sendMessage(
-        message: Message
-    ): MessageSendingResponse
+    fun sendMessages(
+        messages: List<Message>
+    ): Flow<MessageSendingResponse>
 }
 
 data class MessageThread(val id: String, val name: String)
@@ -47,9 +47,9 @@ class MessageServiceTests {
     @Test
     fun `should search for threads based on the last query`() = runTest {
         val repo = object : OpenMessageRepository() {
-            override suspend fun searchThreads(query: String): List<MessageThread> {
+            override fun searchThreads(query: String): Flow<MessageThread> = flow {
                 delay(1000)
-                return listOf(MessageThread("Resp$query", "Name$query"))
+                emit(MessageThread("Resp$query", "Name$query"))
             }
         }
         val service = MessageService(repo)
@@ -67,8 +67,44 @@ class MessageServiceTests {
 
         assertEquals(
             listOf(
-                ValueAndTime(listOf(MessageThread("RespB", "NameB")), 1500),
-                ValueAndTime(listOf(MessageThread("RespC", "NameC")), 3000),
+                ValueAndTime(MessageThread("RespB", "NameB"), 1500),
+                ValueAndTime(MessageThread("RespC", "NameC"), 3000),
+            ),
+            result
+        )
+    }
+
+    @Test
+    fun `should search for all threads`() = runTest {
+        val repo = object : OpenMessageRepository() {
+            override fun searchThreads(query: String): Flow<MessageThread> = flow {
+                delay(1000)
+                emit(MessageThread("Resp$query", "Name$query"))
+                delay(1000)
+                emit(MessageThread("2Resp$query", "2Name$query"))
+            }
+        }
+        val service = MessageService(repo)
+
+        val query = flow {
+            emit("A")
+            delay(2500)
+            emit("B")
+            delay(1500)
+            emit("C")
+            delay(500)
+            emit("D")
+        }
+
+        val result = service.threadsSearch(query).toList()
+
+        assertEquals(
+            listOf(
+                MessageThread("RespA", "NameA"),
+                MessageThread("2RespA", "2NameA"),
+                MessageThread("RespB", "NameB"),
+                MessageThread("RespD", "NameD"),
+                MessageThread("2RespD", "2NameD"),
             ),
             result
         )
@@ -135,18 +171,20 @@ class MessageServiceTests {
     @Test
     fun `should send messages synchroniously`() = runTest {
         val repo = object : OpenMessageRepository() {
-            override suspend fun sendMessage(message: Message): MessageSendingResponse {
-                delay(1000)
-                return MessageSendingResponse(message.threadId, true)
+            override fun sendMessages(messages: List<Message>): Flow<MessageSendingResponse> = flow {
+                messages.forEach {
+                    delay(1000)
+                    emit(MessageSendingResponse(it.threadId, true))
+                }
             }
         }
         val service = MessageService(repo)
         val messages = channelFlow {
-            send(Message("A", "B", "T1"))
+            send(listOf(Message("A", "B", "T1")))
             delay(500)
-            send(Message("C", "D", "T2"))
+            send(listOf(Message("C", "D", "T2")))
             delay(1500)
-            send(Message("E", "F", "T3"))
+            send(listOf(Message("E", "F", "T3")))
         }
 
         val result = service.sendMessages(messages)
@@ -165,7 +203,7 @@ class MessageServiceTests {
 }
 
 open class OpenMessageRepository : MessageRepository {
-    override suspend fun searchThreads(query: String): List<MessageThread> {
+    override fun searchThreads(query: String): Flow<MessageThread> {
         TODO()
     }
 
@@ -173,7 +211,7 @@ open class OpenMessageRepository : MessageRepository {
         TODO()
     }
 
-    override suspend fun sendMessage(message: Message): MessageSendingResponse {
+    override fun sendMessages(messages: List<Message>): Flow<MessageSendingResponse> {
         TODO()
     }
 }
