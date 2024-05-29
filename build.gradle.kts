@@ -1,7 +1,10 @@
+@file:Suppress("OPT_IN_USAGE")
+
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 plugins {
-    kotlin("jvm") version "1.9.10"
+    kotlin("jvm") version "2.0.0"
+    kotlin("plugin.power-assert") version "2.0.0"
     application
 }
 
@@ -27,8 +30,13 @@ tasks.withType<KotlinCompile> {
 
 java.sourceSets["test"].java {
     srcDir("src/main/kotlin")
+    srcDir("src/test/kotlin")
 }
 
 kotlin {
     jvmToolchain(20)
+}
+
+powerAssert {
+    functions = listOf("kotlin.assert", "kotlin.test.assertEquals")
 }
