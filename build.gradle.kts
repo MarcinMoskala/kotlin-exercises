@@ -30,7 +30,6 @@ tasks.withType<KotlinCompile> {
 
 java.sourceSets["test"].java {
     srcDir("src/main/kotlin")
-    srcDir("src/test/kotlin")
 }
 
 kotlin {
