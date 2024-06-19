@@ -32,10 +32,6 @@ java.sourceSets["test"].java {
     srcDir("src/main/kotlin")
 }
 
-kotlin {
-    jvmToolchain(20)
-}
-
 powerAssert {
     functions = listOf("kotlin.assert", "kotlin.test.assertEquals")
 }
