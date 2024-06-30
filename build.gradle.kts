@@ -5,6 +5,7 @@ import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 plugins {
     kotlin("jvm") version "2.0.0"
     kotlin("plugin.power-assert") version "2.0.0"
+//    id("com.google.devtools.ksp") version "2.0.0-1.0.22"
     application
 }
 
@@ -22,6 +23,9 @@ dependencies {
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.7.3")
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-test:1.7.3")
     implementation("com.sksamuel.aedile:aedile-core:1.3.1") // Needed for CompanyDetailsRepository
+//    implementation("io.arrow-kt:arrow-optics:2.0.0-alpha.3")
+//    implementation("io.arrow-kt:arrow-core:2.0.0-alpha.3")
+//    ksp("io.arrow-kt:arrow-optics-ksp-plugin:2.0.0-alpha.3")
 }
 
 tasks.withType<KotlinCompile> {
