@@ -31,10 +31,10 @@ data class PriceSizeTime(
 data class Ticker(val value: String)
 data class Price(val value: Float?)
 
-sealed interface Event { val ticker: String }
-data class BidEvent(override val ticker: String, val price: Float?, val size: Int?, val time: Long?) : Event
-data class AskEvent(override val ticker: String, val price: Float?, val size: Int?, val time: Long?) : Event
-data class TradeEvent(override val ticker: String, val price: Float?, val size: Int?, val time: Long?) : Event
+sealed interface Event { val ticker: Ticker }
+data class BidEvent(override val ticker: Ticker, val price: Float?, val size: Int?, val time: Long?) : Event
+data class AskEvent(override val ticker: Ticker, val price: Float?, val size: Int?, val time: Long?) : Event
+data class TradeEvent(override val ticker: Ticker, val price: Float?, val size: Int?, val time: Long?) : Event
 
 val tickers = List(1000) { Ticker("Ticker$it") }
 
@@ -45,21 +45,21 @@ class MarketClient {
         while (true) {
             val event = when ((0..2).random(random)) {
                 0 -> BidEvent(
-                    tickers.random(random).value,
+                    tickers.random(random),
                     if (random.nextInt(100) == 1) null else (0..100).random(random).toFloat(),
                     if (random.nextInt(100) == 1) null else (0..100).random(random),
                     if (random.nextInt(100) == 1) null else System.currentTimeMillis()
                 )
 
                 1 -> AskEvent(
-                    tickers.random(random).value,
+                    tickers.random(random),
                     if (random.nextInt(100) == 1) null else (0..100).random(random).toFloat(),
                     if (random.nextInt(100) == 1) null else (0..100).random(random),
                     if (random.nextInt(100) == 1) null else System.currentTimeMillis()
                 )
 
                 else -> TradeEvent(
-                    tickers.random(random).value,
+                    tickers.random(random),
                     if (random.nextInt(100) == 1) null else (0..100).random(random).toFloat(),
                     if (random.nextInt(100) == 1) null else (0..100).random(random),
                     if (random.nextInt(100) == 1) null else System.currentTimeMillis()
@@ -69,7 +69,6 @@ class MarketClient {
         }
     }
 }
-
 
 class MarketRepository(
     private val client: MarketClient,
@@ -86,24 +85,24 @@ class MarketRepository(
             client.observe().collect {
                 when (it) {
                     is BidEvent -> {
-                        val snapshot = snapshots.getOrPut(Ticker(it.ticker)) { Snapshot(null, null, null) }
+                        val snapshot = snapshots.getOrPut(it.ticker) { Snapshot(null, null, null) }
                             .copy(bid = PriceSizeTime(Price(it.price), it.size, it.time))
-                        snapshots[Ticker(it.ticker)] = snapshot
-                        updates.emit(TickerSnapshot(Ticker(it.ticker), snapshot))
+                        snapshots[it.ticker] = snapshot
+                        updates.emit(TickerSnapshot(it.ticker, snapshot))
                     }
 
                     is AskEvent -> {
-                        val snapshot = snapshots.getOrPut(Ticker(it.ticker)) { Snapshot(null, null, null) }
+                        val snapshot = snapshots.getOrPut(it.ticker) { Snapshot(null, null, null) }
                             .copy(ask = PriceSizeTime(Price(it.price), it.size, it.time))
-                        snapshots[Ticker(it.ticker)] = snapshot
-                        updates.emit(TickerSnapshot(Ticker(it.ticker), snapshot))
+                        snapshots[it.ticker] = snapshot
+                        updates.emit(TickerSnapshot(it.ticker, snapshot))
                     }
 
                     is TradeEvent -> {
-                        val snapshot = snapshots.getOrPut(Ticker(it.ticker)) { Snapshot(null, null, null) }
+                        val snapshot = snapshots.getOrPut(it.ticker) { Snapshot(null, null, null) }
                             .copy(last = PriceSizeTime(Price(it.price), it.size, it.time))
-                        snapshots[Ticker(it.ticker)] = snapshot
-                        updates.emit(TickerSnapshot(Ticker(it.ticker), snapshot))
+                        snapshots[it.ticker] = snapshot
+                        updates.emit(TickerSnapshot(it.ticker, snapshot))
                     }
                 }
             }
