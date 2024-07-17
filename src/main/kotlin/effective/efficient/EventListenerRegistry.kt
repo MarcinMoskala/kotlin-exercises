@@ -1,21 +1,21 @@
-package effective.efficient.eventlistenerrepository
+package effective.efficient.eventlistenerregistry
 
 import org.junit.Test
 import java.util.concurrent.ConcurrentHashMap
 import kotlin.test.assertEquals
 
-class EventListenerRepository<E> {
-    private var listeners = ConcurrentHashMap
+class EventListenerRegistry<E> {
+    private val listeners = ConcurrentHashMap
         .newKeySet<EventListener<E>>()
     private val lock = Any()
 
     fun addEventListener(
         event: E,
         handler: () -> Unit
-    ): EventListener<E> = synchronized(lock) {
+    ): EventListener<E> {
         val listener = EventListener(event, handler)
         listeners += listener
-        listener
+        return listener
     }
 
     fun invokeListeners(event: E) {
@@ -28,9 +28,8 @@ class EventListenerRepository<E> {
 class EventListener<E>(
     val event: E,
     val handler: () -> Unit,
-    isActive: Boolean = true
 ) {
-    var isActive: Boolean = isActive
+    var isActive: Boolean = true
         private set
 
     fun handleEvent() {
@@ -44,10 +43,10 @@ class EventListener<E>(
 
 enum class Event { A, B, C }
 
-class EventListenerRepositoryTest {
+class EventListenerRegistryTest {
     @Test
     fun `should invoke proper handlers`() {
-        val eventListenerRepository = EventListenerRepository<Event>()
+        val eventListenerRepository = EventListenerRegistry<Event>()
         var a = 0
         var b = 0
         var c = 0
@@ -84,7 +83,7 @@ class EventListenerRepositoryTest {
 
     @Test
     fun `should allow setting more than one handler for an event`() {
-        val eventListenerRepository = EventListenerRepository<Event>()
+        val eventListenerRepository = EventListenerRegistry<Event>()
         var a = 0
         var b = 0
         var c = 0
@@ -102,7 +101,7 @@ class EventListenerRepositoryTest {
 
     @Test
     fun `should allow listener cancelation`() {
-        val eventListenerRepository = EventListenerRepository<Event>()
+        val eventListenerRepository = EventListenerRegistry<Event>()
         var a = 0
 
         val listener = eventListenerRepository.addEventListener(Event.A) { a++ }
