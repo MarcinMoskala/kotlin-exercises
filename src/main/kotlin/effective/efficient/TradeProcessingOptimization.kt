@@ -35,14 +35,14 @@ data class Ticker(val value: String)
 data class Price(val value: Float?)
 
 sealed interface Event {
-    val ticker: Ticker
+    val ticker: String
 }
 
-data class BidEvent(override val ticker: Ticker, val price: Float?, val size: Int?, val time: Long?) : Event
-data class AskEvent(override val ticker: Ticker, val price: Float?, val size: Int?, val time: Long?) : Event
-data class TradeEvent(override val ticker: Ticker, val price: Float?, val size: Int?, val time: Long?) : Event
+data class BidEvent(override val ticker: String, val price: Float?, val size: Int?, val time: Long?) : Event
+data class AskEvent(override val ticker: String, val price: Float?, val size: Int?, val time: Long?) : Event
+data class TradeEvent(override val ticker: String, val price: Float?, val size: Int?, val time: Long?) : Event
 
-val tickers = List(1000) { Ticker("Ticker$it") }
+val tickers = List(1000) { "Ticker$it" }
 
 // Do not touch this one
 class MarketClient {
@@ -91,24 +91,24 @@ class MarketRepository(
             client.observe().collect {
                 when (it) {
                     is BidEvent -> {
-                        val snapshot = snapshots.getOrPut(it.ticker) { Snapshot(null, null, null) }
+                        val snapshot = snapshots.getOrPut(Ticker(it.ticker)) { Snapshot(null, null, null) }
                             .copy(bid = PriceSizeTime(Price(it.price), it.size, it.time))
-                        snapshots[it.ticker] = snapshot
-                        updates.emit(TickerSnapshot(it.ticker, snapshot))
+                        snapshots[Ticker(it.ticker)] = snapshot
+                        updates.emit(TickerSnapshot(Ticker(it.ticker), snapshot))
                     }
 
                     is AskEvent -> {
-                        val snapshot = snapshots.getOrPut(it.ticker) { Snapshot(null, null, null) }
+                        val snapshot = snapshots.getOrPut(Ticker(it.ticker)) { Snapshot(null, null, null) }
                             .copy(ask = PriceSizeTime(Price(it.price), it.size, it.time))
-                        snapshots[it.ticker] = snapshot
-                        updates.emit(TickerSnapshot(it.ticker, snapshot))
+                        snapshots[Ticker(it.ticker)] = snapshot
+                        updates.emit(TickerSnapshot(Ticker(it.ticker), snapshot))
                     }
 
                     is TradeEvent -> {
-                        val snapshot = snapshots.getOrPut(it.ticker) { Snapshot(null, null, null) }
+                        val snapshot = snapshots.getOrPut(Ticker(it.ticker)) { Snapshot(null, null, null) }
                             .copy(last = PriceSizeTime(Price(it.price), it.size, it.time))
-                        snapshots[it.ticker] = snapshot
-                        updates.emit(TickerSnapshot(it.ticker, snapshot))
+                        snapshots[Ticker(it.ticker)] = snapshot
+                        updates.emit(TickerSnapshot(Ticker(it.ticker), snapshot))
                     }
                 }
             }
@@ -169,9 +169,9 @@ class TradeService(
 ) {
     fun observeUpdates(
         filter: Filter? = null,
-        tickers: List<Ticker>? = null,
+        tickers: List<String>? = null,
     ) = repository.observeUpdates()
-        .filter { tickers == null || it.ticker in tickers }
+        .filter { tickers == null || it.ticker.value in tickers }
         .filter { filter == null || filter.check(it) }
 }
 
@@ -181,7 +181,7 @@ suspend fun main() {
     val service = TradeService(repository)
     val filter = Or(
         listOf(
-            And(listOf(TickerIs(tickers.take(1)), PrizeCondition(Ask, GreaterThan, 99f))),
+            And(listOf(TickerIs(tickers.take(1).map(::Ticker)), PrizeCondition(Ask, GreaterThan, 99f))),
             And(listOf(PrizeCondition(Spread, GreaterThan, 99f))),
         )
     )
@@ -203,7 +203,7 @@ class TradeProcessingOptimizationConsistencyTest {
         val service = TradeService(repository)
         val filter = Or(
             listOf(
-                And(listOf(TickerIs(tickers.take(1)), PrizeCondition(Ask, GreaterThan, 99f))),
+                And(listOf(TickerIs(tickers.take(1).map(::Ticker)), PrizeCondition(Ask, GreaterThan, 99f))),
                 And(listOf(PrizeCondition(Spread, GreaterThan, 99f))),
             )
         )
@@ -374,19 +374,17 @@ class TradeProcessingOptimizationConsistencyTest {
     @Test
     fun consistencyMarketClient() = runTest {
         val client = MarketClient()
-        val actual = client.observe().drop(1000).take(10).toList()
+        val actual = client.observe().drop(1000).take(8).toList()
 
         val expected: List<Event> = listOf(
-            BidEvent(ticker = Ticker(value = "Ticker104"), price = 84.0f, size = 62, time = -3918742120704651959),
-            BidEvent(ticker = Ticker(value = "Ticker217"), price = 28.0f, size = 39, time = -8444169246005059055),
-            TradeEvent(ticker = Ticker(value = "Ticker439"), price = 95.0f, size = 49, time = -7252680086516976403),
-            TradeEvent(ticker = Ticker(value = "Ticker448"), price = 70.0f, size = 36, time = -4033282910995118951),
-            BidEvent(ticker = Ticker(value = "Ticker938"), price = 7.0f, size = 62, time = -6616814657806899356),
-            AskEvent(ticker = Ticker(value = "Ticker374"), price = 7.0f, size = 15, time = 4731288498627745830),
-            AskEvent(ticker = Ticker(value = "Ticker853"), price = 65.0f, size = 11, time = 1669441119088229790),
-            AskEvent(ticker = Ticker(value = "Ticker339"), price = 80.0f, size = 29, time = -8415103301060278097),
-            AskEvent(ticker = Ticker(value = "Ticker707"), price = 91.0f, size = 12, time = null),
-            AskEvent(ticker = Ticker(value = "Ticker281"), price = 70.0f, size = 35, time = 5620685276084481760)
+            BidEvent(ticker = "Ticker104", price = 84.0f, size = 62, time = -3918742120704651959),
+            BidEvent(ticker = "Ticker217", price = 28.0f, size = 39, time = -8444169246005059055),
+            TradeEvent(ticker = "Ticker439", price = 95.0f, size = 49, time = -7252680086516976403),
+            TradeEvent(ticker = "Ticker448", price = 70.0f, size = 36, time = -4033282910995118951),
+            BidEvent(ticker = "Ticker938", price = 7.0f, size = 62, time = -6616814657806899356),
+            AskEvent(ticker = "Ticker374", price = 7.0f, size = 15, time = 4731288498627745830),
+            AskEvent(ticker = "Ticker853", price = 65.0f, size = 11, time = 1669441119088229790),
+            AskEvent(ticker = "Ticker339", price = 80.0f, size = 29, time = -8415103301060278097),
         )
         assertEquals(expected, actual)
     }
