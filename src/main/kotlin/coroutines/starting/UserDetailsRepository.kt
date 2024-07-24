@@ -100,8 +100,7 @@ class UserDetailsRepositoryTest {
         assertEquals(100, currentTime)
 
         // when
-        backgroundScope.coroutineContext.job.children
-            .forEach { it.join() }
+        backgroundScope.coroutineContext.job.children.forEach { it.join() }
 
         // then
         assertEquals(1_100, currentTime)
