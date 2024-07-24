@@ -63,7 +63,7 @@ class UserDetailsRepositoryTest {
     
             override suspend fun getFriends(): List<Friend> {
                 // TODO
-                return listOf(Friend("some-friend-id-1"))
+                return listOf(Friend("friend-id-1"))
             }
     
             override suspend fun getProfile(): Profile {

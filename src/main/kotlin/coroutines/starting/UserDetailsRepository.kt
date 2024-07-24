@@ -50,7 +50,7 @@ class UserDetailsRepositoryTest {
 
             override suspend fun getFriends(): List<Friend> {
                 delay(200)
-                return listOf(Friend("some-friend-id-1"))
+                return listOf(Friend("friend-id-1"))
             }
 
             override suspend fun getProfile(): Profile {
@@ -66,7 +66,7 @@ class UserDetailsRepositoryTest {
 
         // then
         assertEquals("Ben", details.name)
-        assertEquals("some-friend-id-1", details.friends.single().id)
+        assertEquals("friend-id-1", details.friends.single().id)
         assertEquals("Example description", details.profile.description)
         assertEquals(300, currentTime)
     }
@@ -82,7 +82,7 @@ class UserDetailsRepositoryTest {
 
             override suspend fun getFriends(): List<Friend> {
                 delay(100)
-                return listOf(Friend("some-friend-id-1"))
+                return listOf(Friend("friend-id-1"))
             }
 
             override suspend fun getProfile(): Profile {
@@ -100,7 +100,8 @@ class UserDetailsRepositoryTest {
         assertEquals(100, currentTime)
 
         // when
-        backgroundScope.coroutineContext.job.children.forEach { it.join() }
+        backgroundScope.coroutineContext.job.children
+            .forEach { it.join() }
 
         // then
         assertEquals(1_100, currentTime)
@@ -110,7 +111,7 @@ class UserDetailsRepositoryTest {
     fun `should load from database`() = runTest {
         // given
         val database = InMemoryDatabase(loadTime = 10)
-        database.save(UserDetails("Ben", listOf(Friend("some-friend-id-1")), Profile("Example description")))
+        database.save(UserDetails("Ben", listOf(Friend("friend-id-1")), Profile("Example description")))
         val client = object : UserDataClient {
             override suspend fun getName(): String {
                 error("Should not be called")
@@ -131,7 +132,7 @@ class UserDetailsRepositoryTest {
 
         // then
         assertEquals("Ben", details.name)
-        assertEquals("some-friend-id-1", details.friends.single().id)
+        assertEquals("friend-id-1", details.friends.single().id)
         assertEquals("Example description", details.profile.description)
         assertEquals(10, currentTime)
     }

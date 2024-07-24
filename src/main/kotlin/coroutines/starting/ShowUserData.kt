@@ -46,7 +46,7 @@ class TestUserDataRepository : UserDataRepository {
 
     override suspend fun getFriends(): List<Friend> {
         delay(1000)
-        return listOf(Friend("some-friend-id-1"))
+        return listOf(Friend("friend-id-1"))
     }
 
     override suspend fun getProfile(): Profile {
@@ -76,7 +76,7 @@ class ShowNewsTest {
 
         // then
         assertEquals(
-            listOf(User("Ben", listOf(Friend("some-friend-id-1")), Profile("Example description"))),
+            listOf(User("Ben", listOf(Friend("friend-id-1")), Profile("Example description"))),
             view.printed
         )
     }
@@ -128,7 +128,7 @@ class ShowNewsTest {
 
         override suspend fun getFriends(): List<Friend> {
             delay(FETCH_TIMEOUT)
-            return listOf(Friend("some-friend-id-1"))
+            return listOf(Friend("friend-id-1"))
         }
 
         override suspend fun getProfile(): Profile {
