@@ -1,12 +1,5 @@
 package coroutines.examples.sus
 
-import java.util.concurrent.Executors
-import java.util.concurrent.TimeUnit
-import kotlin.concurrent.thread
-import kotlin.coroutines.resume
-import kotlin.coroutines.suspendCoroutine
-import kotlin.random.Random
-
 suspend fun main() {
     println("Before")
 
@@ -21,7 +14,20 @@ suspend fun main() {
 
 //executor.schedule({}, 1000, TimeUnit.MILLISECONDS)
 
-
+//val i: Int = suspendCoroutine<Int> { cont ->
+//    cont.resume(42)
+//}
+//println(i) // 42
+//
+//val str: String = suspendCoroutine<String> { cont ->
+//    cont.resume("Some text")
+//}
+//println(str) // Some text
+//
+//val b: Boolean = suspendCoroutine<Boolean> { cont ->
+//    cont.resume(true)
+//}
+//println(b) // true
 
 //fun fetchUser(callback: (User) -> Unit) {
 //    thread {

@@ -1,6 +1,8 @@
 package coroutines.dispatcher.discnewsrepository
 
-import kotlinx.coroutines.*
+import kotlinx.coroutines.coroutineScope
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.runBlocking
 import org.junit.Test
 import kotlin.system.measureTimeMillis
 import kotlin.test.assertEquals
@@ -29,18 +31,18 @@ class DiscNewsRepositoryTests {
 
     @Test
     fun `should read data from disc using DiscReader`() = runBlocking {
-        val repo = DiscNewsRepository(OneSecDiscReader(listOf("Some title", "Some content")))
+        val repo = DiscNewsRepository(ImmediateDiscReader(listOf("Some title", "Some content")))
         val res = repo.getNews("SomeUserId")
         assertEquals("Some title", res.title)
         assertEquals("Some content", res.content)
     }
 
-    class ImmediateDiscReader(val map: Map<String, List<String>>) : DiscReader {
-        override fun read(key: String): List<String> = map[key] ?: error("Element not found")
+    class ImmediateDiscReader(private val response: List<String>) : DiscReader {
+        override fun read(key: String): List<String> = response
     }
 
     @Test
-    fun `should be prepared for many reads at the same time`() = runBlocking<Unit> {
+    fun `should be prepared for concurrent reads`() = runBlocking {
         val repo = DiscNewsRepository(OneSecDiscReader(listOf("Some title", "Some content")))
         val time = measureTimeMillis {
             coroutineScope {
@@ -55,7 +57,7 @@ class DiscNewsRepositoryTests {
     }
 
     @Test(timeout = 2000)
-    fun `should be prepared for 200 parallel reads`() = runBlocking<Unit> {
+    fun `should be prepared for 200 parallel reads`() = runBlocking {
         val repo = DiscNewsRepository(OneSecDiscReader(listOf("Some title", "Some content")))
         val time = measureTimeMillis {
             coroutineScope {
@@ -70,7 +72,7 @@ class DiscNewsRepositoryTests {
     }
 
     @Test(timeout = 3000)
-    fun `should not allow more than 200 parallel reads`() = runBlocking<Unit> {
+    fun `should not allow more than 200 parallel reads`() = runBlocking {
         val repo = DiscNewsRepository(OneSecDiscReader(listOf("Some title", "Some content")))
         val time = measureTimeMillis {
             coroutineScope {
@@ -91,3 +93,8 @@ class DiscNewsRepositoryTests {
         }
     }
 }
+
+
+
+
+
