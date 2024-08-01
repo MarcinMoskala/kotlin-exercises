@@ -1,4 +1,4 @@
-package coroutines.examples.hc1
+package examples.coroutines.hc1
 
 import kotlin.*
 

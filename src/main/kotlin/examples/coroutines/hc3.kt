@@ -1,4 +1,4 @@
-package coroutines.examples.hc3
+package examples.coroutines.hc3
 
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.delay

@@ -1,4 +1,4 @@
-package coroutines.examples.hc2
+package examples.coroutines.hc2
 
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.channels.produce
