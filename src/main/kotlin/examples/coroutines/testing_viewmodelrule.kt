@@ -1,4 +1,4 @@
-package coroutines.examples
+package examples.coroutines.testingviewmodelrule
 
 import kotlinx.coroutines.*
 import kotlinx.coroutines.test.*

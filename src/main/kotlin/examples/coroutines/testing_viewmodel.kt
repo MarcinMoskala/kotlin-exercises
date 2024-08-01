@@ -1,4 +1,4 @@
-package coroutines.examples.t5
+package coroutines.examples.testingviewmodel
 
 import kotlinx.coroutines.*
 import kotlinx.coroutines.test.*
