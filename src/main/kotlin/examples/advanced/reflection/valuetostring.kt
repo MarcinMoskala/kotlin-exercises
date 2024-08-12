@@ -1,3 +1,5 @@
+package examples.advanced.reflection
+
 import kotlin.reflect.full.memberProperties
 
 fun displayPropertiesAsList(value: Any) {
