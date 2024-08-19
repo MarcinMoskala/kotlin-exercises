@@ -1,15 +1,32 @@
 package coroutines.test.testuserdetailsrepository
 
 import kotlinx.coroutines.*
+import kotlinx.coroutines.test.currentTime
 import kotlinx.coroutines.test.runTest
 import org.junit.Test
+import kotlin.test.assertEquals
 
 class UserDetailsRepository(
     private val client: UserDataClient,
     private val userDatabase: UserDetailsDatabase,
     private val backgroundScope: CoroutineScope,
 ) {
-    suspend fun getUserDetails(): UserDetails = TODO()
+    suspend fun getUserDetails(): UserDetails = coroutineScope {
+        val stored = userDatabase.load()
+        if (stored != null) {
+            return@coroutineScope stored
+        }
+        val name = async { client.getName() }
+        val friends = async { client.getFriends() }
+        val profile = async { client.getProfile() }
+        val details = UserDetails(
+            name = name.await(),
+            friends = friends.await(),
+            profile = profile.await(),
+        )
+        backgroundScope.launch { userDatabase.save(details) }
+        details
+    }
 }
 
 interface UserDataClient {
