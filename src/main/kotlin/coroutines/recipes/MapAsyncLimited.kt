@@ -21,20 +21,14 @@ class MapAsyncLimitedTest {
     @Test
     fun should_behave_like_a_regular_map_for_a_list_and_a_set() = runTest {
         val list = ('a'..'z').toList()
-        val charTransformation1 = { c: Char -> c.inc() }
-        assertEquals(list.map(charTransformation1), list.mapAsync(concurrency = anyConcurrency, charTransformation1))
-        val charTransformation2 = { c: Char -> c.code }
-        assertEquals(list.map(charTransformation2), list.mapAsync(concurrency = anyConcurrency, charTransformation2))
-        val charTransformation3 = { c: Char -> c.uppercaseChar() }
-        assertEquals(list.map(charTransformation3), list.mapAsync(concurrency = anyConcurrency, charTransformation3))
+        assertEquals(list.map { c -> c.inc() }, list.mapAsync { c -> c.inc() })
+        assertEquals(list.map { c -> c.code }, list.mapAsync { c -> c.code })
+        assertEquals(list.map { c -> c.uppercaseChar() }, list.mapAsync { c -> c.uppercaseChar() })
 
         val set = (1..10).toSet()
-        val intTransformation1 = { i: Int -> i * i }
-        assertEquals(set.map(intTransformation1), set.mapAsync(concurrency = anyConcurrency, intTransformation1))
-        val intTransformation2 = { i: Int -> "A$i" }
-        assertEquals(set.map(intTransformation2), set.mapAsync(concurrency = anyConcurrency, intTransformation2))
-        val intTransformation3 = { i: Int -> i.toChar() }
-        assertEquals(set.map(intTransformation3), set.mapAsync(concurrency = anyConcurrency, intTransformation3))
+        assertEquals(set.map { i -> i * i }, set.mapAsync { i -> i * i })
+        assertEquals(set.map { i -> "A$i" }, set.mapAsync { i -> "A$i" })
+        assertEquals(set.map { i -> i.toChar() }, set.mapAsync { i -> i.toChar() })
     }
 
     @Test

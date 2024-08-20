@@ -1,9 +1,12 @@
 package coroutines.examples.sus
 
+import kotlin.coroutines.*
+import kotlinx.coroutines.*
+
 suspend fun main() {
     println("Before")
 
-
+    
 
     println("After")
 }
@@ -14,17 +17,17 @@ suspend fun main() {
 
 //executor.schedule({}, 1000, TimeUnit.MILLISECONDS)
 
-//val i: Int = suspendCoroutine<Int> { cont ->
+//val i: Int = suspendCancellableCoroutine<Int> { cont ->
 //    cont.resume(42)
 //}
 //println(i) // 42
 //
-//val str: String = suspendCoroutine<String> { cont ->
+//val str: String = suspendCancellableCoroutine<String> { cont ->
 //    cont.resume("Some text")
 //}
 //println(str) // Some text
 //
-//val b: Boolean = suspendCoroutine<Boolean> { cont ->
+//val b: Boolean = suspendCancellableCoroutine<Boolean> { cont ->
 //    cont.resume(true)
 //}
 //println(b) // true
