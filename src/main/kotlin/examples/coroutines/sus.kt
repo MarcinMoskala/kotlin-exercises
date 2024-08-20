@@ -6,7 +6,7 @@ import kotlinx.coroutines.*
 suspend fun main() {
     println("Before")
 
-    
+
 
     println("After")
 }
