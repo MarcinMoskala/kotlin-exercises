@@ -1,4 +1,4 @@
-package examples.essentials
+package examples.essentials.ranges
 
 import java.math.BigDecimal
 import java.time.Instant

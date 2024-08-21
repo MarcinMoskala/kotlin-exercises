@@ -1,4 +1,4 @@
-package examples.essentials
+package examples.essentials.objects
 
 interface TradeListener {
     fun onTrade(trade: Trade)

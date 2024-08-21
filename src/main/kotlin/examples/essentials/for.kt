@@ -1,4 +1,4 @@
-package examples.essentials
+package examples.essentials.forloop
 
 fun main() {
     val animals = listOf("cat", "dog", "cow")
