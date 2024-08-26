@@ -1,3 +1,5 @@
+@file:Suppress("unused")
+
 package coroutines.cancellation
 
 import kotlinx.coroutines.CancellationException
