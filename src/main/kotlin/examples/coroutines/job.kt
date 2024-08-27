@@ -47,6 +47,32 @@ fun main(): Unit = runBlocking {
 //    }
 //}
 
+//suspend fun main() = coroutineScope {
+//    val job = Job()
+//    println(job)
+//    job.complete()
+//    println(job)
+//
+////    val activeJob = launch {
+////        launch { delay(2000) }
+////        delay(1000)
+////    }
+////    println(activeJob)
+////    delay(1500)
+////    println(activeJob)
+////    activeJob.join()
+////    println(activeJob)
+////
+////    val lazyJob = launch(start = CoroutineStart.LAZY) {
+////        // no-op
+////    }
+////    println(lazyJob)
+////    lazyJob.start()
+////    println(lazyJob)
+////    lazyJob.join()
+////    println(lazyJob)
+//}
+
 //fun main(): Unit = runBlocking {
 //   val job1 = launch {
 //       delay(1000)
