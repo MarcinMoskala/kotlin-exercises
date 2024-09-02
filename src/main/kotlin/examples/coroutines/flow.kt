@@ -7,18 +7,41 @@ import kotlinx.coroutines.withContext
 import kotlin.coroutines.CoroutineContext
 
 suspend fun main() {
-    val f = suspend {
-        println("A")
+    val f = flow { 
+        emit("A")
         delay(1000)
-        println("B")
+        emit("B")
         delay(1000)
-        println("C")
+        emit("C")
         delay(1000)
     }
-    f()
-    f()
-    f()
+    f.collect { println(it) }
+    f.collect { println(it) }
+    f.collect { println(it) }
+    
+//    val f = suspend {
+//        println("A")
+//        delay(1000)
+//        println("B")
+//        delay(1000)
+//        println("C")
+//        delay(1000)
+//    }
+//    f()
+//    f()
+//    f()
 }
+
+
+
+
+
+
+
+
+
+
+
 
 // Flow builders
 
