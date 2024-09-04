@@ -8,15 +8,23 @@ import kotlin.test.assertEquals
 // TODO
 
 fun main() {
+    //val view = View(
+    //    id = "v1",
+    //    isVisible = false,
+    //)
+    //println(view.id) // v1
+    //println(view.isVisible) // false
+    //
     //val textView = TextView(
     //    id = "tv1",
     //    text = "Hello, World!",
     //)
     //println(textView.id) // tv1
+    //println(textView.text) // Hello, World!
+    //println(textView.isVisible) // true
     //
     //textView.text = "Welcome to Kotlin!"
     //println(textView.text) // Welcome to Kotlin!
-    //println(textView.isVisible) // true
     //
     //textView.hide()
     //println(textView.isVisible) // false
@@ -33,6 +41,8 @@ fun main() {
     //println(toggle.isVisible) // true
     //toggle.hide()
     //println(toggle.isVisible) // false
+    //toggle.show()
+    //println(toggle.isVisible) // true
 }
 
 class GuiTests {
