@@ -146,7 +146,7 @@ class MessageServiceTests {
     }
 
     @Test
-    fun `should subscribe to unlimited number of hreads`() = runTest {
+    fun `should subscribe to unlimited number of threads`() = runTest {
         val repo = object : OpenMessageRepository() {
             override fun subscribeThread(threadId: String): Flow<MessageThreadUpdate> = flow {
                 emit(MessageThreadUpdate(threadId, listOf(Message("A", "B", threadId))))

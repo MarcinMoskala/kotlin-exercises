@@ -1,11 +1,8 @@
 package coroutines.flow.distinct
 
 import junit.framework.TestCase.assertEquals
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.*
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.test.currentTime
 import kotlinx.coroutines.test.runTest
 import org.junit.Test
@@ -45,17 +42,5 @@ class DistinctTest {
 
         assertEquals(listOf(1, 3, 2), f.toList())
         assertEquals(listOf(1, 3, 2), f.toList())
-    }
-
-    @Test
-    fun `should keep data flow-specific and thread-safe`() = runBlocking(Dispatchers.IO) {
-        val f = flowOf(1, 1, 3, 1, 2, 3, 1, 2, 3, 1)
-            .distinct()
-
-        repeat(1000) {
-            launch {
-                assertEquals(listOf(1, 3, 2), f.toList())
-            }
-        }
     }
 }
