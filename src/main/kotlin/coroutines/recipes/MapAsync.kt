@@ -64,23 +64,7 @@ class MapAsyncTest {
     }
 
     @Test
-    fun should_support_cancellation() = runTest {
-        var job: Job? = null
-
-        val parentJob = launch {
-            listOf("A").mapAsync {
-                job = currentCoroutineContext().job
-                delay(Long.MAX_VALUE)
-            }
-        }
-
-        delay(1000)
-        parentJob.cancel()
-        assertEquals(true, job?.isCancelled)
-    }
-
-    @Test
-    fun should_propagate_exceptions() = runTest {
+    fun should_propagate_exceptions_from_transformation_and_cancel_other_transformations() = runTest {
         // given
         val e = object : Throwable() {}
         val bodies = listOf(
@@ -89,13 +73,24 @@ class MapAsyncTest {
             suspend { delay(500); throw e },
             suspend { "C" }
         )
+        val jobs = mutableListOf<CoroutineContext>()
 
         // when
-        val result = runCatching { bodies.mapAsync { it() } }
+        val result = runCatching {
+            bodies.mapAsync {
+                jobs += currentCoroutineContext()
+                it()
+            }
+        }
 
-        // then
+        // then should propagate exception
         assertTrue(result.isFailure)
         assertEquals(e, result.exceptionOrNull())
+        
+        // without waiting for slower transformations
         assertEquals(500, currentTime)
+        
+        // and cancel slower transformations
+        assert(jobs.all { it.job.isCompleted })
     }
 }
