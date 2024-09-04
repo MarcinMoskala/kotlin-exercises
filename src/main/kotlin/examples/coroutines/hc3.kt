@@ -1,6 +1,5 @@
 package examples.coroutines.hc3
 
-import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.flow
 
@@ -12,9 +11,8 @@ private fun makeFlow() = flow {
     }
 }
 
-suspend fun main() = coroutineScope {
+suspend fun main() {
     val flow = makeFlow()
-
     delay(1000)
     println("Calling flow...")
     flow.collect { value -> println(value) }

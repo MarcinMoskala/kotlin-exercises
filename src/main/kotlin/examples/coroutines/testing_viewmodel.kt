@@ -1,7 +1,9 @@
 package coroutines.examples.testingviewmodel
 
 import kotlinx.coroutines.*
-import kotlinx.coroutines.test.*
+import kotlinx.coroutines.test.StandardTestDispatcher
+import kotlinx.coroutines.test.TestCoroutineScheduler
+import kotlinx.coroutines.test.setMain
 import org.junit.Before
 import org.junit.Test
 import java.time.Instant
@@ -38,15 +40,19 @@ class MainViewModel(
     val userName: LiveData<String> = _userName
     private val _news = MutableLiveData<List<News>>()
     val news: LiveData<List<News>> = _news
+    private val _showProgress = MutableLiveData<Boolean>()
+    val showProgress: LiveData<Boolean> = _showProgress
 
-    fun onCreate() {
+    init {
         viewModelScope.launch {
             val user = userRepo.getUser()
             _userName.value = user.name
         }
         viewModelScope.launch {
+            _showProgress.value = true
             _news.value = newsRepo.getNews()
                 .sortedByDescending { it.date }
+            _showProgress.value = false
         }
     }
 }
@@ -70,10 +76,68 @@ private val date3 = Date
 private val aName = "Some name"
 private val someNews =
     listOf(News(date3), News(date1), News(date2))
-private val viewModel = MainViewModel(
-    userRepo = FakeUserRepository(aName),
-    newsRepo = FakeNewsRepository(someNews)
-)
+
+class MainViewModelTests {
+    private lateinit var scheduler: TestCoroutineScheduler
+    private lateinit var viewModel: MainViewModel
+
+    @Before
+    fun setUp() {
+        scheduler = TestCoroutineScheduler()
+        Dispatchers.setMain(StandardTestDispatcher(scheduler))
+        viewModel = MainViewModel(
+            userRepo = FakeUserRepository(aName),
+            newsRepo = FakeNewsRepository(someNews)
+        )
+    }
+
+    @Test
+    fun `should show progress when loading news`() {
+        // given
+        assertEquals(null, viewModel.showProgress.value)
+
+        // when
+        scheduler.runCurrent()
+
+        // then
+        assertEquals(true, viewModel.showProgress.value)
+
+        // when
+        scheduler.advanceUntilIdle()
+
+        // then
+        assertEquals(false, viewModel.showProgress.value)
+    }
+
+    @Test
+    fun `user name is shown`() {
+        // when
+        scheduler.advanceUntilIdle()
+
+        // then
+        assertEquals(aName, viewModel.userName.value)
+    }
+
+    @Test
+    fun `sorted news are shown`() {
+        // when
+        scheduler.advanceUntilIdle()
+
+        // then
+        val someNewsSorted =
+            listOf(News(date1), News(date2), News(date3))
+        assertEquals(someNewsSorted, viewModel.news.value)
+    }
+
+    @Test
+    fun `user and news are called concurrently`() {
+        // when
+        scheduler.advanceUntilIdle()
+
+        // then
+        assertEquals(1000, scheduler.currentTime)
+    }
+}
 
 class FakeUserRepository(val name: String) : UserRepository {
     override suspend fun getUser(): UserData {
@@ -86,48 +150,5 @@ class FakeNewsRepository(val news: List<News>) : NewsRepository {
     override suspend fun getNews(): List<News> {
         delay(1000)
         return news
-    }
-}
-
-@ExperimentalCoroutinesApi
-class MainViewModelTests {
-    private lateinit var scheduler: TestCoroutineScheduler
-
-    @Before
-    fun setUp() {
-        scheduler = TestCoroutineScheduler()
-        Dispatchers.setMain(StandardTestDispatcher(scheduler))
-    }
-
-    @Test
-    fun `user name is shown`() {
-        // when
-        viewModel.onCreate()
-        scheduler.advanceUntilIdle()
-
-        // then
-        assertEquals(aName, viewModel.userName.value)
-    }
-
-    @Test
-    fun `sorted news are shown`() {
-        // when
-        viewModel.onCreate()
-        scheduler.advanceUntilIdle()
-
-        // then
-        val someNewsSorted =
-            listOf(News(date1), News(date2), News(date3))
-        assertEquals(someNewsSorted, viewModel.news.value)
-    }
-
-    @Test
-    fun `user and news are called concurrently`() {
-        // when
-        viewModel.onCreate()
-        scheduler.advanceUntilIdle()
-
-        // then
-        assertEquals(1000, scheduler.currentTime)
     }
 }

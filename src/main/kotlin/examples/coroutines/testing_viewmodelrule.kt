@@ -1,7 +1,8 @@
-package examples.coroutines.testingviewmodelrule
+package coroutines.examples.testingviewmodelrule
 
 import kotlinx.coroutines.*
 import kotlinx.coroutines.test.*
+import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 import org.junit.rules.TestWatcher
@@ -40,55 +41,96 @@ class MainViewModel(
     val userName: LiveData<String> = _userName
     private val _news = MutableLiveData<List<News>>()
     val news: LiveData<List<News>> = _news
+    private val _showProgress = MutableLiveData<Boolean>()
+    val showProgress: LiveData<Boolean> = _showProgress
 
-    fun onCreate() {
-        scope.launch {
+    init {
+        viewModelScope.launch {
             val user = userRepo.getUser()
             _userName.value = user.name
         }
-        scope.launch {
+        viewModelScope.launch {
+            _showProgress.value = true
             _news.value = newsRepo.getNews()
                 .sortedByDescending { it.date }
+            _showProgress.value = false
         }
     }
 }
 
 abstract class BaseViewModel : ViewModel() {
-    private val context = Dispatchers.Main + SupervisorJob()
-    val scope = CoroutineScope(context)
+    private val context = Dispatchers.Main.immediate + SupervisorJob()
+    val viewModelScope = CoroutineScope(context)
 
     fun onDestroy() {
         context.cancelChildren()
     }
 }
 
-class MainCoroutineRule : TestWatcher() {
-    lateinit var scheduler: TestCoroutineScheduler
-        private set
-    lateinit var dispatcher: TestDispatcher
-        private set
+class MainViewModelTests {
+    @get:Rule
+    val dispatcherMainRule = MainCoroutineRule()
+    
+    private lateinit var scheduler: TestCoroutineScheduler
+    private lateinit var viewModel: MainViewModel
 
-    override fun starting(description: Description) {
+    @Before
+    fun setUp() {
         scheduler = TestCoroutineScheduler()
-        dispatcher = StandardTestDispatcher(scheduler)
-        Dispatchers.setMain(dispatcher)
+        Dispatchers.setMain(StandardTestDispatcher(scheduler))
+        viewModel = MainViewModel(
+            userRepo = FakeUserRepository(aName),
+            newsRepo = FakeNewsRepository(someNews)
+        )
     }
 
-    override fun finished(description: Description) {
-        Dispatchers.resetMain()
+    @Test
+    fun `should show progress when loading news`() {
+        // given
+        assertEquals(null, viewModel.showProgress.value)
+
+        // when
+        scheduler.runCurrent()
+
+        // then
+        assertEquals(true, viewModel.showProgress.value)
+
+        // when
+        scheduler.advanceUntilIdle()
+
+        // then
+        assertEquals(false, viewModel.showProgress.value)
+    }
+
+    @Test
+    fun `user name is shown`() {
+        // when
+        scheduler.advanceUntilIdle()
+
+        // then
+        assertEquals(aName, viewModel.userName.value)
+    }
+
+    @Test
+    fun `sorted news are shown`() {
+        // when
+        scheduler.advanceUntilIdle()
+
+        // then
+        val someNewsSorted =
+            listOf(News(date1), News(date2), News(date3))
+        assertEquals(someNewsSorted, viewModel.news.value)
+    }
+
+    @Test
+    fun `user and news are called concurrently`() {
+        // when
+        scheduler.advanceUntilIdle()
+
+        // then
+        assertEquals(1000, scheduler.currentTime)
     }
 }
-
-private val date1 = Date.from(Instant.now().minusSeconds(10))
-private val date2 = Date.from(Instant.now().minusSeconds(20))
-private val date3 = Date.from(Instant.now().minusSeconds(30))
-
-val aName = "Some name"
-val someNews = listOf(News(date3), News(date1), News(date2))
-val viewModel = MainViewModel(
-    userRepo = FakeUserRepository(aName),
-    newsRepo = FakeNewsRepository(someNews)
-)
 
 class FakeUserRepository(val name: String) : UserRepository {
     override suspend fun getUser(): UserData {
@@ -104,41 +146,30 @@ class FakeNewsRepository(val news: List<News>) : NewsRepository {
     }
 }
 
-class MainViewModelTests {
+private val date1 = Date
+    .from(Instant.now().minusSeconds(10))
+private val date2 = Date
+    .from(Instant.now().minusSeconds(20))
+private val date3 = Date
+    .from(Instant.now().minusSeconds(30))
 
-    @get:Rule
-    var mainCoroutineRule = MainCoroutineRule()
+private val aName = "Some name"
+private val someNews =
+    listOf(News(date3), News(date1), News(date2))
 
-    @Test
-    fun `user name is shown`() {
-        // when
-        viewModel.onCreate()
-        mainCoroutineRule.scheduler.advanceUntilIdle()
+class MainCoroutineRule : TestWatcher() {
+    lateinit var scheduler: TestCoroutineScheduler
+        private set
+    lateinit var dispatcher: TestDispatcher
+        private set
 
-        // then
-        assertEquals(aName, viewModel.userName.value)
+    override fun starting(description: Description) {
+        scheduler = TestCoroutineScheduler()
+        dispatcher = StandardTestDispatcher(scheduler)
+        Dispatchers.setMain(dispatcher)
     }
 
-    @Test
-    fun `sorted news are shown`() {
-        // when
-        viewModel.onCreate()
-        mainCoroutineRule.scheduler.advanceUntilIdle()
-
-        // then
-        val someNewsSorted =
-            listOf(News(date1), News(date2), News(date3))
-        assertEquals(someNewsSorted, viewModel.news.value)
-    }
-
-    @Test
-    fun `user and news are called concurrently`() {
-        // when
-        viewModel.onCreate()
-        mainCoroutineRule.scheduler.advanceUntilIdle()
-
-
-        // then
-        assertEquals(1000, mainCoroutineRule.scheduler.currentTime)
+    override fun finished(description: Description) {
+        Dispatchers.resetMain()
     }
 }

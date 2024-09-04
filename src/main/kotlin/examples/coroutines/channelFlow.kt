@@ -13,7 +13,7 @@ interface UserApi {
 
 class FakeUserApi : UserApi {
     private val users = List(20) { User("User$it") }
-    private val pageSize: Int = 3
+    private val pageSize: Int = 10
 
     override suspend fun takePage(
         pageNumber: Int
@@ -34,20 +34,20 @@ private fun allUsersFlow(api: UserApi): Flow<User> = flow {
     } while (users.isNotEmpty())
 }
 
-//suspend fun main() {
-//    val api = FakeUserApi()
-//    val users = allUsersFlow(api)
-//    val user = users
-//        .first {
-//            println("Checking $it")
-//            delay(1000) // suspending
-//            it.name == "User3"
-//        }
-//    println(user)
-//}
+suspend fun main() {
+    val api = FakeUserApi()
+    val users = allUsersFlow(api)
+    val user = users
+        .first {
+            println("Checking $it")
+            delay(100) // suspending
+            it.name == "User42"
+        }
+    println(user)
+}
 
 //suspend fun main() = coroutineScope {
-//  flowOf("A", "B", "C")
+//  flowOf("A", "B", "C", "D", "E", "F")
 //      .onEach  {
 //          delay(1000)
 //          println("onEach $it")
@@ -59,19 +59,18 @@ private fun allUsersFlow(api: UserApi): Flow<User> = flow {
 //      }
 //}
 
-//suspend fun main() = coroutineScope {
-//   val flow = flow {
-//       for (i in 1..30) {
-//           delay(100)
-//           emit(i)
-//       }
-//   }
-//
-//   print(flow.onEach { delay(1000) }.toList()) 
-//   // [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30]
-//
-//	print(flow.conflate().onEach { delay(1000) }.toList())
-//   // [1, 10, 20, 30]
+//suspend fun main(): Unit = coroutineScope {
+//    flow {
+//        for (i in 1..300) {
+//            delay(100)
+//            println("Emitting $i")
+//            emit(i)
+//        }
+//    }.conflate()
+//        .collect {
+//            delay(1000)
+//            println(it)
+//        }
 //}
 
 //suspend fun main() {

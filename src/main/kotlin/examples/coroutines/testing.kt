@@ -47,27 +47,27 @@ import kotlinx.coroutines.test.*
 //    println(currentTime)
 //}
 
-class TestBackgroundScope {
-    
-    @Test
-    fun `should increment counter`() = runTest {
-        var i = 0
-        launch {
-            while (true) {
-                delay(1000)
-                i++
-            }
-        }
-        
-        delay(1001)
-        assertEquals(1, i)
-        delay(1000)
-        assertEquals(2, i)
-        
-        // Test would pass if we added
-        // coroutineContext.job.cancelChildren()
-    }
-}
+//class TestBackgroundScope {
+//    
+//    @Test
+//    fun `should increment counter`() = runTest {
+//        var i = 0
+//        launch {
+//            while (true) {
+//                delay(1000)
+//                i++
+//            }
+//        }
+//        
+//        delay(1001)
+//        assertEquals(1, i)
+//        delay(1000)
+//        assertEquals(2, i)
+//        
+//        // Test would pass if we added
+//        // coroutineContext.job.cancelChildren()
+//    }
+//}
 
 //fun main() {
 //    CoroutineScope(StandardTestDispatcher()).launch {

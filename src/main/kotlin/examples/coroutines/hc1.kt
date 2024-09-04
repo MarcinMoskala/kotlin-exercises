@@ -5,8 +5,8 @@ import kotlin.*
 fun main() {
     val l = buildList {
         repeat(3) {
+            println("L: Adding User")
             add("User$it")
-            println("L: Added User")
         }
     }
 
@@ -17,8 +17,8 @@ fun main() {
 
     val s = sequence {
         repeat(3) {
+            println("S: Adding User")
             yield("User$it")
-            println("S: Added User")
         }
     }
 

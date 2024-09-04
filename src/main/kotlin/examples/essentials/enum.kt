@@ -17,10 +17,12 @@ fun main() {
     println(option.name) // CARD
     println(option.ordinal) // 1
 
-    val o: PaymentOption = enumValueOf<PaymentOption>("TRANSFER")
+    val o: PaymentOption = PaymentOption.valueOf("TRANSFER")
+//    val o: PaymentOption = enumValueOf<PaymentOption>("TRANSFER")
     println(o) // TRANSFER
 
-    val paymentOptions: Array<PaymentOption> = enumValues<PaymentOption>()
+    val paymentOptions: List<PaymentOption> = PaymentOption.entries
+//    val paymentOptions: Array<PaymentOption> = enumValues<PaymentOption>()
     for (paymentOption in paymentOptions) {
         println(paymentOption)
     }
