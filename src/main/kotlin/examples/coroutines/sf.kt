@@ -100,7 +100,7 @@ private fun CoroutineScope.startReceiverFor(
 //suspend fun main(): Unit = coroutineScope {
 //    val sf: StateFlow<String> = messagesFlow.stateIn(
 //        scope = this,
-//        started = SharingStarted.WhileSubscribed(stopTimeout = 1000.milliseconds),
+//        started = SharingStarted.Eagerly,
 //        initialValue = ""
 //    )
 //
