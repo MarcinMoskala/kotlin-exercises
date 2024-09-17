@@ -52,22 +52,22 @@ class MarketClient {
             val event = when ((0..2).random(random)) {
                 0 -> BidEvent(
                     tickers.random(random),
-                    if (random.nextInt(100) == 1) null else (0..100).random(random).toFloat(),
-                    if (random.nextInt(100) == 1) null else (0..100).random(random),
+                    if (random.nextInt(100) == 1) null else random.nextInt(100_000).toFloat(),
+                    if (random.nextInt(100) == 1) null else random.nextInt(100_000),
                     if (random.nextInt(100) == 1) null else random.nextLong()
                 )
 
                 1 -> AskEvent(
                     tickers.random(random),
-                    if (random.nextInt(100) == 1) null else (0..100).random(random).toFloat(),
-                    if (random.nextInt(100) == 1) null else (0..100).random(random),
+                    if (random.nextInt(100) == 1) null else random.nextInt(100_000).toFloat(),
+                    if (random.nextInt(100) == 1) null else random.nextInt(100_000),
                     if (random.nextInt(100) == 1) null else random.nextLong()
                 )
 
                 else -> TradeEvent(
                     tickers.random(random),
-                    if (random.nextInt(100) == 1) null else (0..100).random(random).toFloat(),
-                    if (random.nextInt(100) == 1) null else (0..100).random(random),
+                    if (random.nextInt(100) == 1) null else random.nextInt(100_000).toFloat(),
+                    if (random.nextInt(100) == 1) null else random.nextInt(100_000),
                     if (random.nextInt(100) == 1) null else random.nextLong()
                 )
             }
