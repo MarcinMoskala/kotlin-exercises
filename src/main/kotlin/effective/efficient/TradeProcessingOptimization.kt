@@ -181,8 +181,8 @@ suspend fun main() {
     val service = TradeService(repository)
     val filter = Or(
         listOf(
-            And(listOf(TickerIs(tickers.take(1).map(::Ticker)), PrizeCondition(Ask, GreaterThan, 99f))),
-            And(listOf(PrizeCondition(Spread, GreaterThan, 99f))),
+            And(listOf(TickerIs(tickers.take(1).map(::Ticker)), PrizeCondition(Ask, GreaterThan, 99000f))),
+            And(listOf(PrizeCondition(Spread, GreaterThan, 99000f))),
         )
     )
 
