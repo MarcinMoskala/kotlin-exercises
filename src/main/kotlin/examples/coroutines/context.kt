@@ -1,7 +1,7 @@
 package examples.coroutines
 
 import kotlinx.coroutines.*
-import kotlin.coroutines.CoroutineContext
+import kotlin.coroutines.*
 
 fun main() {
     val ctx1: CoroutineContext = CoroutineName("A")

@@ -37,51 +37,6 @@ import kotlinx.coroutines.test.*
 //   println("[${scheduler.currentTime}] After")
 //}
 
-//fun main() = runTest {
-//   println(currentTime)
-//   coroutineScope {
-//       launch { delay(1000) }
-//       launch { delay(1500) }
-//       launch { delay(2000) }
-//   }
-//    println(currentTime)
-//}
-
-//class TestBackgroundScope {
-//    
-//    @Test
-//    fun `should increment counter`() = runTest {
-//        var i = 0
-//        launch {
-//            while (true) {
-//                delay(1000)
-//                i++
-//            }
-//        }
-//        
-//        delay(1001)
-//        assertEquals(1, i)
-//        delay(1000)
-//        assertEquals(2, i)
-//        
-//        // Test would pass if we added
-//        // coroutineContext.job.cancelChildren()
-//    }
-//}
-
-//fun main() {
-//    CoroutineScope(StandardTestDispatcher()).launch {
-//        print("A")
-//        delay(1)
-//        print("B")
-//    }
-//    CoroutineScope(UnconfinedTestDispatcher()).launch {
-//        print("C")
-//        delay(1)
-//        print("D")
-//    }
-//}
-
 class CurrentUserFactory(private val repo: UserRepository) {
     suspend fun produceCurrentUserSync(): User {
        val profile = repo.getProfile()
@@ -138,3 +93,48 @@ class CurrentUserFactoryTest {
         }
     }
 }
+
+//fun main() = runTest {
+//   println(currentTime)
+//   coroutineScope {
+//       launch { delay(1000) }
+//       launch { delay(1500) }
+//       launch { delay(2000) }
+//   }
+//    println(currentTime)
+//}
+
+//class TestBackgroundScope {
+//    
+//    @Test
+//    fun `should increment counter`() = runTest {
+//        var i = 0
+//        launch {
+//            while (true) {
+//                delay(1000)
+//                i++
+//            }
+//        }
+//        
+//        delay(1001)
+//        assertEquals(1, i)
+//        delay(1000)
+//        assertEquals(2, i)
+//        
+//        // Test would pass if we added
+//        // coroutineContext.job.cancelChildren()
+//    }
+//}
+
+//fun main() {
+//    CoroutineScope(StandardTestDispatcher()).launch {
+//        print("A")
+//        delay(1)
+//        print("B")
+//    }
+//    CoroutineScope(UnconfinedTestDispatcher()).launch {
+//        print("C")
+//        delay(1)
+//        print("D")
+//    }
+//}

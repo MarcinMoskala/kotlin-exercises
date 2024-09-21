@@ -1,10 +1,7 @@
 package examples.coroutines.flow
 
-import kotlinx.coroutines.coroutineScope
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.*
-import kotlinx.coroutines.withContext
-import kotlin.coroutines.CoroutineContext
+import kotlinx.coroutines.*
 
 suspend fun main() {
     val f = flow { 

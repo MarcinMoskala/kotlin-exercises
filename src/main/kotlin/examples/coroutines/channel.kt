@@ -69,25 +69,6 @@ import kotlinx.coroutines.channels.produce
 //   }
 //}
 
-//fun CoroutineScope.produceNumbers() = produce<Int> {
-//    var x = 1
-//    while (true) send(x++)
-//}
-//
-//fun CoroutineScope.square(
-//    numbers: ReceiveChannel<Int>
-//): ReceiveChannel<Int> = produce {
-//    for (x in numbers) send(x * x)
-//}
-//
-//fun main() = runBlocking {
-//    val numbers = produceNumbers()
-//    val squares = square(numbers)
-//    for (i in 1..5) println(squares.receive())
-//    println("Done!")
-//    coroutineContext.cancelChildren()
-//}
-
 //fun CoroutineScope.produceNumbers() = produce {
 //   var x = 1 // start from 1
 //   while (true) {
@@ -124,4 +105,23 @@ import kotlinx.coroutines.channels.produce
 //       println(channel.receive())
 //   }
 //   coroutineContext.cancelChildren()
+//}
+
+//fun CoroutineScope.produceNumbers() = produce<Int> {
+//    var x = 1
+//    while (true) send(x++)
+//}
+//
+//fun CoroutineScope.square(
+//    numbers: ReceiveChannel<Int>
+//): ReceiveChannel<Int> = produce {
+//    for (x in numbers) send(x * x)
+//}
+//
+//fun main() = runBlocking {
+//    val numbers = produceNumbers()
+//    val squares = square(numbers)
+//    for (i in 1..5) println(squares.receive())
+//    println("Done!")
+//    coroutineContext.cancelChildren()
 //}

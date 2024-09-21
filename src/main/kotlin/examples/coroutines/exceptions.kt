@@ -3,7 +3,7 @@ package examples.coroutines
 import kotlinx.coroutines.*
 
 //fun main(): Unit = runBlocking {
-//    val scope = CoroutineScope(SupervisorJob())
+//    val scope = CoroutineScope(Job())
 //    scope.launch {
 //        delay(1000)
 //        throw Error("Some error")

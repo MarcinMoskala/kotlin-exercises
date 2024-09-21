@@ -13,7 +13,7 @@ interface UserApi {
 
 class FakeUserApi : UserApi {
     private val users = List(2000) { User("User$it") }
-    private val pageSize: Int = 10
+    private val pageSize: Int = 4
 
     override suspend fun takePage(
         pageNumber: Int
@@ -40,8 +40,8 @@ suspend fun main() {
     val user = users
         .first {
             println("Checking $it")
-            delay(100) // suspending
-            it.name == "User42"
+            delay(1000) // suspending
+            it.name == "User9"
         }
     println(user)
 }
