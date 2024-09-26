@@ -9,11 +9,32 @@ import kotlin.concurrent.thread
 //    }
 //}
 
+
+
+
+
+
+
+
+
+
+
 //fun produce() = { 42 }
 //
 //fun main() {
 //    println(produce()) // ???
 //}
+
+
+
+
+
+
+
+
+
+
+
 
 // Parameters
 //fun main() {
@@ -43,6 +64,8 @@ import kotlin.concurrent.thread
 //    repeat(2, { print("B") }) // BB
 //    println()
 //    repeat(2) { print("B") } // BB
+//    
+//    thread { println("A") }
 //}
 
 //fun sum(a: Int, b: Int) = (a..b).fold(0) { acc, i -> acc + i }
@@ -50,15 +73,6 @@ import kotlin.concurrent.thread
 //fun product(a: Int, b: Int) = (a..b).fold(1) { acc, i -> acc * i }
 
 // Last lambda in argument convention
-
-//fun main() {
-//    thread(priority = 5, block = { println("C") })
-//
-//    thread { println("A") }
-//
-//    val t = thread(start = false) { println("B") }
-//    t.start()
-//}
 
 // Puzzler
 //fun call(before: () -> Unit = {}, after: () -> Unit = {}) {
@@ -81,7 +95,7 @@ import kotlin.concurrent.thread
 //        20
 //        30
 //    }
-//    println(f()) // 30
+//    println(f())
 //}
 
 //fun main() {
@@ -98,6 +112,13 @@ import kotlin.concurrent.thread
 //fun cheerUser(user: User): User {
 //    println("Hello, ${user.name}!")
 //    return user
+//}
+
+//fun main() {
+//    listOf(1, 2, 3, 4, 5).forEach { i -> 
+//        if (i == 3) return
+//        println(i)
+//    }
 //}
 
 //fun main() {
@@ -121,10 +142,6 @@ import kotlin.concurrent.thread
 
 // An implicit name for a single parameter
 
-//val printNumber: (Int) -> Unit = { println(it) }
-//val toName: (String) -> Name = { Name(it) }
-//
-//// Real-life example, functions will be explained later
 //fun produceNewsAdapters(news: List<NewsItem>): List<NewsItemAdapter> =
 //    news.filter { it.visible }
 //        .sortedByDescending { it.publishedAt }
