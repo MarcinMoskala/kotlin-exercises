@@ -9,12 +9,6 @@ import kotlin.collections.onEach as `implement it yourself`
 import kotlin.collections.flatMap as `implement it yourself`
 import kotlin.collections.filter as `implement it yourself`
 
-inline fun <T> Iterable<T>.forEach(operation: (T) -> Unit) {
-    for (elem in this) {
-        operation(elem)
-    }
-}
-
 inline fun <T, C: Iterable<T>> C.onEach(operation: (T) -> Unit): C {
     for (elem in this) {
         operation(elem)

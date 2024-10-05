@@ -7,7 +7,6 @@ import kotlin.test.assertEquals
 class EventListenerRegistry<E> {
     private val listeners = ConcurrentHashMap
         .newKeySet<EventListener<E>>()
-    private val lock = Any()
 
     fun addEventListener(
         event: E,

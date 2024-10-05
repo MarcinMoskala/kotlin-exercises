@@ -5,7 +5,8 @@ fun main() {
     val name = Name("AAA")
     set.add(name)
     // ???
-    print(set.contains(name))
+    println(set.contains(name)) // should print false
+    println(set.first() == name) // should print true
 }
 
 data class Name(var name: String)
