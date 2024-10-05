@@ -7,9 +7,7 @@ fun Shop.getWaitingCustomers(): List<Customer> = TODO()
 
 fun Shop.countProductSales(product: Product): Int = TODO()
 
-fun Shop.getCustomers(
-    minAmount: Double,
-): List<Customer> = TODO()
+fun Shop.getCustomers(minAmount: Double): List<Customer> = TODO()
 
 data class Shop(
     val name: String,
