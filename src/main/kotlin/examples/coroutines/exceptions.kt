@@ -10,7 +10,7 @@ import kotlinx.coroutines.*
 //    }
 //    scope.launch {
 //        delay(2000)
-//        println("Will be printed")
+//        println("Second coroutine finished")
 //    }
 //
 //    delay(3000)
@@ -21,15 +21,15 @@ import kotlinx.coroutines.*
 //   coroutineScope {
 //       launch {
 //           delay(1000)
-//           throw Error("Some error")
+//           throw Exception("Some error") // First coroutine has an exception
 //       }
 //       launch {
 //           delay(2000)
-//           println("Will be printed")
+//           println("Second coroutine finished")
 //       }
 //       launch {
 //           delay(2000)
-//           println("Will be printed")
+//           println("Third coroutine finished")
 //       }
 //   }
 //   println("Done")
