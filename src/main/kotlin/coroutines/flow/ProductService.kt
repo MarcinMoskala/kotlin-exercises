@@ -19,9 +19,7 @@ class ProductService(
 ) {
     private val activeObservers = AtomicInteger(0)
 
-    fun observeProducts(
-        categories: Set<String>,
-    ): Flow<Product> = TODO()
+    fun observeProducts(categories: Set<String>): Flow<Product> = TODO()
 
     fun activeObserversCount(): Int = activeObservers.get()
 }

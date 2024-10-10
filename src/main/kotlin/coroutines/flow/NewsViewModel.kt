@@ -1,7 +1,11 @@
 package coroutines.flow.newsviewmodel
 
 import junit.framework.TestCase.assertEquals
-import kotlinx.coroutines.*
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.channels.Channel
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.TestDispatcher
@@ -12,19 +16,19 @@ import org.junit.Before
 import org.junit.Test
 
 class NewsViewModel(
-    newsRepository: NewsRepository
+    newsRepository: NewsRepository,
 ) : BaseViewModel() {
     private val _progressVisible = MutableStateFlow(false)
     val progressVisible = _progressVisible.asStateFlow()
 
-    private val _newsToShow = MutableSharedFlow<News>()
-    val newsToShow = _newsToShow.asSharedFlow()
+    private val _newsToShow = MutableStateFlow(emptyList<News>())
+    val newsToShow = _newsToShow.asStateFlow()
 
-    private val _errors = MutableSharedFlow<Throwable>()
-    val errors = _errors.asSharedFlow()
+    private val _errors = Channel<Throwable>()
+    val errors = _errors.receiveAsFlow()
 
     init {
-        TODO()
+        // TODO
     }
 }
 
@@ -40,11 +44,11 @@ abstract class BaseViewModel {
     )
 }
 
-class News(
+data class News(
     val title: String,
     val description: String,
     val imageUrl: String,
-    val url: String
+    val url: String,
 )
 
 class FakeNewsRepository : NewsRepository {
@@ -83,12 +87,8 @@ class NewsViewModelTest {
     fun `should show all news`() {
         val viewModel = NewsViewModel(newsRepository)
         newsRepository.fetchNewsDelay = 1000
-        var newsShown = listOf<News>()
-        viewModel.newsToShow.onEach {
-            newsShown += it
-        }.launchIn(CoroutineScope(dispatcher))
         dispatcher.scheduler.advanceUntilIdle()
-        assertEquals(newsRepository.newsList, newsShown)
+        assertEquals(newsRepository.newsList, viewModel.newsToShow.value)
         assertEquals(newsRepository.newsList.size * newsRepository.fetchNewsDelay, dispatcher.scheduler.currentTime)
     }
 

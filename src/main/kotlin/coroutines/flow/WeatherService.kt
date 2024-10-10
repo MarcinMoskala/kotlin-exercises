@@ -1,5 +1,6 @@
 package coroutines.flow.weatherservice
 
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.*
@@ -15,7 +16,12 @@ class WeatherService(
         private set
 
     fun getWeatherUpdates(city: String): Flow<WeatherUpdate> =
-        TODO()
+        weatherDataSource.getWeatherStream(city)
+            .filter { it.temperature > 0 } 
+            .map { dataToUpdate(city, it) }
+            .onEach { lastWeatherUpdate = it }
+            .onCompletion { lastWeatherUpdate = null }
+            .onStart { emit(WeatherUpdate.Loading) }
 
     fun celsiusToFahrenheit(celsius: Double): Double = 
         celsius * 9 / 5 + 32
@@ -29,12 +35,10 @@ class WeatherService(
     )
 }
 
-// Data source interface
 interface WeatherDataSource {
     fun getWeatherStream(city: String): Flow<WeatherData>
 }
 
-// Data model
 data class WeatherData(val temperature: Double)
 sealed class WeatherUpdate {
     object Loading : WeatherUpdate()
