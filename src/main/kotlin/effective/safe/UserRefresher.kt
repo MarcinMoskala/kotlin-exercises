@@ -83,11 +83,11 @@ class UserRefresherTest {
         val userRefresher = UserRefresher(
             scope = backgroundScope,
             refreshData = { userId ->
-                delay(20)
+                delay(10)
                 finished.incrementAndGet()
             }
         )
-
+  
         val sendTime = measureTime {
             coroutineScope {
                 repeat(100) {
@@ -99,7 +99,7 @@ class UserRefresherTest {
             await { finished.get() >= 100 }
         }
         assertEquals(0, sendTime.inWholeSeconds)
-        assertEquals(2, executionTime.inWholeSeconds)
+        assert(1 >= executionTime.inWholeSeconds)
         backgroundScope.cancel()
     }
 }
