@@ -14,7 +14,7 @@ fun main(): Unit = runBlocking {
     }
 
     // That is a different instance than its parent
-    println(job == coroutineContext[Job]) // false
+    println(job == parentJob) // false
 
     // But this instance is a parent of the coroutine
     println(job.parent == parentJob) // true

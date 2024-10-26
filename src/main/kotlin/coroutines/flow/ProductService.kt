@@ -25,6 +25,7 @@ class ProductService(
 }
 
 interface ProductRepository {
+    // Emits ids of the products that got updated
     fun observeProductUpdates(): Flow<String>
     suspend fun fetchProduct(id: String): Product
 }

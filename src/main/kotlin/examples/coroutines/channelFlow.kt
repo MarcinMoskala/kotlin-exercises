@@ -30,7 +30,9 @@ private fun allUsersFlow(api: UserApi): Flow<User> = flow {
     do {
         println("Fetching page $page")
         val users = api.takePage(page++) // suspending
-        emitAll(users.asFlow())
+        for (user in users) {
+            emit(user)
+        }
     } while (users.isNotEmpty())
 }
 
@@ -86,4 +88,15 @@ suspend fun main() {
 //        delay(1000)
 //        emit("${elem}_$it ")
 //    }
+//}
+
+//suspend fun main() {
+//    val f1 = flowOf(1, 2, 3, 4, 5).onEach { delay(1000) }
+//    val f2 = flowOf("A", "B", "C").onEach { delay(800) }
+//
+//    f1.combine(f2) { t1, t2 -> t2 + t1 }
+//        .collect { print("$it ") }
+//    
+//    f1.zip(f2) { t1, t2 -> t2 + t1 }
+//        .collect { print("$it ") }
 //}

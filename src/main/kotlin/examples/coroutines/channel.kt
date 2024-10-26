@@ -50,18 +50,18 @@ import kotlinx.coroutines.channels.produce
 //}
 
 //fun main() = runBlocking<Unit> {
-//   val channel = Channel<String>() // Same as Channel<String>(Channel.RENDEZVOUS)
+//   val channel = Channel<String>(Channel.UNLIMITED)
 //
 //   launch {
-//       var i = 1
 //       repeat(5) {
-//           channel.send("Ping ${i++}")
+//           channel.send("Ping $it")
 //           println("Message sent")
 //       }
 //       channel.close()
 //   }
 //
 //   launch {
+//       delay(1000)
 //       for(text in channel) {
 //           println(text)
 //           delay(1000)

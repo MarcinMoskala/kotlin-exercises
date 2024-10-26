@@ -6,7 +6,7 @@ import java.time.LocalDateTime
 import kotlin.time.Duration.Companion.milliseconds
 
 //suspend fun main(): Unit = coroutineScope {
-//    val mutableSharedFlow = MutableSharedFlow<String>(replay = 0)
+//    val sf = MutableSharedFlow<String>(replay = 0)
 //    // or MutableSharedFlow<String>()
 //
 //    sf.onEach { println("#1 received $it") }
@@ -18,6 +18,7 @@ import kotlin.time.Duration.Companion.milliseconds
 //    sf.emit("Message1")
 //    sf.emit("Message2")
 //
+//    delay(1000)
 //    coroutineContext.job.cancelChildren()
 //}
 
@@ -45,19 +46,18 @@ private fun CoroutineScope.startReceiverFor(
 }
 
 //suspend fun main(): Unit = coroutineScope {
-//    val sharedFlow: SharedFlow<String> = messagesFlow.shareIn(
+//    val flow: Flow<String> = messagesFlow.shareIn(
 //        scope = this,
 //        started = SharingStarted.Eagerly,
 //        // replay = 0 (default)
 //    )
 //
 //    delay(4000)
-//    startReceiverFor(1, 2100, sharedFlow)
+//    startReceiverFor(1, 2100, flow)
 //    delay(3000)
-//    startReceiverFor(2, 3100, sharedFlow)
-//    startReceiverFor(3, 2100, sharedFlow)
+//    startReceiverFor(2, 3100, flow)
+//    startReceiverFor(3, 2100, flow)
 //}
-//
 
 //suspend fun main() = coroutineScope {
 //   val state = MutableStateFlow(1)

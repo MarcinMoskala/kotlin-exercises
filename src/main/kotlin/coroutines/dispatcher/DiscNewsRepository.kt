@@ -81,7 +81,7 @@ class DiscNewsRepositoryTests {
                 }
             }
         }
-        assert(time > 2000) { "Should take less than 2000, took $time" }
+        assert(time > 2000) { "Should take longer than 2000, took $time" }
     }
 
     class OneSecDiscReader(private val response: List<String>) : DiscReader {

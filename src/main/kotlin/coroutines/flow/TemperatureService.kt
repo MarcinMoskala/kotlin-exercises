@@ -23,7 +23,7 @@ class TemperatureService(
     fun getLastKnownWeather(city: String): Fahrenheit? =
         lastKnownTemperature[city]
 
-    fun gerAllLastKnownWeather(): Map<String, Fahrenheit> =
+    fun getAllLastKnownWeather(): Map<String, Fahrenheit> =
         lastKnownTemperature.toMap()
 
     private fun celsiusToFahrenheit(celsius: Double) =
@@ -51,17 +51,24 @@ class WeatherServiceTest {
         // given
         val testDataSource = object : TemperatureDataSource {
             override fun getWeatherStream(): Flow<TemperatureData> = flow {
+                delay(1)
                 emit(TemperatureData("TestCity", 10.0))
                 emit(TemperatureData("TestCity2", 20.0))
+                delay(1)
                 emit(TemperatureData("TestCity", 30.0))
                 emit(TemperatureData("TestCity3", 40.0))
                 emit(TemperatureData("TestCity2", 50.0))
+                delay(1)
             }
         }
         val service = TemperatureService(testDataSource, backgroundScope)
 
         // when
-        val emitted = service.getWeatherUpdates("TestCity").toList()
+        val emitted = mutableListOf<Fahrenheit>()
+        service.getWeatherUpdates("TestCity")
+            .onEach { emitted.add(it) }
+            .launchIn(backgroundScope)
+        delay(10)
 
         // then
         assertEquals(listOf(Fahrenheit(50.0), Fahrenheit(86.0)), emitted)
@@ -94,11 +101,11 @@ class WeatherServiceTest {
 
         delay(150)
         assertEquals(Fahrenheit(50.0), service.getLastKnownWeather("TestCity"))
-        assertEquals(Fahrenheit(50.0), service.gerAllLastKnownWeather()["TestCity"])
+        assertEquals(Fahrenheit(50.0), service.getAllLastKnownWeather()["TestCity"])
 
         delay(200)
         assertEquals(Fahrenheit(86.0), service.getLastKnownWeather("TestCity"))
-        assertEquals(Fahrenheit(86.0), service.gerAllLastKnownWeather()["TestCity"])
+        assertEquals(Fahrenheit(86.0), service.getAllLastKnownWeather()["TestCity"])
     }
 
     @Test

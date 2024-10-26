@@ -24,7 +24,7 @@ class NewsViewModel(
     private val _newsToShow = MutableStateFlow(emptyList<News>())
     val newsToShow = _newsToShow.asStateFlow()
 
-    private val _errors = Channel<Throwable>()
+    private val _errors = Channel<Throwable>(Channel.UNLIMITED)
     val errors = _errors.receiveAsFlow()
 
     init {

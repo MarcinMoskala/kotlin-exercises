@@ -21,7 +21,6 @@ import kotlin.test.assertEquals
 //    }
 //}
 
-@Suppress("FunctionName")
 class CounterContextTests {
 //    @Test
 //    fun `should return next numbers in the same coroutine`() = runBlocking<Unit>(CounterContext()) {
