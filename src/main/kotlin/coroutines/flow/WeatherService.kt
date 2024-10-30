@@ -16,12 +16,7 @@ class WeatherService(
         private set
 
     fun getWeatherUpdates(city: String): Flow<WeatherUpdate> =
-        weatherDataSource.getWeatherStream(city)
-            .filter { it.temperature > 0 } 
-            .map { dataToUpdate(city, it) }
-            .onEach { lastWeatherUpdate = it }
-            .onCompletion { lastWeatherUpdate = null }
-            .onStart { emit(WeatherUpdate.Loading) }
+        TODO()
 
     fun celsiusToFahrenheit(celsius: Double): Double = 
         celsius * 9 / 5 + 32
