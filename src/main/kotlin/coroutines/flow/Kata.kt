@@ -19,7 +19,7 @@ fun producingUnits(num: Int): Flow<Unit> = TODO()
 fun <T> Flow<T>.delayEach(timeMillis: Long): Flow<T> = TODO()
 
 // Should transform values, where transformation value should have index of the element
-// flowOf("A", "B").mapIndexed { index, value -> "$index$value" } -> ["0A", "0B"]
+// flowOf("A", "B").mapIndexed { index, value -> "$index$value" } -> ["0A", "1B"]
 fun <T, R> Flow<T>.mapIndexed(transformation: suspend (index: Int, T) -> R): Flow<R> = TODO()
 
 // Should transform Unit's to next numbers starting from 1

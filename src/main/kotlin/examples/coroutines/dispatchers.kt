@@ -7,9 +7,9 @@ import kotlinx.coroutines.newSingleThreadContext
 import kotlinx.coroutines.test.setMain
 import kotlin.random.Random
 
+val randomList = List(1_000_000) { Random.nextInt() }
 
 suspend fun main() = coroutineScope {
-    val randomList = List(1_000_000) { Random.nextInt() }
     repeat(1000) {
         launch(Dispatchers.Default) {
             // To make it busy
@@ -27,7 +27,7 @@ suspend fun main() = coroutineScope {
 //    repeat(1000) {
 //        launch(Dispatchers.Main) {
 //            // To make it busy
-//            List(1000) { Random.nextLong() }.maxOrNull()
+//            randomList.sorted()
 //
 //            val threadName = Thread.currentThread().name
 //            println("Running on thread: $threadName")

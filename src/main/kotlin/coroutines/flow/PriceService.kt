@@ -27,10 +27,10 @@ interface PriceRepository {
 data class ProductId(val value: String)
 
 class PriceConfig(
-    val prices: Map<String, Map<Currencey, BigDecimal>>,
+    val prices: Map<String, Map<Currency, BigDecimal>>,
 )
 
-enum class Currencey {
+enum class Currency {
     USD, EUR, GBP
 }
 
@@ -38,14 +38,14 @@ class PriceServiceTest {
     val product1 = ProductId("1")
     val product2 = ProductId("2")
     val product3 = ProductId("3")
-    val config1 = PriceConfig(mapOf("1" to mapOf(Currencey.USD to BigDecimal("1.0"))))
+    val config1 = PriceConfig(mapOf("1" to mapOf(Currency.USD to BigDecimal("1.0"))))
     val config2 = PriceConfig(
         mapOf(
-            "1" to mapOf(Currencey.USD to BigDecimal("1.0")),
-            "2" to mapOf(Currencey.USD to BigDecimal("2.0"))
+            "1" to mapOf(Currency.USD to BigDecimal("1.0")),
+            "2" to mapOf(Currency.USD to BigDecimal("2.0"))
         )
     )
-    val config3 = PriceConfig(mapOf("3" to mapOf(Currencey.USD to BigDecimal("3.0"))))
+    val config3 = PriceConfig(mapOf("3" to mapOf(Currency.USD to BigDecimal("3.0"))))
 
     @Test
     fun `should send past prices`() = runTest {

@@ -35,3 +35,12 @@ java.sourceSets["test"].java {
 powerAssert {
     functions = listOf("kotlin.assert", "kotlin.test.assertEquals")
 }
+
+// Uncomment to use Loom
+//tasks.withType<JavaCompile>().configureEach {
+//    options.compilerArgs.add("--enable-preview")
+//}
+//
+//kotlin {
+//    jvmToolchain(20)
+//}
