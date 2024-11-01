@@ -2,11 +2,7 @@
 
 package coroutines.cancellation
 
-import kotlinx.coroutines.CancellationException
-import kotlinx.coroutines.cancelAndJoin
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.*
 import java.io.File
 
 suspend fun updateUser() {
@@ -89,3 +85,50 @@ suspend fun send() {
     println("Sending...")
     delay(1000)
 }
+
+// ****************************************************
+
+suspend fun storeUserArticles(userId: Int) {
+    val token = getToken() // suspending
+    val userDetails = fetchUserDetails(token, userId) // suspending
+    val userArticles = fetchUserArticles(token, userId) // suspending
+
+    for (article in userArticles.articles) {
+        saveArticle(article, userDetails)
+    }
+    println("All articles saved")
+}
+
+fun saveArticle(article: Article, userDetails: UserDetails) {
+    try {
+        val articleContent = runBlocking { fetchArticle(article.key) } // suspending
+        val articleFile = saveArticleToFile(articleContent) // blocking
+        saveArticleMetadata(articleFile, articleContent, userDetails) // blocking
+    } catch (e: Exception) {
+        println("There was an exception while saving article $article:\n$e")
+        println("Trying again...")
+        saveArticle(article, userDetails) // recursive suspending
+    }
+}
+
+//fun main() = runBlocking {
+//    val job = launch { saveArticle(Article("A"), UserDetails(123)) }
+//    delay(100)
+//    job.cancelAndJoin()
+//}
+
+data class UserArticles(val articles: List<Article>)
+data class Article(val key: String)
+data class UserDetails(val userId: Int)
+
+suspend fun getToken(): String = TODO()
+suspend fun fetchUserDetails(token: String, userId: Int): UserDetails = TODO()
+suspend fun fetchUserArticles(token: String, userId: Int): UserArticles = TODO()
+suspend fun fetchArticle(key: String): String {
+    delay(1000)
+    return "Article content"
+}
+
+fun saveArticleMetadata(articleFile: File, articleContent: String, userDetails: UserDetails): Unit = TODO()
+fun saveArticleToFile(articleContent: String): File = TODO()
+suspend fun sendInformationAboutFailure(article: Article, e: Exception): Boolean = TODO()
