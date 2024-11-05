@@ -32,9 +32,10 @@ import kotlinx.coroutines.test.*
 //       println("Coroutine done")
 //   }
 //
-//   println("[${scheduler.currentTime}] Before")
-//   scheduler.advanceTimeBy(1_000)
-//   println("[${scheduler.currentTime}] After")
+//    Thread.sleep(200000)
+////    println(scheduler.currentTime)
+////    scheduler.advanceTimeBy(1_000)
+////    println(scheduler.currentTime)
 //}
 
 class CurrentUserFactory(private val repo: UserRepository) {

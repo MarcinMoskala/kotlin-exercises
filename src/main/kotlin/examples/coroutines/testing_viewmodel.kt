@@ -1,6 +1,8 @@
 package coroutines.examples.testingviewmodel
 
 import kotlinx.coroutines.*
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.TestCoroutineScheduler
 import kotlinx.coroutines.test.setMain
@@ -21,14 +23,6 @@ interface NewsRepository {
 data class UserData(val name: String)
 data class News(val date: Date)
 
-interface LiveData<T> {
-    val value: T?
-}
-
-class MutableLiveData<T> : LiveData<T> {
-    override var value: T? = null
-}
-
 abstract class ViewModel()
 
 class MainViewModel(
@@ -36,12 +30,12 @@ class MainViewModel(
     private val newsRepo: NewsRepository
 ) : BaseViewModel() {
 
-    private val _userName = MutableLiveData<String>()
-    val userName: LiveData<String> = _userName
-    private val _news = MutableLiveData<List<News>>()
-    val news: LiveData<List<News>> = _news
-    private val _showProgress = MutableLiveData<Boolean>()
-    val showProgress: LiveData<Boolean> = _showProgress
+    private val _userName = MutableStateFlow<String?>(null)
+    val userName: StateFlow<String?> = _userName
+    private val _news = MutableStateFlow<List<News>?>(null)
+    val news: StateFlow<List<News>?> = _news
+    private val _showProgress = MutableStateFlow<Boolean>(false)
+    val showProgress: StateFlow<Boolean> = _showProgress
 
     init {
         viewModelScope.launch {
@@ -94,7 +88,7 @@ class MainViewModelTests {
     @Test
     fun `should show progress when loading news`() {
         // given
-        assertEquals(null, viewModel.showProgress.value)
+        assertEquals(false, viewModel.showProgress.value)
 
         // when
         scheduler.runCurrent()

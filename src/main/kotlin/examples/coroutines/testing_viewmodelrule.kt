@@ -1,6 +1,8 @@
 package coroutines.examples.testingviewmodelrule
 
 import kotlinx.coroutines.*
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.test.*
 import org.junit.Before
 import org.junit.Rule
@@ -37,12 +39,12 @@ class MainViewModel(
     private val newsRepo: NewsRepository
 ) : BaseViewModel() {
 
-    private val _userName = MutableLiveData<String>()
-    val userName: LiveData<String> = _userName
-    private val _news = MutableLiveData<List<News>>()
-    val news: LiveData<List<News>> = _news
-    private val _showProgress = MutableLiveData<Boolean>()
-    val showProgress: LiveData<Boolean> = _showProgress
+    private val _userName = MutableStateFlow<String?>(null)
+    val userName: StateFlow<String?> = _userName
+    private val _news = MutableStateFlow<List<News>?>(null)
+    val news: StateFlow<List<News>?> = _news
+    private val _showProgress = MutableStateFlow(false)
+    val showProgress: StateFlow<Boolean> = _showProgress
 
     init {
         viewModelScope.launch {
@@ -71,13 +73,10 @@ class MainViewModelTests {
     @get:Rule
     val dispatcherMainRule = MainCoroutineRule()
     
-    private lateinit var scheduler: TestCoroutineScheduler
     private lateinit var viewModel: MainViewModel
 
     @Before
     fun setUp() {
-        scheduler = TestCoroutineScheduler()
-        Dispatchers.setMain(StandardTestDispatcher(scheduler))
         viewModel = MainViewModel(
             userRepo = FakeUserRepository(aName),
             newsRepo = FakeNewsRepository(someNews)
@@ -87,16 +86,16 @@ class MainViewModelTests {
     @Test
     fun `should show progress when loading news`() {
         // given
-        assertEquals(null, viewModel.showProgress.value)
+        assertEquals(false, viewModel.showProgress.value)
 
         // when
-        scheduler.runCurrent()
+        dispatcherMainRule.scheduler.runCurrent()
 
         // then
         assertEquals(true, viewModel.showProgress.value)
 
         // when
-        scheduler.advanceUntilIdle()
+        dispatcherMainRule.scheduler.advanceUntilIdle()
 
         // then
         assertEquals(false, viewModel.showProgress.value)
@@ -105,7 +104,7 @@ class MainViewModelTests {
     @Test
     fun `user name is shown`() {
         // when
-        scheduler.advanceUntilIdle()
+        dispatcherMainRule.scheduler.advanceUntilIdle()
 
         // then
         assertEquals(aName, viewModel.userName.value)
@@ -114,7 +113,7 @@ class MainViewModelTests {
     @Test
     fun `sorted news are shown`() {
         // when
-        scheduler.advanceUntilIdle()
+        dispatcherMainRule.scheduler.advanceUntilIdle()
 
         // then
         val someNewsSorted =
@@ -125,10 +124,10 @@ class MainViewModelTests {
     @Test
     fun `user and news are called concurrently`() {
         // when
-        scheduler.advanceUntilIdle()
+        dispatcherMainRule.scheduler.advanceUntilIdle()
 
         // then
-        assertEquals(1000, scheduler.currentTime)
+        assertEquals(1000, dispatcherMainRule.scheduler.currentTime)
     }
 }
 
