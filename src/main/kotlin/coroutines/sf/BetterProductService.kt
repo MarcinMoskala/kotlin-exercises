@@ -1,8 +1,8 @@
-package coroutines.flow.productservice
+package coroutines.sf.betterproductservice
 
-import coroutines.flow.productservice.TestData.product1
-import coroutines.flow.productservice.TestData.product2
-import coroutines.flow.productservice.TestData.product3
+import coroutines.sf.betterproductservice.TestData.product1
+import coroutines.sf.betterproductservice.TestData.product2
+import coroutines.sf.betterproductservice.TestData.product3
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.channels.Channel
@@ -23,7 +23,16 @@ class ProductService(
 ) {
     private val activeObservers = AtomicInteger(0)
 
-    fun observeProducts(categories: Set<String>): Flow<Product> = TODO()
+    fun observeProducts(categories: Set<String>): Flow<Product> =
+        productRepository
+            .observeProductUpdates()
+            .distinctUntilChanged()
+            .flatMapMerge(concurrency = Int.MAX_VALUE) {
+                flow { emit(productRepository.fetchProduct(it)) }
+            }
+            .filter { it.category in categories }
+            .onStart { activeObservers.incrementAndGet() }
+            .onCompletion { activeObservers.decrementAndGet() }
 
     fun activeObserversCount(): Int = activeObservers.get()
 }
@@ -41,7 +50,6 @@ data class Product(
     val price: Double,
 )
 
-@ExperimentalCoroutinesApi
 class ProductServiceTest {
 
     @Test
@@ -190,6 +198,66 @@ class ProductServiceTest {
 
         // should take as much as a single fetch
         assertEquals(1000, currentTime)
+    }
+
+    @Test
+    fun `should have one connection for multiple observers`() = runTest {
+        val productRepository = FakeProductRepository()
+        val productService = ProductService(productRepository, backgroundScope)
+        var observedUpdates = 0
+        val categories = setOf(product1.category, product2.category)
+
+        // when time has started, but no one observer
+        runCurrent()
+
+        // then have no observers
+        assertEquals(0, productRepository.observers)
+
+        // when multiple temperature observers start
+        val observerJobs = (1..10).map {
+            productService.observeProducts(categories)
+                .onEach { observedUpdates++ }
+                .launchIn(backgroundScope)
+        }
+        runCurrent()
+
+        // then there is only one observer on repository
+        assertEquals(1, productRepository.observers)
+
+        // when observers get canceled
+        observerJobs.forEach { it.cancel() }
+        delay(5001) // to accept stopTimeout up to 5 seconds
+
+        // then there is no observer on repository
+        assertEquals(0, productRepository.observers)
+    }
+
+    @Test
+    fun `should fetch products only once for all observers`() = runTest {
+        val productRepository = FakeProductRepository()
+        val productService = ProductService(productRepository, backgroundScope)
+        val categories = setOf(product1.category, product2.category)
+        var receivedProducts = listOf<Product>()
+        val observersCount = 10
+
+        // when multiple temperature observers start
+        repeat(observersCount) {
+            productService.observeProducts(categories)
+                .onEach { receivedProducts += it }
+                .launchIn(backgroundScope)
+        }
+        runCurrent()
+
+        // and
+        productRepository.updatesHasOccurred(product1.id, product2.id) // Two product updates, that are both observed
+        delay(1)
+
+        // then all observers receive updated products
+        assertEquals(observersCount, receivedProducts.count { it == product1 })
+        assertEquals(observersCount, receivedProducts.count { it == product2 })
+
+        // and each of those products are fetched only once
+        assertEquals(2, productRepository.productFetchCounter)
     }
 }
 
