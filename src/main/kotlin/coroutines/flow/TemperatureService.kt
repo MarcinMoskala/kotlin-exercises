@@ -17,13 +17,13 @@ class TemperatureService(
     private val lastKnownTemperature =
         ConcurrentHashMap<String, Fahrenheit>()
 
-    fun getWeatherUpdates(city: String): Flow<Fahrenheit> =
+    fun observeTemperature(city: String): Flow<Fahrenheit> =
         TODO()
 
-    fun getLastKnownWeather(city: String): Fahrenheit? =
+    fun getLastKnown(city: String): Fahrenheit? =
         lastKnownTemperature[city]
 
-    fun getAllLastKnownWeather(): Map<String, Fahrenheit> =
+    fun getAllLastKnown(): Map<String, Fahrenheit> =
         lastKnownTemperature.toMap()
 
     private fun celsiusToFahrenheit(celsius: Double) =
@@ -31,7 +31,7 @@ class TemperatureService(
 }
 
 interface TemperatureDataSource {
-    fun getWeatherStream(): Flow<TemperatureData>
+    fun observeTemperatureUpdates(): Flow<TemperatureData>
 }
 
 data class TemperatureData(
@@ -44,13 +44,13 @@ data class Fahrenheit(
 )
 
 @ExperimentalCoroutinesApi
-class WeatherServiceTest {
+class TemperatureServiceTest {
 
     @Test
     fun `should emit temperature updates in Fahrenheit`() = runTest {
         // given
         val testDataSource = object : TemperatureDataSource {
-            override fun getWeatherStream(): Flow<TemperatureData> = flow {
+            override fun observeTemperatureUpdates(): Flow<TemperatureData> = flow {
                 delay(1)
                 emit(TemperatureData("TestCity", 10.0))
                 emit(TemperatureData("TestCity2", 20.0))
@@ -65,7 +65,7 @@ class WeatherServiceTest {
 
         // when
         val emitted = mutableListOf<Fahrenheit>()
-        service.getWeatherUpdates("TestCity")
+        service.observeTemperature("TestCity")
             .onEach { emitted.add(it) }
             .launchIn(backgroundScope)
         delay(10)
@@ -78,7 +78,7 @@ class WeatherServiceTest {
     fun `should store last known temperature update in Fahrenheit`() = runTest {
         // given
         val testDataSource = object : TemperatureDataSource {
-            override fun getWeatherStream(): Flow<TemperatureData> = flow {
+            override fun observeTemperatureUpdates(): Flow<TemperatureData> = flow {
                 delay(100)
                 emit(TemperatureData("TestCity", 10.0))
                 delay(100)
@@ -95,24 +95,24 @@ class WeatherServiceTest {
 
         // when
         val emitted = mutableListOf<Fahrenheit>()
-        service.getWeatherUpdates("TestCity")
+        service.observeTemperature("TestCity")
             .onEach { emitted.add(it) }
             .launchIn(backgroundScope)
 
         delay(150)
-        assertEquals(Fahrenheit(50.0), service.getLastKnownWeather("TestCity"))
-        assertEquals(Fahrenheit(50.0), service.getAllLastKnownWeather()["TestCity"])
+        assertEquals(Fahrenheit(50.0), service.getLastKnown("TestCity"))
+        assertEquals(Fahrenheit(50.0), service.getAllLastKnown()["TestCity"])
 
         delay(200)
-        assertEquals(Fahrenheit(86.0), service.getLastKnownWeather("TestCity"))
-        assertEquals(Fahrenheit(86.0), service.getAllLastKnownWeather()["TestCity"])
+        assertEquals(Fahrenheit(86.0), service.getLastKnown("TestCity"))
+        assertEquals(Fahrenheit(86.0), service.getAllLastKnown()["TestCity"])
     }
 
     @Test
     fun `should emit last known temperature update on start`() = runTest {
         // given
         val testDataSource = object : TemperatureDataSource {
-            override fun getWeatherStream(): Flow<TemperatureData> = flow {
+            override fun observeTemperatureUpdates(): Flow<TemperatureData> = flow {
                 delay(100)
                 emit(TemperatureData("TestCity", 10.0))
                 delay(100)
@@ -120,18 +120,18 @@ class WeatherServiceTest {
             }
         }
         val service = TemperatureService(testDataSource, backgroundScope)
-        service.getWeatherUpdates("TestCity").first()
+        service.observeTemperature("TestCity").first()
         assertEquals(100, currentTime)
 
         // when
-        val result = service.getWeatherUpdates("TestCity").first()
+        val result = service.observeTemperature("TestCity").first()
 
         // then
         assertEquals(Fahrenheit(50.0), result)
         assertEquals(100, currentTime)
 
         // when
-        val result2 = service.getWeatherUpdates("TestCity2").first()
+        val result2 = service.observeTemperature("TestCity2").first()
 
         // then
         assertEquals(Fahrenheit(68.0), result2)
