@@ -188,14 +188,14 @@ class TemperatureServiceTest {
                 .onCompletion { observersCounter++ }
         }
         val service = TemperatureService(testDataSource, backgroundScope)
-        runCurrent()
+        delay(1)
 
         // when
         temperatureUpdatesSource.emit(TemperatureData("A", 10.0))
         temperatureUpdatesSource.emit(TemperatureData("B", 20.0))
         temperatureUpdatesSource.emit(TemperatureData("C", 30.0))
         temperatureUpdatesSource.emit(TemperatureData("D", 40.0))
-        delay(10)
+        delay(1)
 
         // then
         assertEquals(Fahrenheit(temperature = 50.0), service.getLastKnown("A"))

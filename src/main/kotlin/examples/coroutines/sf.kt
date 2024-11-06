@@ -6,8 +6,7 @@ import java.time.LocalDateTime
 import kotlin.time.Duration.Companion.milliseconds
 
 //suspend fun main(): Unit = coroutineScope {
-//    val sf = MutableSharedFlow<String>(replay = 0)
-//    // or MutableSharedFlow<String>()
+//    val sf = MutableSharedFlow<String>()
 //
 //    sf.onEach { println("#1 received $it") }
 //        .launchIn(this)
@@ -60,20 +59,18 @@ private fun CoroutineScope.startReceiverFor(
 //}
 
 //suspend fun main() = coroutineScope {
-//   val state = MutableStateFlow(1)
-//   println(state.value) // 1
+//   val state = MutableStateFlow("A")
+//   println(state.value) // A
 //   delay(1000)
-//   launch {
-//       state.collect { println("Value changed to $it") } // Value changed to 1
-//   }
+//   state.onEach { println("Value changed to $it") }
+//        .launchIn(this) // Value changed to A
 //   delay(1000)
-//   state.value = 2 // Value changed to 2
+//   state.value = "B" // Value changed to B
 //   delay(1000)
-//   launch {
-//       state.collect { println("and now it is $it") } // and now it is 2
-//   }
+//   state.onEach { println("and now it is $it") }
+//        .launchIn(this) // and now it is B
 //   delay(1000)
-//   state.value = 3 // Value changed to 3 and now it is 3
+//   state.value = "C" // Value changed to C and now it is C
 //}
 
 //suspend fun main(): Unit = coroutineScope {
