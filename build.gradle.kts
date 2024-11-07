@@ -21,7 +21,7 @@ dependencies {
     implementation(kotlin("reflect"))
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.7.3")
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-test:1.7.3")
-//    implementation("com.sksamuel.aedile:aedile-core:1.3.1") // Needed for CompanyDetailsRepository
+    implementation("com.sksamuel.aedile:aedile-core:1.3.1") // Needed for CompanyDetailsRepository
 }
 
 tasks.withType<KotlinCompile> {
@@ -37,10 +37,10 @@ powerAssert {
 }
 
 // Uncomment to use Loom
-//tasks.withType<JavaCompile>().configureEach {
-//    options.compilerArgs.add("--enable-preview")
-//}
-//
-//kotlin {
-//    jvmToolchain(20)
-//}
+tasks.withType<JavaCompile>().configureEach {
+    options.compilerArgs.add("--enable-preview")
+}
+
+kotlin {
+    jvmToolchain(20)
+}
