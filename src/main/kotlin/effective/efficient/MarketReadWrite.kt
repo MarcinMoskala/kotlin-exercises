@@ -6,8 +6,6 @@ import java.io.File
 import java.nio.ByteBuffer
 import kotlin.random.Random
 
-val tickers = List(1000) { "Ticker$it" }
-
 fun main() {
     val elements = 10_000_000
     val random = Random(123456789)
@@ -15,21 +13,21 @@ fun main() {
         while (true) {
             val event = when ((0..2).random(random)) {
                 0 -> BidEvent(
-                    tickers.random(random),
+                    random.nextInt(1000),
                     if (random.nextInt(100) == 1) Double.NaN else random.nextInt(100_000).toDouble(),
                     if (random.nextInt(100) == 1) -1 else random.nextInt(100_000),
                     if (random.nextInt(100) == 1) -1 else random.nextLong()
                 )
 
                 1 -> AskEvent(
-                    tickers.random(random),
+                    random.nextInt(1000),
                     if (random.nextInt(100) == 1) Double.NaN else random.nextInt(100_000).toDouble(),
                     if (random.nextInt(100) == 1) -1 else random.nextInt(100_000),
                     if (random.nextInt(100) == 1) -1 else random.nextLong()
                 )
 
                 else -> TradeEvent(
-                    tickers.random(random),
+                    random.nextInt(1000),
                     if (random.nextInt(100) == 1) Double.NaN else random.nextInt(100_000).toDouble(),
                     if (random.nextInt(100) == 1) -1 else random.nextInt(100_000),
                     if (random.nextInt(100) == 1) -1 else random.nextLong()
@@ -46,13 +44,13 @@ fun main() {
         .also { it.createNewFile() }
     result.forEach {
         val array = when (it) {
-            is BidEvent -> byteArrayOf(0) + it.ticker.padEnd(10).toByteArray() + (it.price
+            is BidEvent -> byteArrayOf(0) + it.ticker.toByteArray() + (it.price
                 ?: Double.NaN).toByteArray() + (it.size ?: -1).toByteArray() + (it.time ?: -1).toByteArray()
 
-            is AskEvent -> byteArrayOf(1) + it.ticker.padEnd(10).toByteArray() + (it.price
+            is AskEvent -> byteArrayOf(1) + it.ticker.toByteArray() + (it.price
                 ?: Double.NaN).toByteArray() + (it.size ?: -1).toByteArray() + (it.time ?: -1).toByteArray()
 
-            is TradeEvent -> byteArrayOf(2) + it.ticker.padEnd(10).toByteArray() + (it.price
+            is TradeEvent -> byteArrayOf(2) + it.ticker.toByteArray() + (it.price
                 ?: Double.NaN).toByteArray() + (it.size ?: -1).toByteArray() + (it.time ?: -1).toByteArray()
         }
         file.appendBytes(array)
@@ -63,21 +61,21 @@ fun main() {
         while (true) {
             val event = when (input.read()) {
                 0 -> BidEvent(
-                    input.readText(10).trim(),
+                    input.readInt(),
                     input.readDouble(),
                     input.readInt(),
                     input.readLong()
                 )
 
                 1 -> AskEvent(
-                    input.readText(10).trim(),
+                    input.readInt(),
                     input.readDouble(),
                     input.readInt(),
                     input.readLong()
                 )
 
                 2 -> TradeEvent(
-                    input.readText(10).trim(),
+                    input.readInt(),
                     input.readDouble(),
                     input.readInt(),
                     input.readLong()
