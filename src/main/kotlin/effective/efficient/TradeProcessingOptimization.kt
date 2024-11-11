@@ -90,6 +90,7 @@ fun Snapshot.withUpdate(event: Event): Snapshot = when (event) {
     is TradeEvent -> copy(last = PriceSizeTime(Price(event.price), event.size, event.time))
 }
 
+// No need to touch this class
 sealed class Filter {
     data object All : Filter()
     class Or(val filters: List<Filter>) : Filter()
@@ -170,7 +171,7 @@ suspend fun main() {
             .map { it.ticker.value }
     }
     println("Took ${timedValue.duration}")
-    val expected = listOf<Int>(
+    val expected = listOf(
         20, 20, 20, 20, 20, 20, 20, 22, 15, 15, 15, 15, 13, 4, 4, 4, 27, 54, 
         54, 23, 23, 23, 23, 23, 23, 23, 18, 18, 18, 25, 25, 27, 32, 32, 7, 7, 
         7, 17, 17, 17, 17, 17, 28, 28, 29, 29, 63, 21, 21, 21
