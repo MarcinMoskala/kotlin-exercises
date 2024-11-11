@@ -3,11 +3,7 @@ package effective.efficient
 import effective.efficient.Filter.*
 import effective.efficient.Filter.Relation.*
 import effective.efficient.Filter.SnapshotPart.*
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.*
-import java.io.DataInputStream
-import java.io.File
-import java.util.concurrent.ConcurrentHashMap
 import kotlin.random.Random
 import kotlin.time.measureTimedValue
 
@@ -39,45 +35,6 @@ data class BidEvent(override val ticker: Int?, val price: Double?, val size: Int
 data class AskEvent(override val ticker: Int?, val price: Double?, val size: Int?, val time: Long?) : Event
 data class TradeEvent(override val ticker: Int?, val price: Double?, val size: Int?, val time: Long?) : Event
 
-//class MarketClient {
-//    private val file = File("market.txt")
-//
-//    fun observe(): Flow<Event> = flow {
-//        val input = DataInputStream(file.inputStream())
-//        while (true) {
-//            val event = when (input.read()) {
-//                0 -> BidEvent(
-//                    input.readInt(),
-//                    input.readDouble(),
-//                    input.readInt(),
-//                    input.readLong(),
-//                )
-//
-//                1 -> AskEvent(
-//                    input.readInt(),
-//                    input.readDouble(),
-//                    input.readInt(),
-//                    input.readLong(),
-//                )
-//
-//                2 -> TradeEvent(
-//                    input.readInt(),
-//                    input.readDouble(),
-//                    input.readInt(),
-//                    input.readLong(),
-//                )
-//
-//                -1 -> {
-//                    println("End of file")
-//                    break
-//                }
-//
-//                else -> throw IllegalArgumentException()
-//            }
-//            emit(event)
-//        }
-//    }.flowOn(Dispatchers.IO)
-//}
 class MarketClient {
     private val random = Random(42)
 
@@ -120,25 +77,17 @@ class MarketRepository(
     fun observeUpdates() = client.observe()
         .map { update ->
             val ticker = Ticker(update.ticker)
-            val snapshot = when (update) {
-                is BidEvent -> {
-                    snapshots.getOrPut(ticker) { Snapshot(null, null, null) }
-                        .copy(bid = PriceSizeTime(Price(update.price), update.size, update.time))
-                }
-
-                is AskEvent -> {
-                    snapshots.getOrPut(ticker) { Snapshot(null, null, null) }
-                        .copy(ask = PriceSizeTime(Price(update.price), update.size, update.time))
-                }
-
-                is TradeEvent -> {
-                    snapshots.getOrPut(ticker) { Snapshot(null, null, null) }
-                        .copy(last = PriceSizeTime(Price(update.price), update.size, update.time))
-                }
-            }
+            val snapshot = snapshots.getOrPut(ticker) { Snapshot(null, null, null) }
+                .withUpdate(update)
             snapshots[ticker] = snapshot
             TickerSnapshot(ticker, snapshot)
         }
+}
+
+fun Snapshot.withUpdate(event: Event): Snapshot = when (event) {
+    is BidEvent -> copy(bid = PriceSizeTime(Price(event.price), event.size, event.time))
+    is AskEvent -> copy(ask = PriceSizeTime(Price(event.price), event.size, event.time))
+    is TradeEvent -> copy(last = PriceSizeTime(Price(event.price), event.size, event.time))
 }
 
 sealed class Filter {
@@ -206,7 +155,7 @@ suspend fun main() {
     val service = TradeService(repository)
     val filter = Or(
         listOf(
-            And(listOf(TickerIs(List(1) { Ticker(it) }), PrizeCondition(Ask, GreaterThan, 99950.0))),
+            And(listOf(TickerIs(List(40) { Ticker(it) }), PrizeCondition(Ask, GreaterThan, 99999.0))),
             And(listOf(PrizeCondition(Spread, GreaterThan, 99950.0))),
         )
     )
@@ -218,15 +167,17 @@ suspend fun main() {
         ).take(50)
             .onEach { println(it) }
             .toList()
+            .map { it.ticker.value }
     }
     println("Took ${timedValue.duration}")
-//    val expected = listOf(
-//    )
-//    if (timedValue.value != expected) {
-//        println("The result is incorrect")
-//    } else {
-//        println("The result is correct")
-//    }
+    val expected = listOf<Int>(
+        20, 20, 20, 20, 20, 20, 20, 22, 15, 15, 15, 15, 13, 4, 4, 4, 27, 54, 
+        54, 23, 23, 23, 23, 23, 23, 23, 18, 18, 18, 25, 25, 27, 32, 32, 7, 7, 
+        7, 17, 17, 17, 17, 17, 28, 28, 29, 29, 63, 21, 21, 21
+    )
+    if (timedValue.value != expected) {
+        println("The result is incorrect\nExpected: $expected\nActual: ${timedValue.value}")
+    } else {
+        println("The result is correct")
+    }
 }
-// 11.36 s
-// 35.01 GB
