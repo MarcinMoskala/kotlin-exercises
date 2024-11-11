@@ -44,13 +44,13 @@ fun main() {
         .also { it.createNewFile() }
     result.forEach {
         val array = when (it) {
-            is BidEvent -> byteArrayOf(0) + it.ticker.toByteArray() + (it.price
+            is BidEvent -> byteArrayOf(0) + it.ticker!!.toByteArray() + (it.price
                 ?: Double.NaN).toByteArray() + (it.size ?: -1).toByteArray() + (it.time ?: -1).toByteArray()
 
-            is AskEvent -> byteArrayOf(1) + it.ticker.toByteArray() + (it.price
+            is AskEvent -> byteArrayOf(1) + it.ticker!!.toByteArray() + (it.price
                 ?: Double.NaN).toByteArray() + (it.size ?: -1).toByteArray() + (it.time ?: -1).toByteArray()
 
-            is TradeEvent -> byteArrayOf(2) + it.ticker.toByteArray() + (it.price
+            is TradeEvent -> byteArrayOf(2) + it.ticker!!.toByteArray() + (it.price
                 ?: Double.NaN).toByteArray() + (it.size ?: -1).toByteArray() + (it.time ?: -1).toByteArray()
         }
         file.appendBytes(array)

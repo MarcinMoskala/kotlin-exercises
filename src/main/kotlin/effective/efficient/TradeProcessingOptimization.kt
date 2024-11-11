@@ -8,6 +8,7 @@ import kotlinx.coroutines.flow.*
 import java.io.DataInputStream
 import java.io.File
 import java.util.concurrent.ConcurrentHashMap
+import kotlin.random.Random
 import kotlin.time.measureTimedValue
 
 data class TickerSnapshot(
@@ -22,89 +23,122 @@ data class Snapshot(
 )
 
 data class PriceSizeTime(
-    val price: Price,
+    val price: Price?,
     val size: Int?,
     val time: Long?,
 )
 
-data class Ticker(val value: Int)
+data class Ticker(val value: Int?)
 data class Price(val value: Double?)
 
 sealed interface Event {
-    val ticker: Int
+    val ticker: Int?
 }
 
-data class BidEvent(override val ticker: Int, val price: Double?, val size: Int?, val time: Long?) : Event
-data class AskEvent(override val ticker: Int, val price: Double?, val size: Int?, val time: Long?) : Event
-data class TradeEvent(override val ticker: Int, val price: Double?, val size: Int?, val time: Long?) : Event
+data class BidEvent(override val ticker: Int?, val price: Double?, val size: Int?, val time: Long?) : Event
+data class AskEvent(override val ticker: Int?, val price: Double?, val size: Int?, val time: Long?) : Event
+data class TradeEvent(override val ticker: Int?, val price: Double?, val size: Int?, val time: Long?) : Event
 
+//class MarketClient {
+//    private val file = File("market.txt")
+//
+//    fun observe(): Flow<Event> = flow {
+//        val input = DataInputStream(file.inputStream())
+//        while (true) {
+//            val event = when (input.read()) {
+//                0 -> BidEvent(
+//                    input.readInt(),
+//                    input.readDouble(),
+//                    input.readInt(),
+//                    input.readLong(),
+//                )
+//
+//                1 -> AskEvent(
+//                    input.readInt(),
+//                    input.readDouble(),
+//                    input.readInt(),
+//                    input.readLong(),
+//                )
+//
+//                2 -> TradeEvent(
+//                    input.readInt(),
+//                    input.readDouble(),
+//                    input.readInt(),
+//                    input.readLong(),
+//                )
+//
+//                -1 -> {
+//                    println("End of file")
+//                    break
+//                }
+//
+//                else -> throw IllegalArgumentException()
+//            }
+//            emit(event)
+//        }
+//    }.flowOn(Dispatchers.IO)
+//}
 class MarketClient {
-    private val file = File("market.txt")
+    private val random = Random(42)
 
     fun observe(): Flow<Event> = flow {
-        val input = DataInputStream(file.inputStream())
         while (true) {
-            val event = when (input.read()) {
+            val event = when (random.nextInt(3)) {
                 0 -> BidEvent(
-                    input.readInt(),
-                    input.readDouble(),
-                    input.readInt(),
-                    input.readLong(),
+                    random.nextInt(1000),
+                    random.nextDouble(100_000.0),
+                    random.nextInt(100_000),
+                    random.nextLong(),
                 )
 
                 1 -> AskEvent(
-                    input.readInt(),
-                    input.readDouble(),
-                    input.readInt(),
-                    input.readLong(),
+                    random.nextInt(1000),
+                    random.nextDouble(100_000.0),
+                    random.nextInt(100_000),
+                    random.nextLong(),
                 )
 
                 2 -> TradeEvent(
-                    input.readInt(),
-                    input.readDouble(),
-                    input.readInt(),
-                    input.readLong(),
+                    random.nextInt(1000),
+                    random.nextDouble(100_000.0),
+                    random.nextInt(100_000),
+                    random.nextLong(),
                 )
-
-                -1 -> {
-                    println("End of file")
-                    break
-                }
 
                 else -> throw IllegalArgumentException()
             }
             emit(event)
         }
-    }.flowOn(Dispatchers.IO)
+    }
 }
 
 class MarketRepository(
     private val client: MarketClient,
 ) {
-    private val snapshots = ConcurrentHashMap<Ticker, Snapshot>()
+    private val snapshots = HashMap<Ticker, Snapshot>()
 
     fun observeUpdates() = client.observe()
         .map { update ->
+            val ticker = Ticker(update.ticker)
             val snapshot = when (update) {
                 is BidEvent -> {
-                    snapshots.getOrPut(Ticker(update.ticker)) { Snapshot(null, null, null) }
+                    snapshots.getOrPut(ticker) { Snapshot(null, null, null) }
                         .copy(bid = PriceSizeTime(Price(update.price), update.size, update.time))
                 }
 
                 is AskEvent -> {
-                    snapshots.getOrPut(Ticker(update.ticker)) { Snapshot(null, null, null) }
+                    snapshots.getOrPut(ticker) { Snapshot(null, null, null) }
                         .copy(ask = PriceSizeTime(Price(update.price), update.size, update.time))
                 }
 
                 is TradeEvent -> {
-                    snapshots.getOrPut(Ticker(update.ticker)) { Snapshot(null, null, null) }
+                    snapshots.getOrPut(ticker) { Snapshot(null, null, null) }
                         .copy(last = PriceSizeTime(Price(update.price), update.size, update.time))
                 }
             }
-            snapshots[Ticker(update.ticker)] = snapshot
-            TickerSnapshot(Ticker(update.ticker), snapshot)
+            snapshots[ticker] = snapshot
+            TickerSnapshot(ticker, snapshot)
         }
-        .onStart { snapshots.forEach { emit(TickerSnapshot(it.key, it.value)) } }
 }
 
 sealed class Filter {
@@ -172,8 +206,8 @@ suspend fun main() {
     val service = TradeService(repository)
     val filter = Or(
         listOf(
-            And(listOf(TickerIs(listOf(Ticker(0), Ticker(1))), PrizeCondition(Ask, GreaterThan, 99000.0))),
-            And(listOf(PrizeCondition(Spread, GreaterThan, 99000.0))),
+            And(listOf(TickerIs(List(1) { Ticker(it) }), PrizeCondition(Ask, GreaterThan, 99950.0))),
+            And(listOf(PrizeCondition(Spread, GreaterThan, 99950.0))),
         )
     )
 
@@ -194,5 +228,5 @@ suspend fun main() {
 //        println("The result is correct")
 //    }
 }
-// 22.18 s
-// 2.91 GB
+// 11.36 s
+// 35.01 GB
