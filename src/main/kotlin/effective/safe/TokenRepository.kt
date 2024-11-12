@@ -1,4 +1,4 @@
-package effective.safe
+package effective.safe.tokenrepository
 
 import kotlinx.coroutines.*
 import kotlinx.coroutines.sync.Mutex
@@ -21,7 +21,8 @@ class TokenRepository(
 
     suspend fun getToken(): Token {
         val currentToken = token
-        if (currentToken != null && currentToken.expiration > timeProvider.now()) {
+        if (currentToken != null && 
+            currentToken.expiration > timeProvider.now()) {
             return currentToken
         }
         val newToken = client.fetchToken()
@@ -126,10 +127,10 @@ class TokenRepositoryTest {
 
         // then all tokens should be the same
         assertEquals(1, tokens.toSet().size)
-        
+
         // and fetchToken should be called only once
         assertEquals(1, fetchTokenCalled)
-        
+
         // and it should take as long as the first call
         assertEquals(1000L, currentTime)
     }
@@ -182,14 +183,14 @@ class TokenRepositoryTest {
         // and in-between invalidating token
         delay(500)
         repository.invalidateToken()
-        
+
         // when fetching token again
         val token2 = repository.getToken()
-        
+
         // or fetching later
         val token = tokenAsync.await()
         val token3 = repository.getToken()
-        
+
         // then token should be the same
         assertEquals(token, token2)
         assertEquals(token, token3)
