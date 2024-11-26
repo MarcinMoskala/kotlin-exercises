@@ -1,9 +1,10 @@
 package advanced.reflection.mocking
 
 import org.junit.Test
-import java.lang.reflect.InvocationHandler
 import java.lang.reflect.Method
 import java.lang.reflect.Proxy
+import kotlin.reflect.KClass
+import java.lang.reflect.InvocationHandler      
 import kotlin.test.assertEquals
 import kotlin.test.assertNotNull
 
@@ -19,43 +20,43 @@ interface UserService {
 }
 
 fun main() {
-//    val registry = MockRegistry()
-//    val userRepository = registry.mock<UserRepository>()
-//    val userService = registry.mock<UserService>()
-//
-//    registry.setReturnValue(
-//        { userRepository.getUser("alex") },
-//        User("Alex Smith")
-//    )
-//    registry.setReturnValue(
-//        { userRepository.getUser("bell") },
-//        User("Bell Rogers")
-//    )
-//    registry.setReturnValue(
-//        { userRepository.getUser("dan") },
-//        null
-//    )
-//    registry.setBody({ userRepository.allUsers() }) {
-//        listOf(User("James Bond"), User("Jane Doe"))
-//    }
-//    registry.setBody({ userService.getUser() }) {
-//        User(userRepository.getUser("dan")?.name ?: "Unknown")
-//    }
-//
-//    println(userRepository.getUser("alex"))
-//    // User(name=Alex Smith)
-//    println(userRepository.allUsers())
-//    // [User(name=James Bond), User(name=Jane Doe)]
-//    println(userRepository.getUser("bell"))
-//    // User(name=Bell Rogers)
-//    println(userService.getUser())
-//    // User(name=Unknown)
-//    registry.setReturnValue(
-//        { userRepository.getUser("dan") },
-//        User("Dan Brown")
-//    )
-//    println(userService.getUser())
-//    // User(name=Dan Brown)
+    //val registry = MockRegistry()
+    //val userRepository = registry.mock<UserRepository>()
+    //val userService = registry.mock<UserService>()
+    //
+    //registry.setReturnValue(
+    //    { userRepository.getUser("alex") },
+    //    User("Alex Smith")
+    //)
+    //registry.setReturnValue(
+    //    { userRepository.getUser("bell") },
+    //    User("Bell Rogers")
+    //)
+    //registry.setReturnValue(
+    //    { userRepository.getUser("dan") },
+    //    null
+    //)
+    //registry.setBody({ userRepository.allUsers() }) {
+    //    listOf(User("James Bond"), User("Jane Doe"))
+    //}
+    //registry.setBody({ userService.getUser() }) {
+    //    User(userRepository.getUser("dan")?.name ?: "Unknown")
+    //}
+    //
+    //println(userRepository.getUser("alex"))
+    //// User(name=Alex Smith)
+    //println(userRepository.allUsers())
+    //// [User(name=James Bond), User(name=Jane Doe)]
+    //println(userRepository.getUser("bell"))
+    //// User(name=Bell Rogers)
+    //println(userService.getUser())
+    //// User(name=Unknown)
+    //registry.setReturnValue(
+    //    { userRepository.getUser("dan") },
+    //    User("Dan Brown")
+    //)
+    //println(userService.getUser())
+    //// User(name=Dan Brown)
 }
 
 class MockingTest {
@@ -192,4 +193,3 @@ class MockingTest {
 //        assertEquals(User("Dan Brown"), userService.getUser())
 //    }
 }
-
