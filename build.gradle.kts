@@ -42,5 +42,5 @@ tasks.withType<JavaCompile>().configureEach {
 }
 
 kotlin {
-    jvmToolchain(20)
+    jvmToolchain(21)
 }
