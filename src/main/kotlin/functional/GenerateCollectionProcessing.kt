@@ -2,12 +2,19 @@ package functional
 
 import functional.ProcessorCategory.*
 import functional.collections.map.filter
+import functional.collections.map.flatMap
+import kotlin.random.Random
 import kotlin.reflect.KClass
 import kotlin.reflect.KProperty1
 import kotlin.reflect.KType
 import kotlin.reflect.full.isSubtypeOf
 import kotlin.reflect.full.memberProperties
 import kotlin.reflect.typeOf
+
+//class Level(val value: Int) {
+//    val fruitsNum = 5 + (value / 6)
+//    val stepsNum = 3 + ((value + 3) / 6)
+//}
 
 fun main() {
     println("How many processing steps would you like? (1-10)")
@@ -17,9 +24,7 @@ fun main() {
     val fruitsNum = readln().toInt()
     check(fruitsNum in 0..(fruits.size)) { "Invalid level" }
 
-    val challenge = generateCollectionProcessingChallenge(level)
-
-    println(challenge.toDisplayString())
+    val challenge = generateCollectionProcessingChallenge(level, fruitsNum)
 
     val fruitPropertiesUsed = challenge.fruitPropertiesUsed()
     printFruitPropertiesTable(challenge.fruitsUsed, fruitPropertiesUsed)
@@ -54,6 +59,46 @@ fun main() {
     println("Correct!")
 }
 
+//fun main() {
+    // Find dead ends
+//    val deadEnds = processors.filter { processor ->
+//        processors.none { processor.to.isSubtypeOf(it.from) } && !processor.to.itOneOfAllowedTerminalTypes
+//    }.map { it.to }.distinct()
+//    if (deadEnds.isNotEmpty()) {
+//        println("Dead ends:")
+//        deadEnds.forEach { println(it) }
+//    } else {
+//        println("No dead ends")
+//    }
+    
+    // Collect all unique results
+//    val results = mutableMapOf<KType, List<Any>>()
+//    var resultsDisplay: Map<KType, List<Any>> = emptyMap()
+//    repeat(10) {
+//        repeat(10000) {
+//            val challenge = generateCollectionProcessingChallenge(Random.nextInt(8))
+//            val result = challenge.resultType
+//            results[result] = (results[result] ?: emptyList()) + challenge.result
+//        }
+//        val newResultsDisplay = results.mapValues { (k, v) ->
+//            when {
+//                k.isSubtypeOf(typeOf<Iterable<*>>()) -> (v as List<List<Any>>).flatten()
+//                k.isSubtypeOf(typeOf<Map<*, *>>()) -> (v as List<Map<Any, Any>>).flatMap { it.toList() }
+//                else -> v
+//            }.distinct()
+//        }
+//        if (newResultsDisplay != resultsDisplay) {
+//            resultsDisplay = newResultsDisplay
+//            println("Results:")
+//            resultsDisplay.forEach { (k, v) ->
+//                println("$k: $v")
+//            }
+//        } else {
+//            println("No new results")
+//        }
+//    }
+//}
+
 private fun printFruitPropertiesTable(fruitsUsed: Set<Fruit>, fruitPropertiesUsed: List<KProperty1<Fruit, *>>) {
     if (fruitsUsed.isEmpty()) return
     if (fruitPropertiesUsed.isEmpty()) return
@@ -76,8 +121,8 @@ private fun printFruitPropertiesTable(fruitsUsed: Set<Fruit>, fruitPropertiesUse
     println()
 }
 
-fun generateCollectionProcessingChallenge(steps: Int): CollectionProcessingChallenge {
-    val start = List(6) { fruits.random() }
+fun generateCollectionProcessingChallenge(steps: Int, fruitsNum: Int): CollectionProcessingChallenge {
+    val start = List(fruitsNum) { fruits.random() }
     var fruitsUsed = start.toSet()
     var result: Any = start
     var resultType: KType = typeOf<List<Fruit>>()
@@ -87,15 +132,21 @@ fun generateCollectionProcessingChallenge(steps: Int): CollectionProcessingChall
         val availableProcessors = processors.filter {
             resultType.isSubtypeOf(it.from) &&
                     it !in chosenProcessors &&
-                    (isLastStep || !it.isTerminal) &&
+                    (!isLastStep || it.to.itOneOfAllowedTerminalTypes) &&
                     it.category !in chosenProcessors.takeLast(3).map { it.category }
         }
         if (availableProcessors.isEmpty()) {
-            println("No available processors for $resultType")
-            return generateCollectionProcessingChallenge(steps)
+//            println("No available processors for $resultType")
+            return generateCollectionProcessingChallenge(steps, fruitsNum)
         }
         val processor = availableProcessors.random()
-        result = processor.process(result) as Any
+        try {
+            result = processor.process(result) as Any
+        } catch (e: Exception) {
+//            println("Error processing $processor")
+//            e.printStackTrace()
+            return generateCollectionProcessingChallenge(steps, fruitsNum)
+        }
         resultType = processor.to
         chosenProcessors.add(processor)
     }
@@ -122,33 +173,86 @@ data class CollectionProcessingChallenge(
 }
 
 val processors = listOf(
-    processor<Iterable<Fruit>, List<Fruit>>("filter { it.price > 2 }", Filter) { it.filter { it.price > 2 } }, // TODO: Generate different variations for price and operation
+    processor<Iterable<Fruit>, List<Fruit>>("filter { it.price > 5.0 }", Filter) { it.filter { it.price > 5.0 } },
+    processor<Iterable<Fruit>, List<Fruit>>("filter { it.price >= 10.0 }", Filter) { it.filter { it.price >= 10.0 } },
+    processor<Iterable<Fruit>, List<Fruit>>("filter { it.price < 15.0 }", Filter) { it.filter { it.price < 15.0 } },
+    processor<Iterable<Fruit>, List<Fruit>>("filter { it.price <= 7.0 }", Filter) { it.filter { it.price <= 7.0 } },
     processor<Iterable<Fruit>, List<String>>("map { it.name }", Map) { it.map { it.name } },
     processor<Iterable<Fruit>, List<Color>>("map { it.color }", Map) { it.map { it.color } },
     processor<Iterable<Fruit>, List<Double>>("map { it.price }", Map) { it.map { it.price } },
-    processor<Iterable<Double>, List<Int>>("map { it.toInt() }", Map) { it.map { it.toInt() } },
-    processor<Iterable<Double>, List<Double>>("map { it.toInt() }", Map) { it.filter { it >= 3.0 } },
-    processor<Iterable<Double>, List<Double>>("sorted()", Sort) { it.sorted() },
     processor<Iterable<Fruit>, Set<Fruit>>("toSet()") { it.toSet() },
     processor<Iterable<Fruit>, Map<Fruit, Color>>("associateWith { it.color }") { it.associateWith { it.color } },
     processor<Iterable<Fruit>, Map<Color, Fruit>>("associateBy { it.color }") { it.associateBy { it.color } },
     processor<Iterable<Fruit>, Map<Color, List<Fruit>>>("groupBy { it.color }") { it.groupBy { it.color } },
     processor<Iterable<Fruit>, List<Fruit>>("distinct()", Distinct) { it.distinct() },
-    processor<Iterable<List<Fruit>>, List<Fruit>>("flatten()") { it.flatten() },
-    processor<Iterable<Int>, List<Int>>("filter { it > 6 }", Filter) { it.filter { it > 6 } },
-    processor<Iterable<Int>, List<Int>>("filter { it < 6 }", Filter) { it.filter { it < 6 } },
-    processor<Iterable<Int>, List<Int>>("filter { it % 2 == 0 }", Filter) { it.filter { it % 2 == 0 } },
-    processor<Iterable<Int>, List<Int>>("filter { it % 2 == 1 }", Filter) { it.filter { it % 2 == 1 } },
     processor<Iterable<Fruit>, List<Fruit>>("sortedBy { it.price }", Sort) { it.sortedBy { it.price } },
     processor<Iterable<Fruit>, List<Fruit>>("sortedByDescending { it.price }", Sort) { it.sortedByDescending { it.price } },
     processor<Iterable<Fruit>, List<Fruit>>("sortedBy { it.name }", Sort) { it.sortedBy { it.name } },
     processor<Iterable<Fruit>, List<Fruit>>("sortedByDescending { it.name }", Sort) { it.sortedByDescending { it.name } },
     processor<Iterable<Fruit>, List<Fruit>>("distinctBy { it.color }", Distinct) { it.distinctBy { it.color } },
+    processor<Iterable<Fruit>, Double>("maxOf { it.price }") { it.maxOf { it.price } },
+    processor<Iterable<Fruit>, Double>("minOf { it.price }") { it.minOf { it.price } },
+    processor<Iterable<Fruit>, Fruit>("maxBy { it.price }") { it.maxBy { it.price } },
+    processor<Iterable<Fruit>, Fruit>("minBy { it.price }") { it.minBy { it.price } },
+    processor<Iterable<Fruit>, List<Fruit>>("take(4)") { it.take(4) },
+    processor<List<Fruit>, List<Fruit>>("takeLast(4)") { it.takeLast(4) },
+    processor<Iterable<Fruit>, List<Fruit>>("drop(2)") { it.drop(2) },
+    processor<List<Fruit>, List<Fruit>>("dropLast(2)") { it.dropLast(2) },
+    processor<Iterable<Fruit>, _>("zipWithNext { f1, f2 -> listOf(f1, f2).maxBy { it.price } }") { it.zipWithNext { f1, f2 -> listOf(f1, f2).maxBy { it.price } } },
+    processor<Iterable<Fruit>, _>("zipWithNext().toMap()") { it.zipWithNext().toMap() },
+    processor<Iterable<Fruit>, _>("zipWithNext { f1, f2 -> f1 to f2.price }.toMap()") { it.zipWithNext { f1, f2 -> f1 to f2.price }.toMap() },
+    
+    processor<Collection<List<Fruit>>, _>("flatten()") { it.flatten() },
+    
+    // List<Color>
+    processor<Iterable<Color>, List<String>>("map { it.name }", Map) { it.map { it.name } },
+    processor<Iterable<Color>, List<Color>>("distinct()", Distinct) { it.distinct() },
+    processor<Iterable<Color>, List<Color>>("take(4)") { it.take(4) },
+    processor<List<Color>, List<Color>>("takeLast(4)") { it.takeLast(4) },
+    processor<Iterable<Color>, List<Color>>("drop(2)") { it.drop(2) },
+    processor<List<Color>, List<Color>>("dropLast(2)") { it.dropLast(2) },
+    processor<Iterable<Color>, Color>("first()") { it.first() },
+    processor<Iterable<Color>, Color>("last()") { it.last() },
+    processor<Iterable<Color>, Boolean>("any { it == Color.Red }") { it.any { it == Color.Red } },
+    processor<Iterable<Color>, Boolean>("none { it == Color.Red }") { it.none { it == Color.Red } },
+    processor<Iterable<Color>, Boolean>("any { it == Color.Green }") { it.any { it == Color.Green } },
+    processor<Iterable<Color>, Boolean>("none { it == Color.Green }") { it.none { it == Color.Green } },
+    processor<Iterable<Color>, Boolean>("all { it == Color.Red }") { it.all { it == Color.Red } },
+    processor<Iterable<Color>, Int>("count { it == Color.Red }") { it.count { it == Color.Red } },
+    processor<Iterable<Color>, List<Boolean>>("map { it == Color.Red }", Map) { it.map { it == Color.Red } },
+    processor<Iterable<Color>, List<Boolean>>("map { it == Color.Green }", Map) { it.map { it == Color.Green } },
+
+    // List<Double>    
+    processor<Iterable<Double>, List<Int>>("map { it.toInt() }", Map) { it.map { it.toInt() } },
+    processor<Iterable<Double>, List<Double>>("map { it.toInt() }", Map) { it.filter { it >= 3.0 } },
+    processor<Iterable<Double>, List<Double>>("sorted()", Sort) { it.sorted() },
+    processor<Iterable<Double>, Iterable<Double>>("take(4)") { it.take(4) },
+    processor<List<Double>, Iterable<Double>>("takeLast(4)") { it.takeLast(4) },
+    processor<Iterable<Double>, Iterable<Double>>("drop(2)") { it.drop(2) },
+    processor<List<Double>, Iterable<Double>>("dropLast(2)") { it.dropLast(2) },
+    
+    // List<Boolean>
+    processor<Iterable<Boolean>, Int>("count { it }") { it.count { it } },
+    processor<Iterable<Boolean>, Int>("count { !it }") { it.count { !it } },
+    processor<Iterable<Boolean>, Boolean>("any { it }") { it.any { it } },
+    processor<Iterable<Boolean>, Boolean>("none { it }") { it.none { it } },
+    processor<Iterable<Boolean>, Boolean>("all { it }") { it.all { it } },
+    processor<Iterable<Boolean>, List<Boolean>>("map { !it }", Map) { it.map { !it } },
+    
+    // Iterable<Int>
+    processor<Iterable<Int>, List<Int>>("filter { it > 6 }", Filter) { it.filter { it > 6 } },
+    processor<Iterable<Int>, List<Int>>("filter { it < 6 }", Filter) { it.filter { it < 6 } },
+    processor<Iterable<Int>, List<Int>>("filter { it % 2 == 0 }", Filter) { it.filter { it % 2 == 0 } },
+    processor<Iterable<Int>, List<Int>>("filter { it % 2 == 1 }", Filter) { it.filter { it % 2 == 1 } },
     processor<Iterable<Int>, List<Int>>("sorted()", Sort) { it.sorted() },
     processor<Iterable<Int>, List<Int>>("sortedDescending()", Sort) { it.sortedDescending() },
-    processor<Iterable<*>, Int>("count()") { it.count() },
     processor<Iterable<Int>, Int>("max()") { it.max() },
     processor<Iterable<Int>, Int>("min()") { it.min() },
+    processor<Iterable<Int>, Int>("sum()") { it.sum() },
+    
+    processor<Iterable<*>, Int>("count()") { it.count() },
+    
+    processor<Iterable<List<Fruit>>, List<Fruit>>("flatten()") { it.flatten() },
     
     // Map<Fruit, Color>
     processor<Map<Fruit, Color>, Set<Fruit>>("keys") { it.keys },
@@ -171,17 +275,20 @@ val processors = listOf(
     processor<Map<Color, List<Fruit>>, _>("filter { it.key.color != Color.Red }") { it.filter { it.key != Color.Red } },
     processor<Map<Color, List<Fruit>>, _>("filter { it.value.any { it.color == Color.Red } }") { it.filter { it.value.any { it.color == Color.Red } } },
     
-    // List<Color>
-    processor<Iterable<Color>, List<String>>("map { it.name }", Map) { it.map { it.name } },
-    processor<Iterable<Color>, List<Color>>("distinct()", Distinct) { it.distinct() },
-    processor<Iterable<Color>, List<Color>>("take(4)") { it.take(4) },
-    processor<List<Color>, List<Color>>("takeLast(4)") { it.takeLast(4) },
-    processor<Iterable<Color>, List<Color>>("drop(2)") { it.drop(2) },
-    processor<List<Color>, List<Color>>("dropLast(2)") { it.dropLast(2) },
-    processor<Iterable<Color>, Color>("first()") { it.first() },
-    processor<Iterable<Color>, Color>("last()") { it.last() },
-    processor<Iterable<Color>, Boolean>("any { it == Color.Red }") { it.any { it == Color.Red } },
-    processor<Iterable<Color>, Boolean>("none { it == Color.Red }") { it.none { it == Color.Red } },
+    // Map<Color, List<Fruit>>
+    processor<Map<Color, List<Fruit>>, Map<Color, Int>>("mapValues { it.value.size }") { it.mapValues { it.value.size } },
+    processor<Map<Color, List<Fruit>>, Map<Color, Fruit>>("mapValues { it.value.maxBy { it.price } }") { it.mapValues { it.value.maxBy { it.price } } },
+    processor<Map<Color, List<Fruit>>, Map<Color, Fruit>>("mapValues { it.value.minBy { it.price } } }") { it.mapValues { it.value.minBy { it.price } } },
+    processor<Map<Color, List<Fruit>>, Map<Color, Double>>("mapValues { it.value.maxOf { it.price } }") { it.mapValues { it.value.maxOf { it.price } } },
+    processor<Map<Color, List<Fruit>>, Map<Color, Double>>("mapValues { it.value.minOf { it.price } } ") { it.mapValues { it.value.minOf { it.price } } },
+    
+    // Map<Color, Int>
+    processor<Map<Color, Int>, Map<Color, Int>>("filter { it.value > 2 }", Filter) { it.filter { it.value > 2 } },
+    processor<Map<Color, Int>, Map<Color, Int>>("filter { it.value < 2 }", Filter) { it.filter { it.value < 2 } },
+    processor<Map<Color, Int>, Map<Color, Int>>("filter { it.value % 2 == 0 }", Filter) { it.filter { it.value % 2 == 0 } },
+    processor<Map<Color, Int>, Map<Color, Int>>("filter { it.value % 2 == 1 }", Filter) { it.filter { it.value % 2 == 1 } },
+    processor<Map<Color, Int>, Set<Color>>("keys") { it.keys },
+    processor<Map<Color, Int>, Collection<Int>>("values") { it.values },
     
     // List<String>
     processor<Iterable<String>, List<Int>>("map { it.length }", Map) { it.map { it.length } },
@@ -194,12 +301,46 @@ val processors = listOf(
     processor<List<String>, List<String>>("takeLast(4)") { it.takeLast(4) },
     processor<Iterable<String>, List<String>>("drop(2)") { it.drop(2) },
     processor<List<String>, List<String>>("dropLast(2)") { it.dropLast(2) },
+    
+    // Map<Fruit, Fruit>
+    processor<Map<Fruit, Fruit>, Set<Fruit>>("keys") { it.keys },
+    processor<Map<Fruit, Fruit>, Collection<Fruit>>("values") { it.values },
+    processor<Map<Fruit, Fruit>, Map<Fruit, Double>>("mapValues { it.value.price }") { it.mapValues { it.value.price } },
+    processor<Map<Fruit, Fruit>, Map<Fruit, Color>>("mapValues { it.value.color }") { it.mapValues { it.value.color } },
+    
+    // Map<Fruit, Double>
+    processor<Map<Fruit, Double>, Set<Fruit>>("keys") { it.keys },
+    processor<Map<Fruit, Double>, Collection<Double>>("values") { it.values },
+    processor<Map<Fruit, Double>, Map<Fruit, Double>>("filter { it.value < 12.0 }", Filter) { it.filter { it.value < 12.0 } },
+    processor<Map<Fruit, Double>, Map<Fruit, Double>>("filter { it.value > 4.0 }", Filter) { it.filter { it.value > 4.0 } },
+    
+    
+    // Map<Color, Color>
+    processor<Map<Color, Color>, Set<Color>>("keys") { it.keys },
+    processor<Map<Color, Color>, Collection<Color>>("values") { it.values },
+    processor<Map<Color, Color>, Map<Color, Color>>("filter { it.key != it.value }", Filter) { it.filter { it.key != it.value } },
+    processor<Map<Color, Color>, Map<Color, Color>>("filter { it.key == it.value }", Filter) { it.filter { it.key == it.value } },
+    
+    // Map<Color, Double>
+    processor<Map<Color, Double>, Set<Color>>("keys") { it.keys },
+    processor<Map<Color, Double>, Collection<Double>>("values") { it.values },
+    processor<Map<Color, Double>, Map<Color, Double>>("filter { it.value < 12.0 }", Filter) { it.filter { it.value < 12.0 } },
+    processor<Map<Color, Double>, Map<Color, Double>>("filter { it.value > 4.0 }", Filter) { it.filter { it.value > 4.0 } },
 )
 
 val resultTypes = processors.map { it.to }.distinct().associateBy { it.classifierName }
 
 val KType.classifierName: String
     get() = (classifier as? KClass<*>)?.simpleName.orEmpty()
+
+val KType.itOneOfAllowedTerminalTypes  
+    get() = when {
+        this in basicSupportedTypes -> true
+        this.classifier == List::class || this.classifier == Set::class -> arguments.first().let { it.type in basicSupportedTypes }
+        else -> false
+    }
+
+val basicSupportedTypes = setOf(typeOf<Fruit>(), typeOf<Color>(), typeOf<Int>(), typeOf<Double>(), typeOf<String>(), typeOf<Boolean>())
 
 val fruits = listOf(
     Fruit("🍎", "Apple", 2.0, Color.Red),
@@ -261,9 +402,7 @@ data class Processor(
     val to: KType,
     val process: (Any?) -> Any?,
     val category: ProcessorCategory?
-) {
-    val isTerminal by lazy { processors.none { to.isSubtypeOf(it.from) } }
-}
+)
 
 enum class ProcessorCategory {
     Filter, Map, Sort, Distinct
