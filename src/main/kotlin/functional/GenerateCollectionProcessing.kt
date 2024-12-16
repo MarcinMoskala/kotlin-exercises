@@ -1,12 +1,16 @@
 package functional
 
 import functional.ProcessorCategory.*
-import kotlin.reflect.KClass
+import org.junit.Test
+import kotlin.random.Random
 import kotlin.reflect.KProperty1
 import kotlin.reflect.KType
 import kotlin.reflect.full.isSubtypeOf
 import kotlin.reflect.full.memberProperties
+import kotlin.reflect.full.starProjectedType
 import kotlin.reflect.typeOf
+import kotlin.test.assertFalse
+import kotlin.test.assertTrue
 
 fun main() {
     println("How many processing steps would you like? (1-8)")
@@ -23,24 +27,6 @@ fun main() {
 
     println(challenge.toDisplayString())
 
-//    println("What is the type of the result? (${resultTypes.keys.joinToString { it }})")
-//    val answerResultType = readln()
-//    check(answerResultType in resultTypes.keys) { "Invalid type" }
-//    if (answerResultType != challenge.resultType.classifierName) {
-//        println("Incorrect. The correct type is ${challenge.resultType.classifierName}")
-//        return
-//    }
-//    if (challenge.resultType.arguments.isNotEmpty()) {
-//        println("What is the type arguments?")
-//        val types = List(challenge.resultType.arguments.size) { index ->
-//            if (index == 0) println("First element:") else println("Second element:")
-//            readln()
-//        }
-//        if (types != challenge.resultType.arguments.map { it.type?.classifierName }) {
-//            println("Incorrect. The correct types are ${challenge.resultType.arguments.map { it.type?.classifierName }}")
-//            return
-//        }
-//    }
     println("What is the result?")
     val answer = readln()
     val correctAnswer = challenge.result.toString()
@@ -50,46 +36,6 @@ fun main() {
     }
     println("Correct!")
 }
-
-//fun main() {
-// Find dead ends
-//    val deadEnds = processors.filter { processor ->
-//        processors.none { processor.to.isSubtypeOf(it.from) } && !processor.to.itOneOfAllowedTerminalTypes
-//    }.map { it.to }.distinct()
-//    if (deadEnds.isNotEmpty()) {
-//        println("Dead ends:")
-//        deadEnds.forEach { println(it) }
-//    } else {
-//        println("No dead ends")
-//    }
-
-// Collect all unique results
-//    val results = mutableMapOf<KType, List<Any>>()
-//    var resultsDisplay: Map<KType, List<Any>> = emptyMap()
-//    repeat(10) {
-//        repeat(10000) {
-//            val challenge = generateCollectionProcessingChallenge(Random.nextInt(8))
-//            val result = challenge.resultType
-//            results[result] = (results[result] ?: emptyList()) + challenge.result
-//        }
-//        val newResultsDisplay = results.mapValues { (k, v) ->
-//            when {
-//                k.isSubtypeOf(typeOf<Iterable<*>>()) -> (v as List<List<Any>>).flatten()
-//                k.isSubtypeOf(typeOf<Map<*, *>>()) -> (v as List<Map<Any, Any>>).flatMap { it.toList() }
-//                else -> v
-//            }.distinct()
-//        }
-//        if (newResultsDisplay != resultsDisplay) {
-//            resultsDisplay = newResultsDisplay
-//            println("Results:")
-//            resultsDisplay.forEach { (k, v) ->
-//                println("$k: $v")
-//            }
-//        } else {
-//            println("No new results")
-//        }
-//    }
-//}
 
 private fun printFruitPropertiesTable(fruitsUsed: Set<Fruit>, fruitPropertiesUsed: List<KProperty1<Fruit, *>>) {
     if (fruitsUsed.isEmpty()) return
@@ -146,25 +92,153 @@ fun generateCollectionProcessingChallengeOrNull(steps: Int, fruitsNum: Int): Col
         resultType = processor.to
         chosenProcessors.add(processor)
     }
-    if (anyProcessingStepIsRedundant(start, chosenProcessors, result)) {
+    if (anyGroupOfProcessingStepsIsRedundant(start, chosenProcessors, result)) {
+        return null
+    }
+    if (Random.nextBoolean() && resultIsEmpty(result)) { // Empty results were too common
         return null
     }
     return CollectionProcessingChallenge(start, chosenProcessors, result, resultType, fruitsUsed)
 }
 
-private fun anyProcessingStepIsRedundant(start: List<Fruit>, steps: List<Processor>, result: Any): Boolean =
-    steps.zipWithNext().any { (step, nextStep) -> // We need to check the next steps, to cover for instant toSet that changes nothing
-        step.to.isSubtypeOf(nextStep.from) && (steps - step).tryProcessAll(start) == result
-    } || steps.last().let { step -> // Last must be checked separately as it had no next step
-        step.to == step.from && (steps - step).tryProcessAll(start) == result
+val KType.itOneOfAllowedTerminalTypes get() = this in supportedTypes
+val supportedTypes: Set<KType> = setOf(
+    typeOf<List<Fruit>>(),
+    typeOf<List<Color>>(),
+    typeOf<List<Boolean>>(),
+    typeOf<Set<Fruit>>(),
+    typeOf<Set<Color>>(),
+    typeOf<Set<Boolean>>(),
+    typeOf<String>(),
+    typeOf<Double>(),
+    typeOf<Int>(),
+    typeOf<Fruit>(),
+    typeOf<Color>(),
+    typeOf<Boolean>(),
+)
+
+
+private fun resultIsEmpty(result: Any): Boolean = when (result) {
+    is List<*> -> result.isEmpty()
+    is Set<*> -> result.isEmpty()
+    is Map<*, *> -> result.isEmpty()
+    is String -> result.isEmpty()
+    is Int -> result == 0
+    is Double -> result == 0.0
+    else -> false
+}
+
+private fun anyGroupOfProcessingStepsIsRedundant(start: List<Fruit>, steps: List<Processor>, result: Any): Boolean {
+    for (indexOfStartCut in 0 until steps.size) {
+        for (indexOfEndCut in (indexOfStartCut + 1) until steps.size) {
+            val stepsBefore = steps.take(indexOfStartCut)
+            val stepsAfter = steps.drop(indexOfEndCut)
+            val typeResultOfStepsBefore = stepsBefore.lastOrNull()?.to ?: typeOf<List<Fruit>>()
+            val typeStartOfStepsAfter = stepsAfter.firstOrNull()?.from ?: continue // TODO: The last step might be redundant
+            if (typeResultOfStepsBefore.isSubtypeOf(typeStartOfStepsAfter)) {
+                if ((stepsBefore + stepsAfter).tryProcessAll(start) == result) {
+                    return true
+                }
+            }
+        }
+    }
+    return false
+}
+
+class AnyGroupOfProcessingStepsIsRedundantTest {
+    @Test
+    fun `should eliminate single reduntant step`() {
+        val start = listOf(
+            Fruit("🍎", "Apple", 2.0, Color.Red),
+            Fruit("🍌", "Banana", 2.5, Color.Yellow),
+            Fruit("🍇", "Grape", 3.0, Color.Red)
+        )
+        val steps = listOf(
+            processor<Iterable<Fruit>, List<Fruit>>(
+                "filter { it.price > 5.0 }",
+                Filter
+            ) { it.filter { it.price > 5.0 } }, // Redundant
+            processor<Iterable<Fruit>, List<Fruit>>(
+                "filter { it.price < 2.0 }",
+                Filter
+            ) { it.filter { it.price < 2.0 } },
+        )
+        assertTrue(anyGroupOfProcessingStepsIsRedundant(start, steps, steps.tryProcessAll(start)!!))
     }
 
-fun List<Processor>.tryProcessAll(start: Any?): Any? {
-    return try {
-        fold(start) { acc, processor -> processor.tryProcess(acc) ?: return null }
-    } catch (e: Exception) {
-        null
+    @Test
+    fun `should eliminate single reduntant step mapping to a different type that is a subtype of the next step type`() {
+        val start = listOf(
+            Fruit("🍎", "Apple", 2.0, Color.Red),
+            Fruit("🍌", "Banana", 2.5, Color.Yellow),
+            Fruit("🍇", "Grape", 3.0, Color.Red)
+        )
+        val steps = listOf(
+            processor<Iterable<Fruit>, List<String>>("map { it.name }", Filter) { it.map { it.name } }, // Redundant
+            processor<Iterable<*>, Int>("count()") { it.count() },
+        )
+        assertTrue(anyGroupOfProcessingStepsIsRedundant(start, steps, steps.tryProcessAll(start)!!))
     }
+
+    @Test
+    fun `should eliminate reduntant group of steps`() {
+        val start = listOf(
+            Fruit("🍎", "Apple", 2.0, Color.Red),
+            Fruit("🍌", "Banana", 2.5, Color.Yellow),
+            Fruit("🍇", "Grape", 3.0, Color.Red),
+            Fruit("🍊", "Orange", 6.0, Color.Orange),
+            Fruit("🍏", "Green Apple", 1.5, Color.Green)
+        )
+        val steps = listOf(
+            processor<Iterable<Fruit>, List<Fruit>>(
+                "filter { it.price < 5.0 }",
+                Filter
+            ) { it.filter { it.price < 5.0 } }, // Eliminates 🍊
+            processor<Iterable<Fruit>, Set<Fruit>>("toSet()") { it.toSet() },
+            processor<Iterable<Fruit>, List<Fruit>>("toList()") { it.toList() },
+        )
+        assertTrue(anyGroupOfProcessingStepsIsRedundant(start, steps, steps.tryProcessAll(start)!!))
+    }
+
+    @Test
+    fun `should not consider incorrect type mappings`() {
+        val start = listOf(
+            Fruit("🍎", "Apple", 2.0, Color.Red),
+            Fruit("🍌", "Banana", 2.5, Color.Yellow),
+            Fruit("🍇", "Grape", 3.0, Color.Red),
+            Fruit("🍊", "Orange", 6.0, Color.Orange),
+            Fruit("🍏", "Green Apple", 1.5, Color.Green)
+        )
+        val steps = listOf(
+            processor<Iterable<Fruit>, List<Color>>("map { it.color }", Map) { it.map { it.color } },
+            processor<Iterable<Color>, Boolean>("none { it == Color.Green }") { it.none { it == Color.Green } },
+        )
+        assertFalse(anyGroupOfProcessingStepsIsRedundant(start, steps, steps.tryProcessAll(start)!!))
+    }
+
+    @Test
+    fun `should not eliminate non-redundant steps`() {
+        val start = listOf(
+            Fruit("🍎", "Apple", 2.0, Color.Red),
+            Fruit("🍌", "Banana", 2.5, Color.Yellow),
+            Fruit("🍇", "Grape", 3.0, Color.Red)
+        )
+        val steps = listOf(
+            processor<Iterable<Fruit>, List<Fruit>>(
+                "filter { it.price >= 2.5 }",
+                Filter
+            ) { it.filter { it.price >= 2.5 } }, // Redundant
+            processor<Iterable<Fruit>, List<Fruit>>(
+                "filter { it.price <= 2.5 }",
+                Filter
+            ) { it.filter { it.price <= 2.5 } },
+        )
+        assertFalse(anyGroupOfProcessingStepsIsRedundant(start, steps, steps.tryProcessAll(start)!!))
+    }
+}
+
+fun List<Processor>.tryProcessAll(start: Any?): Any? {
+    return fold(start) { acc, processor -> processor.tryProcess(acc) ?: return null }
 }
 
 data class CollectionProcessingChallenge(
@@ -194,6 +268,8 @@ val processors = listOf(
     processor<Iterable<Fruit>, List<String>>("map { it.name }", Map) { it.map { it.name } },
     processor<Iterable<Fruit>, List<Color>>("map { it.color }", Map) { it.map { it.color } },
     processor<Iterable<Fruit>, List<Double>>("map { it.price }", Map) { it.map { it.price } },
+    processor<Iterable<Fruit>, List<Fruit>>("reversed()") { it.reversed() },
+
     processor<Iterable<Fruit>, Set<Fruit>>("toSet()") { it.toSet() },
     processor<Iterable<Fruit>, Map<Fruit, Color>>("associateWith { it.color }") { it.associateWith { it.color } },
     processor<Iterable<Fruit>, Map<Color, Fruit>>("associateBy { it.color }") { it.associateBy { it.color } },
@@ -214,6 +290,10 @@ val processors = listOf(
     processor<Iterable<Fruit>, Double>("minOf { it.price }") { it.minOf { it.price } },
     processor<Iterable<Fruit>, Fruit>("maxBy { it.price }") { it.maxBy { it.price } },
     processor<Iterable<Fruit>, Fruit>("minBy { it.price }") { it.minBy { it.price } },
+    processor<Iterable<Fruit>, Double?>("maxOf { it.price }") { it.maxOfOrNull { it.price } },
+    processor<Iterable<Fruit>, Double?>("minOf { it.price }") { it.minOfOrNull { it.price } },
+    processor<Iterable<Fruit>, Fruit?>("maxBy { it.price }") { it.maxByOrNull { it.price } },
+    processor<Iterable<Fruit>, Fruit?>("minBy { it.price }") { it.minByOrNull { it.price } },
     processor<Iterable<Fruit>, List<Fruit>>("take(4)") { it.take(4) },
     processor<List<Fruit>, List<Fruit>>("takeLast(4)") { it.takeLast(4) },
     processor<Iterable<Fruit>, List<Fruit>>("drop(2)") { it.drop(2) },
@@ -231,6 +311,11 @@ val processors = listOf(
         it.zipWithNext { f1, f2 -> f1 to f2.price }.toMap()
     },
 
+    processor<Iterable<Fruit>, Grouping<Fruit, Color>>("groupingBy { it.color }") {
+        it.groupingBy { it.color }
+    },
+    processor<Grouping<Fruit, Color>, Map<Color, Int>>("eachCount()") { it.eachCount() },
+
     processor<Collection<List<Fruit>>, _>("flatten()") { it.flatten() },
 
     // List<Color>
@@ -247,7 +332,6 @@ val processors = listOf(
     processor<Iterable<Color>, Boolean>("any { it == Color.Green }") { it.any { it == Color.Green } },
     processor<Iterable<Color>, Boolean>("none { it == Color.Green }") { it.none { it == Color.Green } },
     processor<Iterable<Color>, Boolean>("all { it == Color.Red }") { it.all { it == Color.Red } },
-    processor<Iterable<Color>, Int>("count { it == Color.Red }") { it.count { it == Color.Red } },
     processor<Iterable<Color>, List<Boolean>>("map { it == Color.Red }", Map) { it.map { it == Color.Red } },
     processor<Iterable<Color>, List<Boolean>>("map { it == Color.Green }", Map) { it.map { it == Color.Green } },
 
@@ -259,6 +343,8 @@ val processors = listOf(
     processor<List<Double>, Iterable<Double>>("takeLast(4)") { it.takeLast(4) },
     processor<Iterable<Double>, Iterable<Double>>("drop(2)") { it.drop(2) },
     processor<List<Double>, Iterable<Double>>("dropLast(2)") { it.dropLast(2) },
+    processor<List<Double>, Double>("max()") { it.max() },
+    processor<List<Double>, Double>("min()") { it.min() },
 
     // List<Boolean>
     processor<Iterable<Boolean>, Int>("count { it }") { it.count { it } },
@@ -282,6 +368,23 @@ val processors = listOf(
     processor<Iterable<*>, Int>("count()") { it.count() },
 
     processor<Iterable<List<Fruit>>, List<Fruit>>("flatten()") { it.flatten() },
+
+    // Iterable<String>
+    processor<Iterable<String>, String>("max()") { it.max() },
+    processor<Iterable<String>, String>("min()") { it.min() },
+    processor<Iterable<String>, String>("first()") { it.first() },
+    processor<Iterable<String>, String>("last()") { it.last() },
+    processor<Iterable<String>, List<String>>("distinct()", Distinct) { it.distinct() },
+    processor<Iterable<String>, List<String>>("sorted()", Sort) { it.sorted() },
+    processor<Iterable<String>, List<String>>("sortedDescending()", Sort) { it.sortedDescending() },
+    processor<Iterable<String>, List<String>>("sortedBy { it.length }", Sort) { it.sortedBy { it.length } },
+    processor<Iterable<String>, List<String>>(
+        "sortedByDescending { it.length }",
+        Sort
+    ) { it.sortedByDescending { it.length } },
+    processor<Iterable<String>, String>("maxBy { it.length }") { it.maxBy { it.length } },
+    processor<Iterable<String>, String>("minBy { it.length }") { it.minBy { it.length } },
+    processor<Iterable<String>, List<String>>("distinctBy { it.length }", Distinct) { it.distinctBy { it.length } },
 
     // Map<Fruit, Color>
     processor<Map<Fruit, Color>, Set<Fruit>>("keys") { it.keys },
@@ -387,23 +490,6 @@ val processors = listOf(
     ) { it.filter { it.value > 4.0 } },
 )
 
-val resultTypes = processors.map { it.to }.distinct().associateBy { it.classifierName }
-
-val KType.classifierName: String
-    get() = (classifier as? KClass<*>)?.simpleName.orEmpty()
-
-val KType.itOneOfAllowedTerminalTypes
-    get() = when {
-        this in basicSupportedTypes -> true
-        this.classifier == List::class || this.classifier == Set::class -> arguments.first()
-            .let { it.type in basicSupportedTypes }
-
-        else -> false
-    }
-
-val basicSupportedTypes =
-    setOf(typeOf<Fruit>(), typeOf<Color>(), typeOf<Int>(), typeOf<Double>(), typeOf<String>(), typeOf<Boolean>())
-
 val fruits = listOf(
     Fruit("🍎", "Apple", 2.0, Color.Red),
     Fruit("🍌", "Banana", 2.5, Color.Yellow),
@@ -466,9 +552,13 @@ data class Processor(
 ) {
     fun tryProcess(value: Any?): Any? = try {
         process(value)
+    } catch (e: TypeCastException) {
+        throw e
     } catch (e: Exception) {
         null
     }
+
+    override fun toString(): String = display
 }
 
 enum class ProcessorCategory {
