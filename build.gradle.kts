@@ -44,6 +44,6 @@ tasks.withType<JavaCompile>().configureEach {
     options.compilerArgs.add("--enable-preview")
 }
 
-kotlin {
-    jvmToolchain(20)
-}
+//kotlin {
+//    jvmToolchain(20)
+//}
