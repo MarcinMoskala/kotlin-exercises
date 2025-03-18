@@ -42,7 +42,7 @@ class ProductTest {
 //       assertEquals(10.0, Product("Apple", 1.0, 10).calculateTotalValue())
 //       assertEquals(0.0, Product("Apple", 1.0, 0).calculateTotalValue())
 //       assertEquals(0.0, Product("Apple", 0.0, 10).calculateTotalValue())
-//       assertEquals(3.6, Product("Apple", 1.2, 3).calculateTotalValue())
+//       assertEquals(4.8, Product("Apple", 1.2, 4).calculateTotalValue())
 //   }
 // 
 //   @Test
