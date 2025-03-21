@@ -19,7 +19,9 @@ private fun generateChallenge(expectedStatements: Int, vg: ValueGenerator = Valu
             if (statementsToAdd <= 0) break
             state = state.addRandomStatementToRandomBlock(statementLeft = statementsToAdd, vg = vg)
         }
-        state = state.purgeStatementsThatNotAffectResult()
+        state = state
+            .purgePrintsThatHappenAtTheSameTime()
+            .purgeStatementsThatNotAffectResult()
     } while (state.countStatements() < expectedStatements)
     return state
 }
@@ -205,13 +207,14 @@ fun ChallengeStatement.purgeStatementsThatNotAffectResult(): ChallengeStatement 
     fun theSameResult(statements: List<ChallengeStatement>) = getResult(statements) == currentResult
 
     fun List<ChallengeStatement>.removeUsages(statement: ChallengeStatement): List<ChallengeStatement> {
-        if (statement is ChallengeStatement.LaunchJob) {
-            return this - ChallengeStatement.Cancel(statement.variableName) - ChallengeStatement.Join(statement.variableName)
-            // TODO: Deeper removal
-        }
-        if (statement is ChallengeStatement.Async) {
-            return this - ChallengeStatement.PrintAwait(statement.variableName)
-            // TODO: Deeper removal
+        if (statement is ChallengeStatement.WithUsage) {
+            return ChallengeStatement.CoroutineScope(this)
+                .minusAll(
+                    ChallengeStatement.Cancel(statement.variableName),
+                    ChallengeStatement.Join(statement.variableName),
+                    ChallengeStatement.PrintAwait(statement.variableName),
+                )
+                .statements
         }
         return this
     }
@@ -240,6 +243,16 @@ fun ChallengeStatement.purgeStatementsThatNotAffectResult(): ChallengeStatement 
         }
     }
 
+    // Remove repeating print or delay
+    for ((curr, next) in newStatements.zipWithNext()) {
+        if (curr is ChallengeStatement.Print && next is ChallengeStatement.Print) {
+            newStatements -= curr
+        }
+        if (curr is ChallengeStatement.Delay && next is ChallengeStatement.Delay) {
+            newStatements -= curr
+        }
+    }
+
     // Try the same for all statements
     newStatements = newStatements.map { it.purgeStatementsThatNotAffectResult() }
 
@@ -250,6 +263,26 @@ fun ChallengeStatement.purgeStatementsThatNotAffectResult(): ChallengeStatement 
         return this
     }
 }
+
+fun ChallengeStatement.purgePrintsThatHappenAtTheSameTime(): ChallengeStatement {
+    val results = this.getResult()
+    var newStatement = this
+    for ((elem, next) in results.zipWithNext()) {
+        if (elem.time == next.time) {
+            newStatement = this - ChallengeStatement.Print(elem.value)
+        }
+    }
+    return newStatement
+}
+
+private operator fun ChallengeStatement.minus(elem: ChallengeStatement): ChallengeStatement = when(this) {
+    is ChallengeBlock -> withStatements((statements - elem).map { it - elem })
+    else -> this
+}
+
+
+private fun ChallengeBlock.minusAll(vararg elem: ChallengeStatement): ChallengeBlock =
+    withStatements((statements - elem).map { if (it is ChallengeBlock) it.minusAll(*elem) else it })
 
 private fun <T> List<T>.plusAt(index: Int, element: T): List<T> {
     require(index in 0..size)
@@ -262,6 +295,9 @@ sealed class ChallengeStatement {
     sealed class ChallengeBlock : ChallengeStatement() {
         abstract val statements: List<ChallengeStatement>
         abstract fun withStatements(statements: List<ChallengeStatement>): ChallengeBlock
+    }
+    interface WithUsage {
+        val variableName: String
     }
 
     // 1
@@ -281,18 +317,18 @@ sealed class ChallengeStatement {
 
     // 2
     data class LaunchJob(
-        val variableName: String,
+        override val variableName: String,
         override val statements: List<ChallengeStatement>
-    ) : ChallengeBlock() {
+    ) : ChallengeBlock(), WithUsage {
         override fun withStatements(statements: List<ChallengeStatement>): ChallengeBlock =
             copy(statements = statements)
     }
 
     data class Async(
-        val variableName: String,
+        override val variableName: String,
         val resultString: String,
         override val statements: List<ChallengeStatement>
-    ) : ChallengeBlock() {
+    ) : ChallengeBlock(), WithUsage {
         override fun withStatements(statements: List<ChallengeStatement>): ChallengeBlock =
             copy(statements = statements)
     }
@@ -300,7 +336,6 @@ sealed class ChallengeStatement {
     data class Join(val variableName: String) : ChallengeStatement()
     data class Cancel(val variableName: String) : ChallengeStatement()
     data class PrintAwait(val variableName: String) : ChallengeStatement()
-
 
 //    data object RunBlocking
 //    data object Exception: ChallengeStatement()
@@ -324,8 +359,9 @@ private fun List<ChallengeStatement>.toCodeWithIndent() = joinToString(separator
     it.toCode().prependIndent("    ")
 }
 
+data class PrintWithTime(val value: String, val time: Long)
 
-private fun ChallengeStatement.getResult(): String = buildList<String> {
+private fun ChallengeStatement.getResult(): List<PrintWithTime> = buildList<PrintWithTime> {
     val jobs = mutableMapOf<String, Job>()
     val deferred = mutableMapOf<String, Deferred<String>>()
     runTest {
@@ -349,17 +385,23 @@ private fun ChallengeStatement.getResult(): String = buildList<String> {
                 }
 
                 is ChallengeStatement.Delay -> delay(statement.time.toLong())
-                is ChallengeStatement.Print -> add("[${currentTime}] ${statement.text}")
+                is ChallengeStatement.Print -> add(PrintWithTime(statement.text, currentTime))
                 is ChallengeStatement.Cancel -> requireNotNull(jobs[statement.variableName]) { "No ${statement.variableName} in jobs $jobs" }.cancel()
                 is ChallengeStatement.Join -> requireNotNull(jobs[statement.variableName]) { "No ${statement.variableName} in jobs $jobs" }.join()
-                is ChallengeStatement.PrintAwait -> add("[${currentTime}] " + requireNotNull(deferred[statement.variableName]) { "No ${statement.variableName} in deferred $deferred" }.await())
+                is ChallengeStatement.PrintAwait -> add(PrintWithTime(requireNotNull(deferred[statement.variableName]) { "No ${statement.variableName} in deferred $deferred" }.await(), currentTime))
             }
         }
 
         evaluate(this@getResult, this)
-        add("[${currentTime}] Done")
+        add(PrintWithTime("(done)", currentTime))
     }
-}.joinToString("\n")
+}
+
+private fun ChallengeStatement.getStringResult() =
+    getResult().joinToString(separator = "\n") {
+        "[${it.time}] ${it.value}"
+    }
+
 
 private class ValueGenerator(seed: Long = Random.nextLong()) {
     val random = Random(seed)
@@ -383,7 +425,7 @@ fun main() {
     println("******")
     println(challenge.purgeStatementsThatNotAffectResult().toCode())
     println("******")
-    println(challenge.getResult())
+    println(challenge.getStringResult())
 }
 
 class AsyncGameTest {
