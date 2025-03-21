@@ -2,6 +2,7 @@ package coroutines
 
 import coroutines.ChallengeStatement.ChallengeBlock
 import functional.collections.map.filter
+import io.ktor.utils.io.CancellationException
 import kotlinx.coroutines.*
 import kotlinx.coroutines.test.currentTime
 import kotlinx.coroutines.test.runTest
@@ -60,6 +61,25 @@ private fun generateChallengeStatement(
             variableName = vg.nextJobName(),
             statements = generateStatementBody()
         )
+
+        ChallengeStatementType.ThrowException -> ChallengeStatement.ThrowException(
+            cancellation = false
+        )
+
+        ChallengeStatementType.ThrowCancellationException -> ChallengeStatement.ThrowException(
+            cancellation = true
+        )
+
+        ChallengeStatementType.TryCatch -> ChallengeStatement.TryCatch(
+            statements = generateStatementBody()
+        )
+
+        ChallengeStatementType.SupervisorScope -> ChallengeStatement.SupervisorScope(
+            statements = generateStatementBody()
+        )
+//        ChallengeStatementType.RunBlocking -> ChallengeStatement.RunBlocking(
+//            statements = generateStatementBody()
+//        )
     }
 }
 
@@ -96,12 +116,13 @@ enum class ChallengeStatementType(
     AsyncAwait(isBlock = true, hasUsage = true),
     LaunchJoin(isBlock = true, hasUsage = true),
     LaunchCancel(isBlock = true, hasUsage = true),
+
     // 3
-//    ThrowException,
-//    ThrowCancellationException,
-//    TryCatch(isBlock = true),
-//    TryCatchCoroutineScope(isBlock = true),
-//    SupervisorScope(isBlock = true),
+//    RunBlocking,
+    ThrowException,
+    ThrowCancellationException,
+    TryCatch(isBlock = true),
+    SupervisorScope(isBlock = true)
     ;
 
     val statementsNeeded = 1 + (if (isBlock) 1 else 0) + (if (hasUsage) 1 else 0)
@@ -201,7 +222,7 @@ fun ChallengeStatement.purgeStatementsThatNotAffectResult(): ChallengeStatement 
 
     // We must compare like statements, otherwise comparing launch or async is useless
     fun getResult(statements: List<ChallengeStatement>) =
-        runCatching { ChallengeStatement.CoroutineScope(statements).getResult() }.getOrNull()
+        ChallengeStatement.CoroutineScope(statements).getResult()
 
     val currentResult = getResult(statements)
     fun theSameResult(statements: List<ChallengeStatement>) = getResult(statements) == currentResult
@@ -226,21 +247,38 @@ fun ChallengeStatement.purgeStatementsThatNotAffectResult(): ChallengeStatement 
         if (statement !is ChallengeBlock) return@forEach
         val afterInlining = statements.flatMap { if (it == statement) statement.statements else listOf(it) }
             .removeUsages(statement)
-        println("After inlining $statement, the result is: ${ChallengeStatement.CoroutineScope(statements).getResult()}")
+        println(
+            "After inlining $statement, the result is: ${
+                ChallengeStatement.CoroutineScope(statements).getResult()
+            }"
+        )
         if (theSameResult(afterInlining)) {
             println("It is the same, so inlining $statement")
-            newStatements -= statement
+            newStatements = afterInlining
+            println("the result it $afterInlining")
         }
     }
 
     // Try removing different statements
     newStatements.forEach { statement ->
         val afterRemoving = (newStatements - statement).removeUsages(statement)
-        println("After removing $statement, the result is: ${ChallengeStatement.CoroutineScope(statements).getResult()}")
+        println(
+            "After removing $statement, the result is: ${
+                ChallengeStatement.CoroutineScope(statements).getResult()
+            }"
+        )
         if (theSameResult(afterRemoving)) {
             println("It is the same, so removing $statement")
-            newStatements -= statement
+            newStatements = afterRemoving
+            println("the result it $afterRemoving")
         }
+    }
+
+    // Remove empty blocks
+    val emptyBlocks = newStatements.filter { it is ChallengeBlock && it.statements.isEmpty() }
+    newStatements = newStatements.minus(emptyBlocks)
+    for (emptyBlock in emptyBlocks) {
+        newStatements = newStatements.removeUsages(emptyBlock)
     }
 
     // Remove repeating print or delay
@@ -269,13 +307,22 @@ fun ChallengeStatement.purgePrintsThatHappenAtTheSameTime(): ChallengeStatement 
     var newStatement = this
     for ((elem, next) in results.zipWithNext()) {
         if (elem.time == next.time) {
-            newStatement = this - ChallengeStatement.Print(elem.value)
+            if (ChallengeStatement.Print(elem.value) in this) {
+                newStatement = this - ChallengeStatement.Print(elem.value)
+            } else {
+                newStatement = this - ChallengeStatement.Print(next.value)
+            }
         }
     }
     return newStatement
 }
 
-private operator fun ChallengeStatement.minus(elem: ChallengeStatement): ChallengeStatement = when(this) {
+private operator fun ChallengeStatement.contains(statement: ChallengeStatement): Boolean = when (this) {
+    is ChallengeBlock -> this == statement || statements.any { it.contains(statement) }
+    else -> this == statement
+}
+
+private operator fun ChallengeStatement.minus(elem: ChallengeStatement): ChallengeStatement = when (this) {
     is ChallengeBlock -> withStatements((statements - elem).map { it - elem })
     else -> this
 }
@@ -296,6 +343,7 @@ sealed class ChallengeStatement {
         abstract val statements: List<ChallengeStatement>
         abstract fun withStatements(statements: List<ChallengeStatement>): ChallengeBlock
     }
+
     interface WithUsage {
         val variableName: String
     }
@@ -337,10 +385,21 @@ sealed class ChallengeStatement {
     data class Cancel(val variableName: String) : ChallengeStatement()
     data class PrintAwait(val variableName: String) : ChallengeStatement()
 
-//    data object RunBlocking
-//    data object Exception: ChallengeStatement()
-//    data class TryCatch(override val statements: List<ChallengeStatement>): ChallengeBlock()
-//    data class SupervisorScope(override val statements: List<ChallengeStatement>): ChallengeBlock()
+    data class ThrowException(val cancellation: Boolean) : ChallengeStatement()
+    data class RunBlocking(override val statements: List<ChallengeStatement>) : ChallengeBlock() {
+        override fun withStatements(statements: List<ChallengeStatement>): ChallengeBlock =
+            copy(statements = statements)
+    }
+
+    data class TryCatch(override val statements: List<ChallengeStatement>) : ChallengeBlock() {
+        override fun withStatements(statements: List<ChallengeStatement>): ChallengeBlock =
+            copy(statements = statements)
+    }
+
+    data class SupervisorScope(override val statements: List<ChallengeStatement>) : ChallengeBlock() {
+        override fun withStatements(statements: List<ChallengeStatement>): ChallengeBlock =
+            copy(statements = statements)
+    }
 }
 
 private fun ChallengeStatement.toCode(): String = when (this) {
@@ -353,6 +412,10 @@ private fun ChallengeStatement.toCode(): String = when (this) {
     is ChallengeStatement.PrintAwait -> "println($variableName.await())"
     is ChallengeStatement.Join -> "$variableName.join()"
     is ChallengeStatement.Cancel -> "$variableName.cancel()"
+    is ChallengeStatement.RunBlocking -> "runBlocking {\n${statements.toCodeWithIndent()}\n}"
+    is ChallengeStatement.SupervisorScope -> "supervisorScope {\n${statements.toCodeWithIndent()}\n}"
+    is ChallengeStatement.TryCatch -> "try {\n${statements.toCodeWithIndent()}\n} catch (e: Exception) {\n    println(\"Got exception\")\n}"
+    is ChallengeStatement.ThrowException -> if (cancellation) "throw CancellationException()" else "throw Exception()"
 }
 
 private fun List<ChallengeStatement>.toCodeWithIndent() = joinToString(separator = "\n") {
@@ -364,43 +427,81 @@ data class PrintWithTime(val value: String, val time: Long)
 private fun ChallengeStatement.getResult(): List<PrintWithTime> = buildList<PrintWithTime> {
     val jobs = mutableMapOf<String, Job>()
     val deferred = mutableMapOf<String, Deferred<String>>()
-    runTest {
-        suspend fun evaluate(statement: ChallengeStatement, scope: CoroutineScope) {
-            when (statement) {
-                is ChallengeStatement.CoroutineScope -> coroutineScope {
-                    statement.statements.forEach { evaluate(it, this) }
-                }
+    println("Evaluating:\n${this@getResult}\n${toCode()}")
+    try {
+        runTest {
+            suspend fun evaluate(statement: ChallengeStatement, scope: CoroutineScope) {
+                when (statement) {
+                    is ChallengeStatement.CoroutineScope -> coroutineScope {
+                        statement.statements.forEach { evaluate(it, this@coroutineScope) }
+                    }
 
-                is ChallengeStatement.Launch -> scope.launch {
-                    statement.statements.forEach { evaluate(it, this) }
-                }
+                    is ChallengeStatement.Launch -> scope.launch {
+                        statement.statements.forEach { evaluate(it, this@launch) }
+                    }
 
-                is ChallengeStatement.LaunchJob -> jobs[statement.variableName] = scope.launch {
-                    statement.statements.forEach { evaluate(it, this) }
-                }
+                    is ChallengeStatement.LaunchJob -> jobs[statement.variableName] = scope.launch {
+                        statement.statements.forEach { evaluate(it, this@launch) }
+                    }
 
-                is ChallengeStatement.Async -> deferred[statement.variableName] = scope.async {
-                    statement.statements.forEach { evaluate(it, this) }
-                    statement.resultString
-                }
+                    is ChallengeStatement.Async -> deferred[statement.variableName] = scope.async {
+                        statement.statements.forEach { evaluate(it, this@async) }
+                        statement.resultString
+                    }
 
-                is ChallengeStatement.Delay -> delay(statement.time.toLong())
-                is ChallengeStatement.Print -> add(PrintWithTime(statement.text, currentTime))
-                is ChallengeStatement.Cancel -> requireNotNull(jobs[statement.variableName]) { "No ${statement.variableName} in jobs $jobs" }.cancel()
-                is ChallengeStatement.Join -> requireNotNull(jobs[statement.variableName]) { "No ${statement.variableName} in jobs $jobs" }.join()
-                is ChallengeStatement.PrintAwait -> add(PrintWithTime(requireNotNull(deferred[statement.variableName]) { "No ${statement.variableName} in deferred $deferred" }.await(), currentTime))
+                    is ChallengeStatement.Delay -> delay(statement.time.toLong())
+                    is ChallengeStatement.Print -> add(PrintWithTime(statement.text, currentTime))
+                    is ChallengeStatement.Cancel -> requireNotNull(jobs[statement.variableName]) { "No ${statement.variableName} in jobs $jobs" }.cancel()
+                    is ChallengeStatement.Join -> requireNotNull(jobs[statement.variableName]) { "No ${statement.variableName} in jobs $jobs" }.join()
+                    is ChallengeStatement.PrintAwait -> add(
+                        PrintWithTime(
+                            requireNotNull(deferred[statement.variableName]) { "No ${statement.variableName} in deferred $deferred" }.await(),
+                            currentTime
+                        )
+                    )
+
+                    // TODO
+                    is ChallengeStatement.RunBlocking -> runBlocking {
+                        statement.statements.forEach {
+                            evaluate(it, this)
+                        }
+                    }
+
+                    is ChallengeStatement.SupervisorScope -> supervisorScope {
+                        statement.statements.forEach { evaluate(it, this) }
+                    }
+
+                    is ChallengeStatement.TryCatch -> try {
+                        statement.statements.forEach { evaluate(it, this) }
+                    } catch (e: Exception) {
+                        add(PrintWithTime("Got exception", currentTime))
+                    }
+
+                    is ChallengeStatement.ThrowException -> if (statement.cancellation) throw GameCancellationException() else throw GameException()
+                }
+            }
+            try {
+                evaluate(this@getResult, this)
+                add(PrintWithTime("(done)", currentTime))
+            } catch (npe: GameException) {
+                add(PrintWithTime("(exception)", currentTime))
+            } catch (npe: GameCancellationException) {
+                add(PrintWithTime("(cancellation exception)", currentTime))
             }
         }
-
-        evaluate(this@getResult, this)
-        add(PrintWithTime("(done)", currentTime))
+    } catch (npe: GameException) {
+        // no-op
+    } catch (npe: GameCancellationException) {
+        // no-op
     }
 }
 
-private fun ChallengeStatement.getStringResult() =
-    getResult().joinToString(separator = "\n") {
-        "[${it.time}] ${it.value}"
-    }
+private class GameException : Exception()
+private class GameCancellationException : CancellationException()
+
+
+private fun ChallengeStatement.getStringResult() = getResult()
+    .joinToString(separator = "\n") { "[${it.time}] ${it.value}" }
 
 
 private class ValueGenerator(seed: Long = Random.nextLong()) {
@@ -414,10 +515,10 @@ private class ValueGenerator(seed: Long = Random.nextLong()) {
 }
 
 fun main() {
-    val challenge = generateChallenge(10)
+    val challenge = generateChallenge(20)
     println(challenge)
     println("******")
-    println("Befre purge")
+    println("Before purge")
     println("******")
     println(challenge.toCode())
     println("******")
@@ -439,12 +540,10 @@ class AsyncGameTest {
 
     @Test
     fun `should not generate two prints or delays one after another`() {
-
     }
 
     @Test
     fun `should purge statements that do not change result`() {
-
     }
 
     @Test
