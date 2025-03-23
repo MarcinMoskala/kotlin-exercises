@@ -7,33 +7,127 @@ import kotlinx.coroutines.*
 import kotlinx.coroutines.test.currentTime
 import kotlinx.coroutines.test.runTest
 import org.junit.Test
-import java.util.concurrent.atomic.AtomicInteger
-import kotlin.random.Random
+ import kotlin.random.Random
 import kotlin.test.assertEquals
 
-private fun generateChallenge(expectedStatements: Int, vg: ValueGenerator = ValueGenerator()): ChallengeStatement {
+suspend fun generateChallenge(expectedStatements: Int, difficulty: CoroutinesRacesDifficulty) =
+    generateChallenge(expectedStatements, vg = ValueGenerator(), types = difficulty.typesForDifficulty())
+
+enum class CoroutinesRacesDifficulty {
+    Simple,
+    WithSynchronization,
+    WithExceptions
+}
+
+private fun CoroutinesRacesDifficulty.typesForDifficulty(): List<ChallengeStatementType> = when (this) {
+    CoroutinesRacesDifficulty.Simple -> listOf(
+        ChallengeStatementType.Delay,
+        ChallengeStatementType.Print,
+        ChallengeStatementType.Launch,
+        ChallengeStatementType.AsyncAwait,
+    )
+
+    CoroutinesRacesDifficulty.WithSynchronization -> listOf(
+        ChallengeStatementType.Delay,
+        ChallengeStatementType.Delay,
+        ChallengeStatementType.Print,
+        ChallengeStatementType.Print,
+        ChallengeStatementType.Launch,
+        ChallengeStatementType.AsyncAwait,
+        ChallengeStatementType.CoroutineScope,
+        ChallengeStatementType.LaunchJoin,
+        ChallengeStatementType.LaunchCancel,
+    )
+
+    CoroutinesRacesDifficulty.WithExceptions -> listOf(
+        ChallengeStatementType.Delay,
+        ChallengeStatementType.Delay,
+        ChallengeStatementType.Print,
+        ChallengeStatementType.Print,
+        ChallengeStatementType.Print,
+        ChallengeStatementType.Launch,
+        ChallengeStatementType.AsyncAwait,
+        ChallengeStatementType.CoroutineScope,
+        ChallengeStatementType.LaunchJoin,
+        ChallengeStatementType.LaunchCancel,
+        ChallengeStatementType.ThrowException,
+        ChallengeStatementType.ThrowCancellationException,
+        ChallengeStatementType.TryCatch,
+        ChallengeStatementType.SupervisorScope
+    )
+}
+
+suspend private fun generateChallenge(
+    expectedStatements: Int,
+    vg: ValueGenerator = ValueGenerator(),
+    types: List<ChallengeStatementType> = ChallengeStatementType.entries,
+): ChallengeStatement {
     var state: ChallengeStatement =
-        ChallengeStatement.CoroutineScope(generateInitialBodyStatements(expectedStatements, vg = vg))
+        ChallengeStatement.CoroutineScope(generateInitialBodyStatements(expectedStatements, vg = vg, types = types))
     do {
+        prepareValuesInHolder(vg, state)
         while (true) {
             val statementsToAdd = expectedStatements - state.countStatements()
             if (statementsToAdd <= 0) break
-            state = state.addRandomStatementToRandomBlock(statementLeft = statementsToAdd, vg = vg)
+            state = state.addRandomStatementToRandomBlock(statementLeft = statementsToAdd, vg = vg, types = types)
         }
+        yield()
         state = state
-            .purgePrintsThatHappenAtTheSameTime()
-            .purgeStatementsThatNotAffectResult()
+            .purgePrintsThatHappenAtTheSameTime(vg)
+            .purgeStatementsThatNotAffectResult(vg)
+        yield()
     } while (state.countStatements() < expectedStatements)
     return state
 }
 
-private fun generateInitialBodyStatements(statementLeft: Int, vg: ValueGenerator): List<ChallengeStatement> =
+private fun ChallengeStatement.forEveryStatement(block: (ChallengeStatement) -> Unit) {
+    block(this)
+    if (this is ChallengeBlock) {
+        statements.forEach { it.forEveryStatement(block) }
+    }
+}
+
+private fun prepareValuesInHolder(vg: ValueGenerator, state: ChallengeStatement) {
+    val values = sortedSetOf<String>()
+    val jobs = sortedSetOf<String>()
+    val strings = sortedSetOf<String>()
+    state.forEveryStatement {
+        if (it is ChallengeStatement.LaunchJob) {
+            jobs += it.variableName
+        }
+        if (it is ChallengeStatement.Async) {
+            values += it.variableName
+            strings += it.resultString
+        }
+        if (it is ChallengeStatement.Print) {
+            strings += it.text
+        }
+        if (it is ChallengeStatement.PrintAwait) {
+            strings += it.variableName
+        }
+    }
+    vg.restartJobNames(jobs)
+    vg.restartVariableNames(values)
+    vg.restartStrings(strings)
+}
+
+private fun generateInitialBodyStatements(
+    statementLeft: Int,
+    vg: ValueGenerator,
+    types: List<ChallengeStatementType>,
+): List<ChallengeStatement> =
     buildList {
         add(
             generateChallengeStatement(
-                randomChallengeStatementType(statementsLeft = statementLeft, isFirstInBlock = true, vg = vg),
+                randomChallengeStatementType(
+                    statementsLeft = statementLeft,
+                    isFirstInBlock = true,
+                    vg = vg,
+                    types = types
+                ),
                 statementLeft = statementLeft,
-                vg = vg
+                vg = vg,
+                types = types,
             )
         )
     }
@@ -41,10 +135,11 @@ private fun generateInitialBodyStatements(statementLeft: Int, vg: ValueGenerator
 private fun generateChallengeStatement(
     type: ChallengeStatementType,
     statementLeft: Int,
-    vg: ValueGenerator
+    vg: ValueGenerator,
+    types: List<ChallengeStatementType>,
 ): ChallengeStatement {
     fun generateStatementBody() =
-        generateInitialBodyStatements(statementLeft = statementLeft - type.statementsNeeded, vg = vg)
+        generateInitialBodyStatements(statementLeft = statementLeft - type.statementsNeeded, vg = vg, types = types)
     return when (type) {
         ChallengeStatementType.Delay -> ChallengeStatement.Delay(vg.random.nextInt(1, 3) * 1000)
         ChallengeStatementType.Print -> ChallengeStatement.Print(vg.nextString())
@@ -77,15 +172,12 @@ private fun generateChallengeStatement(
         ChallengeStatementType.SupervisorScope -> ChallengeStatement.SupervisorScope(
             statements = generateStatementBody()
         )
-//        ChallengeStatementType.RunBlocking -> ChallengeStatement.RunBlocking(
-//            statements = generateStatementBody()
-//        )
     }
 }
 
 private fun generateStatementUsageStatement(
     statementType: ChallengeStatementType,
-    statement: ChallengeStatement
+    statement: ChallengeStatement,
 ): ChallengeStatement = when (statementType) {
     ChallengeStatementType.AsyncAwait -> ChallengeStatement.PrintAwait((statement as ChallengeStatement.Async).variableName)
     ChallengeStatementType.LaunchJoin -> ChallengeStatement.Join((statement as ChallengeStatement.LaunchJob).variableName)
@@ -97,9 +189,9 @@ private fun randomChallengeStatementType(
     vg: ValueGenerator,
     isFirstInBlock: Boolean = false,
     statementsLeft: Int = Int.MAX_VALUE,
+    types: List<ChallengeStatementType>,
 ) =
-    (ChallengeStatementType.entries + ChallengeStatementType.Delay + ChallengeStatementType.Delay + ChallengeStatementType.Print)
-        .filter { statementsLeft >= it.statementsNeeded }
+    types.filter { statementsLeft >= it.statementsNeeded }
         .let { if (isFirstInBlock) it.filterNot { it.hasUsage } - listOf(ChallengeStatementType.Print) else it }
         .randomOrNull(vg.random) ?: ChallengeStatementType.Print
 
@@ -110,15 +202,14 @@ enum class ChallengeStatementType(
     Delay,
     Print,
     Launch(isBlock = true),
-    CoroutineScope(isBlock = true),
 
     // 2
+    CoroutineScope(isBlock = true),
     AsyncAwait(isBlock = true, hasUsage = true),
     LaunchJoin(isBlock = true, hasUsage = true),
     LaunchCancel(isBlock = true, hasUsage = true),
 
     // 3
-//    RunBlocking,
     ThrowException,
     ThrowCancellationException,
     TryCatch(isBlock = true),
@@ -142,23 +233,23 @@ private fun ChallengeStatement.countPossibleInsertionPoints(): Int =
 
 private fun ChallengeStatement.addRandomStatementToRandomBlock(
     statementLeft: Int,
-    vg: ValueGenerator
+    vg: ValueGenerator,
+    types: List<ChallengeStatementType>,
 ): ChallengeStatement {
-    val statementType = randomChallengeStatementType(statementsLeft = statementLeft, vg = vg)
+    val statementType = randomChallengeStatementType(statementsLeft = statementLeft, vg = vg, types = types)
     val statement = generateChallengeStatement(
         statementType,
         statementLeft = statementLeft - statementType.statementsNeeded,
-        vg = vg
+        vg = vg,
+        types = types,
     )
-
-    println(this.toCode())
     return addStatementAtRandomPosition(statementType, statement, vg = vg)
 }
 
 private fun ChallengeStatement.addStatementAtRandomPosition(
     statementType: ChallengeStatementType,
     statement: ChallengeStatement,
-    vg: ValueGenerator
+    vg: ValueGenerator,
 ): ChallengeStatement {
     val possibleInsertionPoints = countPossibleInsertionPoints()
     var chosenBlock = if (possibleInsertionPoints <= 1) 0 else vg.random.nextInt(0, possibleInsertionPoints - 1)
@@ -179,12 +270,9 @@ private fun ChallengeStatement.addStatementAtRandomPosition(
                     val laterPositionInsertionPoints =
                         restOfStatementsInBlock.sumOf { it.countPossibleInsertionPoints() + 1 } + 1
                     val usage = generateStatementUsageStatement(statementType, statement)
-                    println("The rest is:\n${restOfStatementsInBlock.joinToString { it.toCode() }}")
-                    println("Can insert rest in $laterPositionInsertionPoints insertion points")
                     val chosenUsageInsertionPoint = vg.random.nextInt(laterPositionInsertionPoints)
                     if (chosenUsageInsertionPoint <= restOfStatementsInBlock.size) {
                         // Adding to the same block
-                        print("Adding to the same block")
                         newBlock.withStatements(
                             newBlock.statements.plusAt(
                                 indexWhereToAddStatement + 1 + chosenUsageInsertionPoint,
@@ -193,7 +281,6 @@ private fun ChallengeStatement.addStatementAtRandomPosition(
                         )
                     } else {
                         // Adding to later child block
-                        print("Adding to later child block")
                         chosenBlock += newBlock.countPossibleInsertionPoints() + chosenUsageInsertionPoint
                         valueToInsertAtChosenBlock = usage
                         newBlock.withStatements(newBlock.statements.map { it.addStatementToChosenInsertionPoint() })
@@ -215,14 +302,13 @@ private fun ChallengeStatement.addStatementAtRandomPosition(
     return addStatementToChosenInsertionPoint()
 }
 
-fun ChallengeStatement.purgeStatementsThatNotAffectResult(): ChallengeStatement {
-    println("Purging $this")
+private fun ChallengeStatement.purgeStatementsThatNotAffectResult(vg: ValueGenerator): ChallengeStatement {
     if (this !is ChallengeBlock) return this
     var newStatements = statements
 
     // We must compare like statements, otherwise comparing launch or async is useless
     fun getResult(statements: List<ChallengeStatement>) =
-        ChallengeStatement.CoroutineScope(statements).getResult()
+          ChallengeStatement.CoroutineScope(statements).getResult()
 
     val currentResult = getResult(statements)
     fun theSameResult(statements: List<ChallengeStatement>) = getResult(statements) == currentResult
@@ -240,37 +326,21 @@ fun ChallengeStatement.purgeStatementsThatNotAffectResult(): ChallengeStatement 
         return this
     }
 
-    println("The result is: $currentResult")
-
     // Try inlining different statements
     statements.forEach { statement ->
         if (statement !is ChallengeBlock) return@forEach
         val afterInlining = statements.flatMap { if (it == statement) statement.statements else listOf(it) }
             .removeUsages(statement)
-        println(
-            "After inlining $statement, the result is: ${
-                ChallengeStatement.CoroutineScope(statements).getResult()
-            }"
-        )
         if (theSameResult(afterInlining)) {
-            println("It is the same, so inlining $statement")
             newStatements = afterInlining
-            println("the result it $afterInlining")
         }
     }
 
     // Try removing different statements
     newStatements.forEach { statement ->
         val afterRemoving = (newStatements - statement).removeUsages(statement)
-        println(
-            "After removing $statement, the result is: ${
-                ChallengeStatement.CoroutineScope(statements).getResult()
-            }"
-        )
         if (theSameResult(afterRemoving)) {
-            println("It is the same, so removing $statement")
             newStatements = afterRemoving
-            println("the result it $afterRemoving")
         }
     }
 
@@ -292,26 +362,27 @@ fun ChallengeStatement.purgeStatementsThatNotAffectResult(): ChallengeStatement 
     }
 
     // Try the same for all statements
-    newStatements = newStatements.map { it.purgeStatementsThatNotAffectResult() }
+    newStatements = newStatements.map { it.purgeStatementsThatNotAffectResult(vg) }
 
     if (newStatements != statements) {
         return withStatements(newStatements)
-            .purgeStatementsThatNotAffectResult()
+            .purgeStatementsThatNotAffectResult(vg)
     } else {
         return this
     }
 }
 
-fun ChallengeStatement.purgePrintsThatHappenAtTheSameTime(): ChallengeStatement {
+private fun ChallengeStatement.purgePrintsThatHappenAtTheSameTime(vg: ValueGenerator): ChallengeStatement {
     val results = this.getResult()
     var newStatement = this
     for ((elem, next) in results.zipWithNext()) {
         if (elem.time == next.time) {
-            if (ChallengeStatement.Print(elem.value) in this) {
-                newStatement = this - ChallengeStatement.Print(elem.value)
+            val text = if (ChallengeStatement.Print(elem.value) in this) {
+                elem.value
             } else {
-                newStatement = this - ChallengeStatement.Print(next.value)
+                next.value
             }
+            newStatement = this - ChallengeStatement.Print(text)
         }
     }
     return newStatement
@@ -357,7 +428,7 @@ sealed class ChallengeStatement {
     }
 
     data class CoroutineScope(
-        override val statements: List<ChallengeStatement>
+        override val statements: List<ChallengeStatement>,
     ) : ChallengeBlock() {
         override fun withStatements(statements: List<ChallengeStatement>): ChallengeBlock =
             copy(statements = statements)
@@ -366,7 +437,7 @@ sealed class ChallengeStatement {
     // 2
     data class LaunchJob(
         override val variableName: String,
-        override val statements: List<ChallengeStatement>
+        override val statements: List<ChallengeStatement>,
     ) : ChallengeBlock(), WithUsage {
         override fun withStatements(statements: List<ChallengeStatement>): ChallengeBlock =
             copy(statements = statements)
@@ -375,7 +446,7 @@ sealed class ChallengeStatement {
     data class Async(
         override val variableName: String,
         val resultString: String,
-        override val statements: List<ChallengeStatement>
+        override val statements: List<ChallengeStatement>,
     ) : ChallengeBlock(), WithUsage {
         override fun withStatements(statements: List<ChallengeStatement>): ChallengeBlock =
             copy(statements = statements)
@@ -386,10 +457,6 @@ sealed class ChallengeStatement {
     data class PrintAwait(val variableName: String) : ChallengeStatement()
 
     data class ThrowException(val cancellation: Boolean) : ChallengeStatement()
-    data class RunBlocking(override val statements: List<ChallengeStatement>) : ChallengeBlock() {
-        override fun withStatements(statements: List<ChallengeStatement>): ChallengeBlock =
-            copy(statements = statements)
-    }
 
     data class TryCatch(override val statements: List<ChallengeStatement>) : ChallengeBlock() {
         override fun withStatements(statements: List<ChallengeStatement>): ChallengeBlock =
@@ -412,7 +479,6 @@ private fun ChallengeStatement.toCode(): String = when (this) {
     is ChallengeStatement.PrintAwait -> "println($variableName.await())"
     is ChallengeStatement.Join -> "$variableName.join()"
     is ChallengeStatement.Cancel -> "$variableName.cancel()"
-    is ChallengeStatement.RunBlocking -> "runBlocking {\n${statements.toCodeWithIndent()}\n}"
     is ChallengeStatement.SupervisorScope -> "supervisorScope {\n${statements.toCodeWithIndent()}\n}"
     is ChallengeStatement.TryCatch -> "try {\n${statements.toCodeWithIndent()}\n} catch (e: Exception) {\n    println(\"Got exception\")\n}"
     is ChallengeStatement.ThrowException -> if (cancellation) "throw CancellationException()" else "throw Exception()"
@@ -427,7 +493,6 @@ data class PrintWithTime(val value: String, val time: Long)
 private fun ChallengeStatement.getResult(): List<PrintWithTime> = buildList<PrintWithTime> {
     val jobs = mutableMapOf<String, Job>()
     val deferred = mutableMapOf<String, Deferred<String>>()
-    println("Evaluating:\n${this@getResult}\n${toCode()}")
     try {
         runTest {
             suspend fun evaluate(statement: ChallengeStatement, scope: CoroutineScope) {
@@ -451,21 +516,14 @@ private fun ChallengeStatement.getResult(): List<PrintWithTime> = buildList<Prin
 
                     is ChallengeStatement.Delay -> delay(statement.time.toLong())
                     is ChallengeStatement.Print -> add(PrintWithTime(statement.text, currentTime))
-                    is ChallengeStatement.Cancel -> requireNotNull(jobs[statement.variableName]) { "No ${statement.variableName} in jobs $jobs" }.cancel()
-                    is ChallengeStatement.Join -> requireNotNull(jobs[statement.variableName]) { "No ${statement.variableName} in jobs $jobs" }.join()
+                    is ChallengeStatement.Cancel -> jobs[statement.variableName]?.cancel()
+                    is ChallengeStatement.Join -> jobs[statement.variableName]?.join()
                     is ChallengeStatement.PrintAwait -> add(
                         PrintWithTime(
-                            requireNotNull(deferred[statement.variableName]) { "No ${statement.variableName} in deferred $deferred" }.await(),
+                            deferred[statement.variableName]?.await().orEmpty() ,
                             currentTime
                         )
                     )
-
-                    // TODO
-                    is ChallengeStatement.RunBlocking -> runBlocking {
-                        statement.statements.forEach {
-                            evaluate(it, this)
-                        }
-                    }
 
                     is ChallengeStatement.SupervisorScope -> supervisorScope {
                         statement.statements.forEach { evaluate(it, this) }
@@ -506,36 +564,52 @@ private fun ChallengeStatement.getStringResult() = getResult()
 
 private class ValueGenerator(seed: Long = Random.nextLong()) {
     val random = Random(seed)
-    val varCounter = AtomicInteger(1)
-    fun nextVariableName() = "value${varCounter.getAndIncrement()}"
-    val jobCounter = AtomicInteger(1)
-    fun nextJobName() = "job${jobCounter.getAndIncrement()}"
-    val char = AtomicInteger(0)
-    fun nextString() = "${'A' + char.getAndIncrement()}"
+    
+    val variableNamesInitial = (1..1000).map { "value$it" }
+    private val variableNames = ArrayDeque(variableNamesInitial)
+    fun nextVariableName() = variableNames.removeFirst()
+    fun restartVariableNames(used: Set<String>) {
+        variableNames.clear()
+        variableNames.addAll(variableNamesInitial )
+        variableNames.removeAll(used)
+    }
+    
+    val jobNamesInitial = (1..1000).map { "value$it" }
+    private val jobNames = ArrayDeque(jobNamesInitial)
+    fun nextJobName() = jobNames.removeFirst()
+    fun restartJobNames(used: Set<String>) {
+        jobNames.clear()
+        jobNames.addAll(jobNamesInitial)
+        jobNames.removeAll(used)
+    }
+    
+    val stringsInitial = ('A'..'Z').map { it.toString() } + (1..1000).map { "v$it" }
+    private val strings = ArrayDeque(stringsInitial)
+    fun nextString() = strings.removeFirst()
+    fun restartStrings(used: Set<String>) {
+        strings.clear()
+        strings.addAll(stringsInitial)
+        strings.removeAll(used)
+    }
 }
 
-fun main() {
-    val challenge = generateChallenge(20)
-    println(challenge)
-    println("******")
-    println("Before purge")
-    println("******")
-    println(challenge.toCode())
-    println("******")
-    println("After purge")
-    println("******")
-    println(challenge.purgeStatementsThatNotAffectResult().toCode())
-    println("******")
-    println(challenge.getStringResult())
+suspend fun main() {
+    for (level in CoroutinesRacesDifficulty.entries) {
+        val challenge = generateChallenge(20, level)
+            println(challenge.toCode())
+            println(challenge.getStringResult())
+    }
 }
 
 class AsyncGameTest {
 
     @Test
-    fun `should not create bigger challenge than expected`() = repeat(20) {
-        val size = it * 2 + 5
-        val challenge = generateChallenge(size, ValueGenerator(it * 1234L))
-        assertEquals(size, challenge.countStatements())
+    fun `should not create bigger challenge than expected`() = runTest {
+        repeat(20) {
+            val size = it * 2 + 5
+            val challenge = generateChallenge(size, ValueGenerator(it * 1234L))
+            assertEquals(size, challenge.countStatements())
+        }
     }
 
     @Test
