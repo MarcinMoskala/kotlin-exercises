@@ -580,6 +580,21 @@ private class GameCancellationException : CancellationException()
 private fun ChallengeStatement.getStringResult() = getResult()
     .joinToString(separator = "\n") { "[${it.time}] ${it.value}" }
 
+private fun ChallengeStatement.getSequentialResult(): List<String> = getResult()
+    .zipWithNext()
+    .flatMapIndexed { i, (elem, next) ->
+        buildList {
+            if (i == 0 && elem.time != 0L) {
+                add("(${elem.time} sec)")
+            }
+            add(elem.value)
+            if (elem.time != next.time) {
+                val timeDiffSec = (next.time - elem.time) / 1000
+                add("($timeDiffSec sec)")
+            }
+        }
+    }
+
 
 private class ValueGenerator(seed: Long = Random.nextLong()) {
     val random = Random(seed)
@@ -617,6 +632,7 @@ suspend fun main() {
         val challenge = generateChallenge(20, level)
         println(challenge.toCode())
         println(challenge.getStringResult())
+        println(challenge.getSequentialResult())
     }
 }
 
