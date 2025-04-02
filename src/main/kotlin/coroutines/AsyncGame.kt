@@ -8,7 +8,6 @@ import kotlinx.coroutines.test.currentTime
 import kotlinx.coroutines.test.runTest
 import org.junit.Test
 import kotlin.random.Random
-import kotlin.test.assertEquals
 
 suspend fun generateChallenge(expectedStatements: Int, difficulty: CoroutinesRacesDifficulty) =
     generateChallenge(expectedStatements, vg = ValueGenerator(), types = difficulty.typesForDifficulty())
@@ -64,6 +63,7 @@ suspend private fun generateChallenge(
 ): ChallengeStatement {
     var state: ChallengeStatement =
         ChallengeStatement.CoroutineScope(generateInitialBodyStatements(expectedStatements, vg = vg, types = types))
+    var stateFromLastIteration: ChallengeStatement? = null
     do {
         prepareValuesInHolder(vg, state)
         while (true) {
@@ -75,16 +75,21 @@ suspend private fun generateChallenge(
         state = state
             .purgePrintsThatHappenAtTheSameTime(vg)
             .purgeStatementsThatNotAffectResult(vg)
+            .purgeUsagesWithoutStatementsOrStatementsWithoutUsages()
         yield()
+        if (stateFromLastIteration != null && stateFromLastIteration == state) {
+            // State hasn't changed, let's try again
+            state = ChallengeStatement.CoroutineScope(
+                generateInitialBodyStatements(
+                    expectedStatements,
+                    vg = vg,
+                    types = types
+                )
+            )
+        }
+        stateFromLastIteration = state
     } while (state.countStatements() < expectedStatements)
     return state
-}
-
-private fun ChallengeStatement.forEveryStatement(block: (ChallengeStatement) -> Unit) {
-    block(this)
-    if (this is ChallengeBlock) {
-        statements.forEach { it.forEveryStatement(block) }
-    }
 }
 
 private fun prepareValuesInHolder(vg: ValueGenerator, state: ChallengeStatement) {
@@ -407,6 +412,47 @@ private fun ChallengeStatement.purgePrintsThatHappenAtTheSameTime(vg: ValueGener
     return newStatement
 }
 
+private fun ChallengeStatement.purgeUsagesWithoutStatementsOrStatementsWithoutUsages(): ChallengeStatement {
+    val challenge = this
+    return challenge.mapNotNullStatement { statement ->
+        when {
+            statement is ChallengeStatement.Usage && !challenge.anyStatement { it is ChallengeStatement.WithUsage && statement.variableName == it.variableName } -> null
+            statement is ChallengeStatement.WithUsage && !challenge.anyStatement { it is ChallengeStatement.Usage && statement.variableName == it.variableName } -> {
+                when (statement) {
+                    is ChallengeStatement.Async -> ChallengeStatement.Launch(statements = statement.statements)
+                    is ChallengeStatement.LaunchJob -> ChallengeStatement.Launch(statements = statement.statements)
+                    else -> error("$statement is not a statement with usage (if it is, add it to when)")
+                }
+            }
+
+            else -> statement
+        }
+    }!!
+}
+
+private fun ChallengeStatement.forEveryStatement(block: (ChallengeStatement) -> Unit) {
+    block(this)
+    if (this is ChallengeBlock) {
+        statements.forEach { it.forEveryStatement(block) }
+    }
+}
+
+private fun ChallengeStatement.anyStatement(block: (ChallengeStatement) -> Boolean): Boolean {
+    if (block(this)) return true
+    if (this is ChallengeBlock) {
+        for (statement in statements) {
+            if (statement.anyStatement(block)) return true
+        }
+    }
+    return false
+}
+
+private fun ChallengeStatement.mapNotNullStatement(block: (ChallengeStatement) -> ChallengeStatement?): ChallengeStatement? =
+    when (this) {
+        is ChallengeBlock -> withStatements(statements.mapNotNull { block(it)?.mapNotNullStatement(block) })
+        else -> this
+    }
+
 private operator fun ChallengeStatement.contains(statement: ChallengeStatement): Boolean = when (this) {
     is ChallengeBlock -> this == statement || statements.any { it.contains(statement) }
     else -> this == statement
@@ -435,6 +481,10 @@ sealed class ChallengeStatement {
     }
 
     interface WithUsage {
+        val variableName: String
+    }
+
+    interface Usage {
         val variableName: String
     }
 
@@ -471,9 +521,9 @@ sealed class ChallengeStatement {
             copy(statements = statements)
     }
 
-    data class Join(val variableName: String) : ChallengeStatement()
-    data class Cancel(val variableName: String) : ChallengeStatement()
-    data class PrintAwait(val variableName: String) : ChallengeStatement()
+    data class Join(override val variableName: String) : ChallengeStatement(), Usage
+    data class Cancel(override val variableName: String) : ChallengeStatement(), Usage
+    data class PrintAwait(override val variableName: String) : ChallengeStatement(), Usage
 
     data class ThrowException(val cancellation: Boolean) : ChallengeStatement()
 
@@ -608,7 +658,7 @@ private class ValueGenerator(seed: Long = Random.nextLong()) {
         variableNames.removeAll(used)
     }
 
-    val jobNamesInitial = (1..1000).map { "value$it" }
+    val jobNamesInitial = (1..1000).map { "job$it" }
     private val jobNames = ArrayDeque(jobNamesInitial)
     fun nextJobName() = jobNames.removeFirst()
     fun restartJobNames(used: Set<String>) {
@@ -638,12 +688,65 @@ suspend fun main() {
 
 class AsyncGameTest {
 
+    companion object {
+        private val challengesPerDifficulty = 4
+        private fun statementsPerIndex(level: Int) = level * 5 + 5
+
+        private val exampleChallenges by lazy {
+            runBlocking(Dispatchers.Default) {
+                CoroutinesRacesDifficulty.entries.flatMap { difficulty ->
+                    List(challengesPerDifficulty) {
+                        val statements = statementsPerIndex(it)
+                        async {
+                            generateChallenge(
+                                expectedStatements = statements,
+                                difficulty = difficulty,
+                            ).also {
+                                println("Created challenge with $statements statements and $difficulty")
+                            }
+                        }
+                    }
+                }.awaitAll()
+            }
+        }
+    }
+
     @Test
     fun `should not create bigger challenge than expected`() = runTest {
-        repeat(20) {
-            val size = it * 2 + 5
-            val challenge = generateChallenge(size, ValueGenerator(it * 1234L))
-            assertEquals(size, challenge.countStatements())
+        exampleChallenges.forEachIndexed { index, challengeStatement ->
+            val expectedStatements = statementsPerIndex(index % challengesPerDifficulty)
+            val statementsCount = challengeStatement.countStatements()
+            assert(statementsCount == expectedStatements) {
+                "Challenge with $statementsCount statements not as big as expected $expectedStatements"
+            }
+        }
+    }
+
+    @Test
+    fun `should not have repeating, undeclared or unused variables`() {
+        exampleChallenges.forEach { challenge ->
+            val variableDeclarations = mutableListOf<String>()
+            val usedVariables = mutableListOf<String>()
+            challenge.forEveryStatement { statement ->
+                if (statement is ChallengeStatement.WithUsage) {
+                    variableDeclarations += statement.variableName
+                }
+                if (statement is ChallengeStatement.Usage) {
+                    usedVariables += statement.variableName
+                }
+            }
+            assert(variableDeclarations.size == variableDeclarations.toSet().size) {
+                "There are repeating variable declarations: $variableDeclarations\nin $challenge"
+            }
+            assert(usedVariables.size == usedVariables.toSet().size) {
+                "There are repeating variable usages: $usedVariables\nin $challenge"
+            }
+            assert(variableDeclarations.all { it in usedVariables }) {
+                "There are undeclared variables: ${variableDeclarations - usedVariables}\nin $challenge"
+            }
+            assert(usedVariables.all { it in variableDeclarations }) {
+                "There are unused variables: ${usedVariables - variableDeclarations}\nin $challenge"
+            }
         }
     }
 
@@ -652,7 +755,7 @@ class AsyncGameTest {
     }
 
     @Test
-    fun `should purge statements that do not change result`() {
+    fun `should not include statements that do not change result`() {
     }
 
     @Test
