@@ -7,7 +7,7 @@ import kotlinx.coroutines.*
 import kotlinx.coroutines.test.currentTime
 import kotlinx.coroutines.test.runTest
 import org.junit.Test
- import kotlin.random.Random
+import kotlin.random.Random
 import kotlin.test.assertEquals
 
 suspend fun generateChallenge(expectedStatements: Int, difficulty: CoroutinesRacesDifficulty) =
@@ -308,7 +308,7 @@ private fun ChallengeStatement.purgeStatementsThatNotAffectResult(vg: ValueGener
 
     // We must compare like statements, otherwise comparing launch or async is useless
     fun getResult(statements: List<ChallengeStatement>) =
-          ChallengeStatement.CoroutineScope(statements).getResult()
+        ChallengeStatement.CoroutineScope(statements).getResult()
 
     val currentResult = getResult(statements)
     fun theSameResult(statements: List<ChallengeStatement>) = getResult(statements) == currentResult
@@ -351,6 +351,13 @@ private fun ChallengeStatement.purgeStatementsThatNotAffectResult(vg: ValueGener
         newStatements = newStatements.removeUsages(emptyBlock)
     }
 
+    // Remove try-catch blocks with only throw inside
+    for (statement in newStatements) {
+        if (statement is ChallengeStatement.TryCatch && statement.statements.singleOrNull() is ChallengeStatement.ThrowException) {
+            newStatements -= statement
+        }
+    }
+
     // Remove repeating print or delay
     for ((curr, next) in newStatements.zipWithNext()) {
         if (curr is ChallengeStatement.Print && next is ChallengeStatement.Print) {
@@ -358,6 +365,18 @@ private fun ChallengeStatement.purgeStatementsThatNotAffectResult(vg: ValueGener
         }
         if (curr is ChallengeStatement.Delay && next is ChallengeStatement.Delay) {
             newStatements -= curr
+        }
+    }
+
+    // Remove repeating print+delay or delay+print
+    for ((e1, e2, e3, e4) in newStatements.windowed(4, 1)) {
+        if (e1 is ChallengeStatement.Print && e2 is ChallengeStatement.Delay && e3 is ChallengeStatement.Print && e4 is ChallengeStatement.Delay) {
+            newStatements -= e3
+            newStatements -= e4
+        }
+        if (e1 is ChallengeStatement.Delay && e2 is ChallengeStatement.Print && e3 is ChallengeStatement.Delay && e4 is ChallengeStatement.Print) {
+            newStatements -= e3
+            newStatements -= e4
         }
     }
 
@@ -520,7 +539,7 @@ private fun ChallengeStatement.getResult(): List<PrintWithTime> = buildList<Prin
                     is ChallengeStatement.Join -> jobs[statement.variableName]?.join()
                     is ChallengeStatement.PrintAwait -> add(
                         PrintWithTime(
-                            deferred[statement.variableName]?.await().orEmpty() ,
+                            deferred[statement.variableName]?.await().orEmpty(),
                             currentTime
                         )
                     )
@@ -564,16 +583,16 @@ private fun ChallengeStatement.getStringResult() = getResult()
 
 private class ValueGenerator(seed: Long = Random.nextLong()) {
     val random = Random(seed)
-    
+
     val variableNamesInitial = (1..1000).map { "value$it" }
     private val variableNames = ArrayDeque(variableNamesInitial)
     fun nextVariableName() = variableNames.removeFirst()
     fun restartVariableNames(used: Set<String>) {
         variableNames.clear()
-        variableNames.addAll(variableNamesInitial )
+        variableNames.addAll(variableNamesInitial)
         variableNames.removeAll(used)
     }
-    
+
     val jobNamesInitial = (1..1000).map { "value$it" }
     private val jobNames = ArrayDeque(jobNamesInitial)
     fun nextJobName() = jobNames.removeFirst()
@@ -582,7 +601,7 @@ private class ValueGenerator(seed: Long = Random.nextLong()) {
         jobNames.addAll(jobNamesInitial)
         jobNames.removeAll(used)
     }
-    
+
     val stringsInitial = ('A'..'Z').map { it.toString() } + (1..1000).map { "v$it" }
     private val strings = ArrayDeque(stringsInitial)
     fun nextString() = strings.removeFirst()
@@ -596,8 +615,8 @@ private class ValueGenerator(seed: Long = Random.nextLong()) {
 suspend fun main() {
     for (level in CoroutinesRacesDifficulty.entries) {
         val challenge = generateChallenge(20, level)
-            println(challenge.toCode())
-            println(challenge.getStringResult())
+        println(challenge.toCode())
+        println(challenge.getStringResult())
     }
 }
 
