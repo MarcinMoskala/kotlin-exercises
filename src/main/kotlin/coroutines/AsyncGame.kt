@@ -381,11 +381,9 @@ private fun ChallengeBlock.addStatementAtRandomPositionAfter(
 }
 
 private fun ChallengeBlock.purgeStatementsThatNotAffectResult(vg: ValueGenerator): ChallengeBlock {
-    var newStatements = statements
-
     // We must compare like statements, otherwise comparing launch or async is useless
     fun getResult(statements: List<ChallengeStatement>) =
-        ChallengeStatement.CoroutineScope(statements).getResult()
+        ChallengeStatement.CoroutineScope(statements).getResultOrNull()
 
     val currentResult = getResult(statements)
     fun theSameResult(statements: List<ChallengeStatement>) = getResult(statements) == currentResult
@@ -409,8 +407,17 @@ private fun ChallengeBlock.purgeStatementsThatNotAffectResult(vg: ValueGenerator
         return this
     }
 
+    var newStatements = statements
+
+    // Purge print that is the first statement
+    newStatements.firstOrNull()?.let { firstStatement ->
+        if (firstStatement is ChallengeStatement.Print) {
+            newStatements -= firstStatement
+        }
+    }
+
     // Try inlining different statements
-    statements.forEach { statement ->
+    newStatements.forEach { statement ->
         if (statement !is ChallengeBlock) return@forEach
         val afterInlining = statements.flatMap { if (it == statement) statement.statements else listOf(it) }
             .removeUsages(statement)
@@ -693,7 +700,9 @@ private fun List<ChallengeStatement>.toCodeWithIndent() = joinToString(separator
 
 data class PrintWithTime(val value: String, val time: Long)
 
-private fun ChallengeStatement.getResult(): List<PrintWithTime> = buildList<PrintWithTime> {
+private fun ChallengeStatement.getResult(): List<PrintWithTime> = getResultOrNull() ?: error("Incorrect result for state: $this\n${this.toCode()}")
+
+private fun ChallengeStatement.getResultOrNull(): List<PrintWithTime>? = buildList<PrintWithTime> {
     val jobs = mutableMapOf<String, Job>()
     val deferred = mutableMapOf<String, Deferred<String>>()
     try {
@@ -752,7 +761,7 @@ private fun ChallengeStatement.getResult(): List<PrintWithTime> = buildList<Prin
                             is ChallengeStatement.ThrowException -> if (statement.cancellation) throw GameCancellationException() else throw GameException()
                         }
                     }
-                    evaluate(this@getResult, this)
+                    evaluate(this@getResultOrNull, this)
                     add(PrintWithTime("(done)", currentTime))
                 }
             } catch (t: TimeoutCancellationException) {
@@ -771,6 +780,9 @@ private fun ChallengeStatement.getResult(): List<PrintWithTime> = buildList<Prin
         // no-op
     } catch (e: AssertionError) {
         // no-op, this is UncompletedCoroutinesError that results from runTest not finishing for 1 sec
+    } catch (e: Exception) {
+        println("Incorrect result for state: ${this@getResultOrNull}\n${this@getResultOrNull.toCode()}")
+        return null
     }
 }
 
