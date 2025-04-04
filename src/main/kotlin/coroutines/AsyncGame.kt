@@ -8,6 +8,7 @@ import kotlinx.coroutines.test.currentTime
 import kotlinx.coroutines.test.runTest
 import org.junit.Test
 import kotlin.random.Random
+import kotlin.time.Duration.Companion.seconds
 
 suspend fun generateChallenge(expectedStatements: Int, difficulty: CoroutinesRacesDifficulty) =
     generateChallenge(expectedStatements, vg = ValueGenerator(), types = difficulty.typesForDifficulty())
@@ -121,6 +122,8 @@ private fun prepareValuesInHolder(vg: ValueGenerator, state: ChallengeStatement)
         }
         if (it is ChallengeStatement.CompleteCompletableDeferred) {
             strings += it.text
+        }
+        if (it is ChallengeStatement.CompletableDeferred) {
             values += it.variableName
         }
         if (it is ChallengeStatement.Job) {
@@ -303,15 +306,27 @@ private fun ChallengeBlock.addRandomStatementToRandomBlock(
         types = types,
     )
     val usageStatements = generateStatementUsagesStatements(statementType, statement, vg = vg)
-    var withStatement = addStatementAtRandomPosition(statement, vg = vg)
-    for (usageStatement in usageStatements) {
-        withStatement = withStatement.addStatementAtRandomPositionAfter(
-            usageStatement,
-            afterStatement = statement,
-            vg = vg
-        )
+    return when (usageStatements.size) {
+        0 -> addStatementAtRandomPosition(statement, vg = vg)
+        1 -> addStatementAtRandomPosition(statement, vg = vg)
+            .addStatementAtRandomPositionAfter(usageStatements.first(), afterStatement = statement, vg = vg)
+
+        2 -> {
+            val (u1, u2) = usageStatements
+            addStatementAtFirstPosition(statement)
+                .addStatementAtRandomPositionAfter(u1, afterStatement = statement, vg = vg)
+                .addStatementAtRandomPositionAfter(u2, afterStatement = u1, vg = vg)
+
+        }
+
+        else -> error("Unsupported number of usages: ${usageStatements.size}")
     }
-    return withStatement
+}
+
+private fun ChallengeBlock.addStatementAtFirstPosition(
+    statement: ChallengeStatement,
+): ChallengeBlock {
+    return withStatements(listOf(statement) + statements)
 }
 
 private fun ChallengeBlock.addStatementAtRandomPosition(
@@ -419,6 +434,13 @@ private fun ChallengeBlock.purgeStatementsThatNotAffectResult(vg: ValueGenerator
         newStatements = newStatements.removeUsages(emptyBlock)
     }
 
+    // Remove launch with only print
+    for (statement in newStatements) {
+        if (statement is ChallengeStatement.Launch && statement.statements.all { it is ChallengeStatement.Print }) {
+            newStatements -= statement
+        }
+    }
+
     // Remove try-catch blocks with only throw inside
     for (statement in newStatements) {
         if (statement is ChallengeStatement.TryCatch && statement.statements.singleOrNull() is ChallengeStatement.ThrowException) {
@@ -497,25 +519,30 @@ private fun ChallengeBlock.purgeJoinsThatResultWithInfiniteWait(): ChallengeBloc
     fun ChallengeStatement.hasInfiniteWait(): Boolean =
         this.getResult().any { it.time > 1_000_000 }
 
-    fun ChallengeBlock.withoutUsageItsDeclarationAndItsUsages(usage: ChallengeStatement): ChallengeBlock =
-        mapNotNullStatement {
-            if (usage !is ChallengeStatement.Usage) return@mapNotNullStatement it
+    fun ChallengeBlock.withoutUsageItsDeclarationAndItsUsages(usage: ChallengeStatement): ChallengeBlock {
+        val variableName = when (usage) {
+            is ChallengeStatement.WithUsage -> usage.variableName
+            is ChallengeStatement.Usage -> usage.variableName
+            else -> error("Incorrect argument: $usage")
+        }
+        return mapNotNullStatement {
             when {
-                it is ChallengeStatement.LaunchJob && it.variableName == usage.variableName -> ChallengeStatement.Launch(
+                it is ChallengeStatement.LaunchJob && it.variableName == variableName -> ChallengeStatement.Launch(
                     statements = it.statements
                 )
 
-                it is ChallengeStatement.WithUsage && it.variableName == usage.variableName -> null
-                it is ChallengeStatement.Usage && it.variableName == usage.variableName -> null
+                it is ChallengeStatement.WithUsage && it.variableName == variableName -> null
+                it is ChallengeStatement.Usage && it.variableName == variableName -> null
                 else -> it
             }
         }
+    }
 
     if (!hasInfiniteWait()) {
         return this
     }
     val potentialStatementsToRemove =
-        this.statements.filter { it is ChallengeStatement.Join || it is ChallengeStatement.PrintAwait }
+        this.filterFromAllStatements { it is ChallengeStatement.Job || it is ChallengeStatement.CompletableDeferred }
     for (potentialStatement in potentialStatementsToRemove) {
         if (!(this - potentialStatement).hasInfiniteWait()) {
             return withoutUsageItsDeclarationAndItsUsages(potentialStatement)
@@ -542,6 +569,9 @@ private fun ChallengeStatement.anyStatement(block: (ChallengeStatement) -> Boole
     }
     return false
 }
+
+private fun ChallengeBlock.filterFromAllStatements(predicate: (ChallengeStatement) -> Boolean): List<ChallengeStatement> =
+    buildList { forEveryStatement { if(predicate(it)) add(it) } }
 
 private fun ChallengeBlock.mapNotNullStatement(block: (ChallengeStatement) -> ChallengeStatement?): ChallengeBlock =
     withStatements(statements.mapNotNull { block(it) }
@@ -667,61 +697,61 @@ private fun ChallengeStatement.getResult(): List<PrintWithTime> = buildList<Prin
     val jobs = mutableMapOf<String, Job>()
     val deferred = mutableMapOf<String, Deferred<String>>()
     try {
-        runTest {
-            suspend fun evaluate(statement: ChallengeStatement, scope: CoroutineScope) {
-                when (statement) {
-                    is ChallengeStatement.CoroutineScope -> coroutineScope {
-                        statement.statements.forEach { evaluate(it, this@coroutineScope) }
-                    }
-
-                    is ChallengeStatement.Launch -> scope.launch {
-                        statement.statements.forEach { evaluate(it, this@launch) }
-                    }
-
-                    is ChallengeStatement.LaunchJob -> jobs[statement.variableName] = scope.launch {
-                        statement.statements.forEach { evaluate(it, this@launch) }
-                    }
-
-                    is ChallengeStatement.Async -> deferred[statement.variableName] = scope.async {
-                        statement.statements.forEach { evaluate(it, this@async) }
-                        statement.resultString
-                    }
-
-                    is ChallengeStatement.Delay -> delay(statement.time.toLong())
-                    is ChallengeStatement.Print -> add(PrintWithTime(statement.text, currentTime))
-                    is ChallengeStatement.Cancel -> jobs[statement.variableName]?.cancel()
-                    is ChallengeStatement.Join -> jobs[statement.variableName]?.join()
-                    is ChallengeStatement.PrintAwait -> add(
-                        PrintWithTime(
-                            deferred[statement.variableName]?.await().orEmpty(),
-                            currentTime
-                        )
-                    )
-
-                    is ChallengeStatement.Job -> jobs[statement.variableName] = Job()
-                    is ChallengeStatement.CompletableDeferred -> deferred[statement.variableName] =
-                        CompletableDeferred<String>()
-
-                    is ChallengeStatement.CompleteJob -> (jobs[statement.variableName] as? CompletableJob)?.complete()
-                    is ChallengeStatement.CompleteCompletableDeferred -> (deferred[statement.variableName] as? CompletableDeferred<String>)?.complete(
-                        statement.text
-                    )
-
-                    is ChallengeStatement.SupervisorScope -> supervisorScope {
-                        statement.statements.forEach { evaluate(it, this) }
-                    }
-
-                    is ChallengeStatement.TryCatch -> try {
-                        statement.statements.forEach { evaluate(it, this) }
-                    } catch (e: Exception) {
-                        add(PrintWithTime("Got exception", currentTime))
-                    }
-
-                    is ChallengeStatement.ThrowException -> if (statement.cancellation) throw GameCancellationException() else throw GameException()
-                }
-            }
+        runTest(timeout = 1.seconds) {
             try {
                 withTimeout(10_000_000) {
+                    suspend fun evaluate(statement: ChallengeStatement, scope: CoroutineScope) {
+                        when (statement) {
+                            is ChallengeStatement.CoroutineScope -> coroutineScope {
+                                statement.statements.forEach { evaluate(it, this@coroutineScope) }
+                            }
+
+                            is ChallengeStatement.Launch -> scope.launch {
+                                statement.statements.forEach { evaluate(it, this@launch) }
+                            }
+
+                            is ChallengeStatement.LaunchJob -> jobs[statement.variableName] = scope.launch {
+                                statement.statements.forEach { evaluate(it, this@launch) }
+                            }
+
+                            is ChallengeStatement.Async -> deferred[statement.variableName] = scope.async {
+                                statement.statements.forEach { evaluate(it, this@async) }
+                                statement.resultString
+                            }
+
+                            is ChallengeStatement.Delay -> delay(statement.time.toLong())
+                            is ChallengeStatement.Print -> add(PrintWithTime(statement.text, currentTime))
+                            is ChallengeStatement.Cancel -> jobs[statement.variableName]?.cancel()
+                            is ChallengeStatement.Join -> jobs[statement.variableName]?.join()
+                            is ChallengeStatement.PrintAwait -> add(
+                                PrintWithTime(
+                                    deferred[statement.variableName]?.await().orEmpty(),
+                                    currentTime
+                                )
+                            )
+
+                            is ChallengeStatement.Job -> jobs[statement.variableName] = Job()
+                            is ChallengeStatement.CompletableDeferred -> deferred[statement.variableName] =
+                                CompletableDeferred<String>()
+
+                            is ChallengeStatement.CompleteJob -> (jobs[statement.variableName] as? CompletableJob)?.complete()
+                            is ChallengeStatement.CompleteCompletableDeferred -> (deferred[statement.variableName] as? CompletableDeferred<String>)?.complete(
+                                statement.text
+                            )
+
+                            is ChallengeStatement.SupervisorScope -> supervisorScope {
+                                statement.statements.forEach { evaluate(it, this) }
+                            }
+
+                            is ChallengeStatement.TryCatch -> try {
+                                statement.statements.forEach { evaluate(it, this) }
+                            } catch (e: Exception) {
+                                add(PrintWithTime("Got exception", currentTime))
+                            }
+
+                            is ChallengeStatement.ThrowException -> if (statement.cancellation) throw GameCancellationException() else throw GameException()
+                        }
+                    }
                     evaluate(this@getResult, this)
                     add(PrintWithTime("(done)", currentTime))
                 }
@@ -739,6 +769,8 @@ private fun ChallengeStatement.getResult(): List<PrintWithTime> = buildList<Prin
         // no-op
     } catch (npe: GameCancellationException) {
         // no-op
+    } catch (e: AssertionError) {
+        // no-op, this is UncompletedCoroutinesError that results from runTest not finishing for 1 sec
     }
 }
 
@@ -802,9 +834,9 @@ fun printState(statement: ChallengeStatement) {
     println(statement.getSequentialResult())
 }
 
-suspend fun main() {
+suspend fun main() = repeat(20) {
     for (level in CoroutinesRacesDifficulty.entries) {
-        val challenge = generateChallenge(20, CoroutinesRacesDifficulty.WithSynchronization)
+        val challenge = generateChallenge(20, level)
         println(challenge.toCode())
         println(challenge.getStringResult())
         println(challenge.getSequentialResult())
@@ -857,10 +889,10 @@ class AsyncGameTest {
             challenge.forEveryStatement { statement ->
                 if (statement is ChallengeStatement.WithUsage) {
                     variableDeclarations += statement.variableName
-                    if (statement is ChallengeStatement.Job || statement is ChallengeStatement.CompletableDeferred) {
-                        expectedUsages += 2
+                    expectedUsages += if (statement is ChallengeStatement.Job || statement is ChallengeStatement.CompletableDeferred) {
+                        2
                     } else {
-                        expectedUsages += 1
+                        1
                     }
                 }
                 if (statement is ChallengeStatement.Usage) {
