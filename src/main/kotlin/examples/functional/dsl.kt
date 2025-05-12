@@ -85,6 +85,7 @@ fun sendEmailToBuyer(buyerEmail: String) {
     email.body = EmailMessage.Content()
     email.body!!.type = "text/plain"
     email.body!!.value = "Thank you for your purchase!"
+    email.send()
 }
 
 class EmailMessage {
