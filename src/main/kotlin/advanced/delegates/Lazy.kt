@@ -1,5 +1,7 @@
 package advanced.delegates.lazy
 
+import kotlin.system.measureTimeMillis      
+
 data class BlogPost(
     val title: String,
     val content: String,
@@ -102,7 +104,7 @@ fun main() {
 //                content = longText,
 //                author = author,
 //            )
-//            repeat(if (it % 4 == 0) 1 else 0) { post.isLongRead }
+//            repeat(if (it % 4 == 0) 1 else 0) { post.wordCount }
 //        }
 //    }.let { println("Reading isLongRead from 10 000 objects 0, 0, 0, or 1 times took $it") }
 //    
