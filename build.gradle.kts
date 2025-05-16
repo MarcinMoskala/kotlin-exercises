@@ -25,12 +25,17 @@ dependencies {
     implementation("io.ktor:ktor-client-core:3.0.2")
     implementation("io.ktor:ktor-client-java:3.0.2")
     implementation("io.ktor:ktor-client-websockets:3.0.2")
+//    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-debug:1.7.3")
 }
 
 tasks.withType<KotlinCompile> {
-    kotlinOptions.freeCompilerArgs = listOf("-Xcontext-receivers", "-Xopt-in=kotlinx.coroutines.ExperimentalCoroutinesApi")
-    kotlinOptions.freeCompilerArgs = listOf("-Xopt-in=kotlinx.coroutines.ExperimentalAtomicApi")
-    kotlinOptions.freeCompilerArgs = listOf("-Xopt-in=kotlinx.coroutines.ExperimentalUuidApi")
+    kotlinOptions.freeCompilerArgs = listOf(
+        "-Xcontext-receivers",
+        "-Xopt-in=kotlinx.coroutines.ExperimentalCoroutinesApi",
+        "-Xopt-in=kotlinx.coroutines.ExperimentalAtomicApi",
+        "-Xopt-in=kotlinx.coroutines.ExperimentalUuidApi",
+//        "-Xdebug",
+    )
 }
 
 java.sourceSets["test"].java {
@@ -44,6 +49,7 @@ powerAssert {
 // Uncomment to use Loom
 tasks.withType<JavaCompile>().configureEach {
     options.compilerArgs.add("--enable-preview")
+
 }
 
 //kotlin {
