@@ -31,7 +31,7 @@ class OrderService(
     suspend fun createOrder(addOrder: AddOrderRequest): AddOrderResponse {
         val totalPrice = calculateOrderTotalPrice(addOrder)
         val ebookCountsAsEbookMap = addOrder.ebookCounts.associate {
-            val ebook = ebookService.getEbook(it.key, it.language) ?: error("Ebook not found")
+            val ebook = ebookService.getEbook(it.key) ?: error("Ebook not found")
             ebook to it.count
         }
         val orderId = orderRepository.addOrder(ebookCountsAsEbookMap, totalPrice)
@@ -47,18 +47,17 @@ class OrderService(
         backgroundScope.launch {
             orderRepository.modifyOrderStatus(orderId, OrderStatus.CONFIRMED)
             val order = orderRepository.findOrderById(orderId) ?: error("Order not found")
-            val job = launch {
+            launch {
                 paymentRepository.completePayment(orderId)
                 orderRepository.createPurchasedEbooks(orderId, order.ebooks)
             }
             order.ebooks.map { ebook ->
                 launch {
                     val ebook = ebookService.generateEbook(ebook) ?: error("Ebook generation failed")
-                    job.join()
                     orderRepository.addGeneratedPurchasedEbook(orderId, ebook)
                     ebook
                 }
-            }.joinAll()
+            }
             orderRepository.modifyOrderStatus(orderId, OrderStatus.FINISHED)
             val ebookUrls = orderRepository.getEbookUrls(orderId)
             emailService.sendEmailToBuyer(order, ebookUrls)
@@ -460,7 +459,7 @@ class FakeEbooksService : EbooksService {
 }
 
 private class FakeEmailService : EmailService {
-    private var emailsSent = listOf <Pair<Order, List<String>>>()
+    private var emailsSent = mutableListOf<Pair<Order, List<String>>>()
 
     override suspend fun sendEmailToBuyer(order: Order, ebookUrls: List<String>) {
         emailsSent += Pair(order, ebookUrls)
