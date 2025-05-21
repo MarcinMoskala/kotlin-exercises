@@ -53,9 +53,8 @@ class OrderService(
             }
             order.ebooks.map { ebook ->
                 launch {
-                    val ebook = ebookService.generateEbook(ebook) ?: error("Ebook generation failed")
-                    orderRepository.addGeneratedPurchasedEbook(orderId, ebook)
-                    ebook
+                    val generated = ebookService.generateEbook(ebook) ?: error("Ebook generation failed")
+                    orderRepository.addGeneratedPurchasedEbook(orderId, generated)
                 }
             }
             orderRepository.modifyOrderStatus(orderId, OrderStatus.FINISHED)
