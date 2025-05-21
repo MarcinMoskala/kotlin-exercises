@@ -31,7 +31,7 @@ class OrderService(
     suspend fun createOrder(addOrder: AddOrderRequest): AddOrderResponse {
         val totalPrice = calculateOrderTotalPrice(addOrder)
         val ebookCountsAsEbookMap = addOrder.ebookCounts.associate {
-            val ebook = ebookService.getEbook(it.key) ?: error("Ebook not found")
+            val ebook = ebookService.getEbook(it.key, it.language) ?: error("Ebook not found")
             ebook to it.count
         }
         val orderId = orderRepository.addOrder(ebookCountsAsEbookMap, totalPrice)
@@ -154,7 +154,7 @@ class OrderService(
             .add(BigDecimal("1.0"))  // Convert from rate to multiplier
 
         // Ensure tax rate is within legal bounds (1.0 to 1.5)
-        return calculatedTaxRate.min(BigDecimal("1.5")).max(BigDecimal("1.0"))
+        return calculatedTaxRate.min(BigDecimal("1.0")).max(BigDecimal("1.0"))
             .setScale(4, RoundingMode.HALF_UP)
     }
 }
@@ -290,7 +290,7 @@ interface OrderRepository {
 }
 
 interface EbooksService {
-    fun getEbook(ebookKey: String, language: Language = Language.EN): Ebook?
+    fun getEbook(ebookKey: String, language: Language): Ebook?
     suspend fun generateEbook(ebook: Ebook): GeneratedEbook?
 }
 
