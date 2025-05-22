@@ -230,6 +230,33 @@ class OrderServiceTest {
             )
         )
     }
+
+    @Test
+    fun `should create orders concurrently`() = backgroundScope.runTest {
+        // given
+        val random = Random(12345)
+        val countries = listOf("DE", "FR", "UK", "IT", "US")
+        val requests = List(100_000) {
+            AddOrderRequest(
+                (1..random.nextInt(3)).map {
+                    val ebook = ebookService.ebooks.random(random)
+                    EbookCount(ebook.key, ebook.language, random.nextInt(0, 4))
+                },
+                Currency.entries.random(random),
+                countries.random(random),
+            )
+        }
+
+        // when
+        requests.map {
+            async(Dispatchers.IO) {
+                orderService.createOrder(it)
+            }
+        }.awaitAll()
+
+        // then
+        assertEquals(requests.size, orderRepository.getOrders().size)
+    }
 }
 
 // Stress test
@@ -533,6 +560,9 @@ private class FakeOrderRepository : OrderRepository {
         return orders[orderId]?.purchasedOrder?.flatMap { it.ebookUrls } ?: emptyList()
     }
 
+    fun getOrders(): List<Order> {
+        return orders.values.toList()
+    }
 }
 
 private class FakePaymentRepository : PaymentRepository {
