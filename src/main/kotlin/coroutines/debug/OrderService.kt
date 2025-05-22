@@ -31,7 +31,7 @@ class OrderService(
     suspend fun createOrder(addOrder: AddOrderRequest): AddOrderResponse {
         val totalPrice = calculateOrderTotalPrice(addOrder)
         val ebookCountsAsEbookMap = addOrder.ebookCounts.associate {
-            val ebook = ebookService.getEbook(it.key, it.language) ?: error("Ebook not found")
+            val ebook = ebookService.getEbook(it.key) ?: error("Ebook not found")
             ebook to it.count
         }
         val orderId = orderRepository.addOrder(ebookCountsAsEbookMap, totalPrice)
@@ -317,7 +317,7 @@ interface OrderRepository {
 }
 
 interface EbooksService {
-    fun getEbook(ebookKey: String, language: Language): Ebook?
+    fun getEbook(ebookKey: String, language: Language = Language.EN): Ebook?
     suspend fun generateEbook(ebook: Ebook): GeneratedEbook?
 }
 
@@ -362,7 +362,7 @@ data class Order(
     val status: OrderStatus,
     val ebooks: List<Ebook>,
     val userId: String,
-    val purchasedOrder: List<PurchasedOrder>
+    val purchasedOrder: List<PurchasedOrder>,
 )
 
 data class PurchasedOrder(
@@ -532,7 +532,7 @@ private class FakeOrderRepository : OrderRepository {
 
     override suspend fun createPurchasedEbooks(
         orderId: String,
-        ebooks: List<Ebook>
+        ebooks: List<Ebook>,
     ) {
         orders[orderId]?.let {
             orders[orderId] = it.copy(purchasedOrder = it.purchasedOrder + PurchasedOrder(orderId, emptyList()))
