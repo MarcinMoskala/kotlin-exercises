@@ -249,10 +249,10 @@ class OrderServiceTest {
 
         // when
         requests.map {
-            async(Dispatchers.IO) {
+            launch(Dispatchers.IO) {
                 orderService.createOrder(it)
             }
-        }.awaitAll()
+        }.joinAll()
 
         // then
         assertEquals(requests.size, orderRepository.getOrders().size)
