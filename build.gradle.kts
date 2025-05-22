@@ -3,8 +3,8 @@
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 plugins {
-    kotlin("jvm") version "2.1.20"
-    kotlin("plugin.power-assert") version "2.1.20"
+    kotlin("jvm") version "2.2.0-RC"
+    kotlin("plugin.power-assert") version "2.2.0-RC"
     application
 }
 
@@ -29,13 +29,12 @@ dependencies {
 }
 
 tasks.withType<KotlinCompile> {
-    kotlinOptions.freeCompilerArgs = listOf(
-        "-Xcontext-receivers",
-        "-Xopt-in=kotlinx.coroutines.ExperimentalCoroutinesApi",
-        "-Xopt-in=kotlinx.coroutines.ExperimentalAtomicApi",
-        "-Xopt-in=kotlinx.coroutines.ExperimentalUuidApi",
-//        "-Xdebug",
-    )
+    compilerOptions {
+        optIn.add("kotlinx.coroutines.ExperimentalCoroutinesApi")
+        optIn.add("kotlinx.coroutines.ExperimentalAtomicApi")
+        optIn.add("kotlinx.coroutines.ExperimentalUuidApi")
+//        freeCompilerArgs.add("-Xdebug")
+    }
 }
 
 java.sourceSets["test"].java {
