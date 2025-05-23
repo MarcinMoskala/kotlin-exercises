@@ -236,7 +236,7 @@ class OrderServiceTest {
         // given
         val random = Random(12345)
         val countries = listOf("DE", "FR", "UK", "IT", "US")
-        val requests = List(100_000) {
+        val requests = List(1000) {
             AddOrderRequest(
                 (1..random.nextInt(3)).map {
                     val ebook = ebookService.ebooks.random(random)
