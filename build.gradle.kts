@@ -3,8 +3,8 @@
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 plugins {
-    kotlin("jvm") version "2.2.0-RC"
-    kotlin("plugin.power-assert") version "2.2.0-RC"
+    kotlin("jvm") version "2.1.20"
+    kotlin("plugin.power-assert") version "2.1.20"
     application
 }
 
