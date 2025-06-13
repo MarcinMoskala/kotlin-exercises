@@ -1,6 +1,7 @@
 package coroutines.starting.beststudent
 
-import kotlinx.coroutines.*
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.test.currentTime
@@ -22,7 +23,7 @@ interface StudentsRepository {
     suspend fun getStudent(id: Int): Student
 }
 
-class RequestTest {
+class BestStudentTest {
 
     @Test
     fun `Function does return the best student in the semester`() = runTest {
