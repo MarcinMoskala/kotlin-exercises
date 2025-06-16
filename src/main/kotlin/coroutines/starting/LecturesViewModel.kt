@@ -1,4 +1,4 @@
-package coroutines.starting
+package coroutines.starting.lecturesviewmodel
 
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -15,18 +15,18 @@ import kotlin.test.assertEquals
 class LecturesViewModel(
     private val lecturesRepository: LecturesRepository,
 ) : ViewModel() {
-    private val _lectures = MutableStateFlow(LecturesUiState())
-    val lectures: StateFlow<LecturesUiState> = _lectures.asStateFlow()
+    private val _uiState = MutableStateFlow(LecturesUiState())
+    val uiState: StateFlow<LecturesUiState> = _uiState.asStateFlow()
 
     init {
-        _lectures.update { it.copy(loading = true) }
+        _uiState.update { it.copy(loading = true) }
         loadPresentations()
     }
 
     fun onToggleFavorite(lectureId: String) {
-        val currentState = _lectures.value.lectures.find { it.id == lectureId }?.isFavorite ?: return
+        val currentState = _uiState.value.lectures.find { it.id == lectureId }?.isFavorite ?: return
         val newState = !currentState
-        _lectures.update {
+        _uiState.update {
             it.copy(lectures = it.lectures.map {
                 if (it.id == lectureId) it.copy(isFavorite = newState) else it
             })
@@ -39,19 +39,13 @@ class LecturesViewModel(
 
     private fun loadPresentations() {
         viewModelScope.launch {
-            try {
-                _lectures.update { it.copy(loading = true) }
-                val lectures = async { lecturesRepository.getPresentations() }
-                val userFavorites = async { lecturesRepository.getUserFavorites() }
-                val favoriteSet = userFavorites.await().toSet()
-                val lecturesUi = lectures.await().map { lecture ->
-                    lecture.toUi(isFavorite = lecture.id in favoriteSet)
-                }
-                _lectures.update { it.copy(lectures = lecturesUi, loading = false) }
-            } catch (e: Exception) {
-                _lectures.update { it.copy(loading = false) }
-                throw e
+            val lectures = async { lecturesRepository.getPresentations() }
+            val userFavorites = async { lecturesRepository.getUserFavorites() }
+            val favoriteSet = userFavorites.await().toSet()
+            val lecturesUi = lectures.await().map { lecture ->
+                lecture.toUi(isFavorite = lecture.id in favoriteSet)
             }
+            _uiState.update { it.copy(lectures = lecturesUi, loading = false) }
         }
     }
 }
@@ -111,19 +105,19 @@ class PresentationsViewModelTest {
     @Test
     fun `initial state should show loading`() {
         // Initial state should show loading
-        assertEquals(true, viewModel.lectures.value.loading)
+        assertEquals(true, viewModel.uiState.value.loading)
 
         // Run initial coroutines
         scheduler.runCurrent()
 
         // Should still be loading while coroutines are in progress
-        assertEquals(true, viewModel.lectures.value.loading)
+        assertEquals(true, viewModel.uiState.value.loading)
 
         // Complete the coroutines
         scheduler.advanceUntilIdle()
 
         // Loading should be false after operations complete
-        assertEquals(false, viewModel.lectures.value.loading)
+        assertEquals(false, viewModel.uiState.value.loading)
     }
 
     @Test
@@ -138,7 +132,7 @@ class PresentationsViewModelTest {
         scheduler.advanceUntilIdle()
 
         // Verify lectures are loaded with correct favorite status
-        val lectures = viewModel.lectures.value.lectures
+        val lectures = viewModel.uiState.value.lectures
         assertEquals(2, lectures.size)
 
         val pres1 = lectures.find { it.id == "1" }
@@ -146,7 +140,7 @@ class PresentationsViewModelTest {
 
         assertEquals(true, pres1?.isFavorite)
         assertEquals(false, pres2?.isFavorite)
-        assertEquals(false, viewModel.lectures.value.loading) // Loading should be false after loading completes
+        assertEquals(false, viewModel.uiState.value.loading) // Loading should be false after loading completes
     }
 
     @Test
@@ -160,7 +154,7 @@ class PresentationsViewModelTest {
         scheduler.advanceUntilIdle()
 
         // Verify initial state
-        val initialPres = viewModel.lectures.value.lectures.first()
+        val initialPres = viewModel.uiState.value.lectures.first()
         assertEquals(false, initialPres.isFavorite)
 
         // Toggle favorite
@@ -175,22 +169,8 @@ class PresentationsViewModelTest {
         scheduler.advanceUntilIdle()
 
         // Verify lecture was updated
-        val updatedPres = viewModel.lectures.value.lectures.first()
+        val updatedPres = viewModel.uiState.value.lectures.first()
         assertEquals(true, updatedPres.isFavorite)
-    }
-
-    @Test
-    fun `should handle error during loading`() {
-        // Setup repository to throw exception
-        repository.shouldThrowException = true
-
-        // Run coroutines
-        scheduler.advanceUntilIdle()
-
-        // Loading should be false after an error occurs
-        assertEquals(false, viewModel.lectures.value.loading)
-        // Presentations should be empty
-        assertEquals(emptyList<PresentationUi>(), viewModel.lectures.value.lectures)
     }
 
     @Test
@@ -215,6 +195,10 @@ class FakeLecturesRepository : LecturesRepository {
     var lastFavoriteId: String? = null
     var lastFavoriteState: Boolean? = null
     var shouldThrowException = false
+    var getPresentationsIsRunning = false
+        private set
+    var getUserFavoritesIsRunning = false
+        private set
 
     fun setPresentations(newPresentations: List<Presentation>) {
         lectures = newPresentations
@@ -228,7 +212,12 @@ class FakeLecturesRepository : LecturesRepository {
         if (shouldThrowException) {
             throw RuntimeException("Test exception")
         }
-        delay(100)
+        getPresentationsIsRunning = true
+        try {
+            delay(100)
+        } finally {
+            getPresentationsIsRunning = false
+        }
         return lectures
     }
 
@@ -236,7 +225,12 @@ class FakeLecturesRepository : LecturesRepository {
         if (shouldThrowException) {
             throw RuntimeException("Test exception")
         }
-        delay(100)
+        getUserFavoritesIsRunning = true
+        try {
+            delay(100)
+        } finally {
+            getUserFavoritesIsRunning = false
+        }
         return favorites
     }
 

@@ -1,4 +1,4 @@
-package coroutines.starting
+package coroutines.starting.notificationsender
 
 import kotlinx.coroutines.*
 import kotlinx.coroutines.test.StandardTestDispatcher
