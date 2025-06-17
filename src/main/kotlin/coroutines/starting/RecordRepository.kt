@@ -1,31 +1,35 @@
-package coroutines.starting.recordrepository
+package coroutines.starting
 
-import kotlinx.coroutines.*
+import kotlinx.coroutines.CompletableDeferred
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.currentTime
 import kotlinx.coroutines.test.runTest
 import java.util.concurrent.atomic.AtomicBoolean
 import kotlin.test.Test
 
-// In the Kafka message processor, the intention is to store the incoming record and commit the offset as quickly as possible, allowing engineService.notifyEngines(...) to run later in the background, so as not to delay processing under high message
-// In the Kafka case, are the engine notifications guaranteed to finish after the commit?
+// In the Kafka message processor, the intention is to store the incoming record and commit
+// the offset as quickly as possible, allowing engineService.notifyEngines(...) to run later
+// in the background, so as not to delay processing under high load.
 class RecordRepository(
     val handler: RecordHandler,
-    val sender: Sender,
+    val messageSender: MessageSender,
     val engineService: EngineService,
     val backgroundScope: CoroutineScope,
 ) {
-    suspend fun processRecord(record: ConsumerRecord) = coroutineScope{
+    suspend fun processRecord(record: ConsumerRecord) {
         handler.storeEvent(record)
             .onSuccess { notifications ->
-                launch  {
+                backgroundScope.launch {
                     notifications.forEach {
                         engineService.notifyEngines(it)
                     }
                 }
-                sender.commit(record)
+                messageSender.commit(record)
             }.onFailure {
-                sender.commit(record)
+                messageSender.commit(record)
             }
     }
 }
@@ -33,7 +37,7 @@ class RecordRepository(
 class ProcessRecordTest {
 
     @Test
-    fun `should commit record without waiting for notify engined`() = runTest {
+    fun `should commit record without waiting for notify engines`() = runTest {
         // Given
         val commitInvoked = CompletableDeferred<Unit>()
         val commitCompleted = AtomicBoolean(false)
@@ -45,7 +49,7 @@ class ProcessRecordTest {
                 return Result.success(listOf(Notification("1"), Notification("2")))
             }
         }
-        val sender = object : Sender {
+        val messageSender = object : MessageSender {
             override suspend fun commit(record: ConsumerRecord) {
                 commitInvoked.complete(Unit)
                 delay(2345)
@@ -58,7 +62,7 @@ class ProcessRecordTest {
                 notifyEngines.set(true)
             }
         }
-        val repository = RecordRepository(handler, sender, engineService, backgroundScope)
+        val repository = RecordRepository(handler, messageSender, engineService, backgroundScope)
 
         // when
         launch {
@@ -87,7 +91,7 @@ interface RecordHandler {
     suspend fun storeEvent(record: ConsumerRecord): Result<List<Notification>>
 }
 
-interface Sender {
+interface MessageSender {
     suspend fun commit(record: ConsumerRecord)
 }
 
