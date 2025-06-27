@@ -1,8 +1,8 @@
 package comment
 
-import domain.comment.NoSuchUserException
-import domain.comment.User
-import domain.comment.UserService
+import coroutines.comment.NoSuchUserException
+import coroutines.comment.User
+import coroutines.comment.UserService
 import kotlinx.coroutines.delay
 
 class FakeUserService : UserService {

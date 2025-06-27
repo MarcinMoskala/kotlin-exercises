@@ -1,4 +1,4 @@
-package domain.comment
+package coroutines.comment
 
 /**
  * Interface for validating comments before they are added to the repository.

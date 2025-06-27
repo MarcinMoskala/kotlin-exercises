@@ -1,4 +1,4 @@
-package domain.comment
+package coroutines.comment
 
 import java.time.Instant
 
@@ -7,6 +7,7 @@ interface CommentRepository {
     suspend fun getComment(id: String): CommentModel?
     suspend fun addComment(comment: CommentModel)
     suspend fun deleteComment(commentId: String)
+    suspend fun getCollectionKeyObservers(collectionKey: String): List<String>
 }
 
 data class CommentModel(

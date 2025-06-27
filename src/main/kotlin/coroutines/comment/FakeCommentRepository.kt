@@ -1,10 +1,11 @@
 package comment
 
-import domain.comment.CommentModel
-import domain.comment.CommentRepository
+import coroutines.comment.CommentModel
+import coroutines.comment.CommentRepository
 
 class FakeCommentRepository: CommentRepository {
     private var comments = listOf<CommentModel>()
+    private var collectionObservers = mapOf<String, List<String>>()
 
     fun has(vararg comment: CommentModel) {
         comments = comments + comment
@@ -12,6 +13,11 @@ class FakeCommentRepository: CommentRepository {
 
     fun clean() {
         comments = emptyList()
+        collectionObservers = emptyMap()
+    }
+
+    fun setObservers(collectionKey: String, observers: List<String>) {
+        collectionObservers = collectionObservers + (collectionKey to observers)
     }
 
     override suspend fun getComments(collectionKey: String): List<CommentModel> =
@@ -27,4 +33,7 @@ class FakeCommentRepository: CommentRepository {
     override suspend fun deleteComment(commentId: String) {
         TODO("Not yet implemented")
     }
+
+    override suspend fun getCollectionKeyObservers(collectionKey: String): List<String> =
+        collectionObservers[collectionKey] ?: emptyList()
 }

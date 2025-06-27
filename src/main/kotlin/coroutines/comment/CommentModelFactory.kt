@@ -1,4 +1,4 @@
-package domain.comment
+package coroutines.comment
 
 class CommentModelFactory(
     private val uuidProvider: UuidProvider,

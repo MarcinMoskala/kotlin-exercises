@@ -1,4 +1,4 @@
-package domain.comment
+package coroutines.comment
 
 class FakeUuidProvider: UuidProvider {
     private var counter = 1

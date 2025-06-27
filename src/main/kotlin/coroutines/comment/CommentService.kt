@@ -1,16 +1,15 @@
 package coroutines.comment.commentservice
 
-import domain.comment.*
-import kotlinx.coroutines.async
-import kotlinx.coroutines.awaitAll
-import kotlinx.coroutines.coroutineScope
-import kotlinx.coroutines.runBlocking
+import coroutines.comment.*
+import kotlinx.coroutines.*
 
 class CommentService(
     private val commentRepository: CommentRepository,
     private val userService: UserService,
     private val commentModelFactory: CommentModelFactory,
     private val commentValidator: CommentValidator,
+    private val emailService: EmailService,
+    private val backgroundScope: CoroutineScope,
 ) {
     suspend fun addComment(
         token: String,
@@ -26,6 +25,8 @@ class CommentService(
         val commentModel = commentModelFactory
             .toCommentModel(userId, collectionKey, body)
         commentRepository.addComment(commentModel)
+
+        notifyAddCommentObservers(collectionKey, body)
     }
 
     suspend fun getComments(
@@ -55,6 +56,23 @@ class CommentService(
         collectionKey: String
     ): CommentsCollection = runBlocking {
         getComments(collectionKey)
+    }
+
+    private fun notifyAddCommentObservers(collectionKey: String, body: AddComment) {
+        backgroundScope.launch {
+            val observerIds = commentRepository.getCollectionKeyObservers(collectionKey)
+            val users = observerIds.map { userService.findUserById(it) }
+
+            users.forEach { user ->
+                launch {
+                    emailService.notifyAboutCommentInObservedCollection(
+                        email = user.email,
+                        collectionKey = collectionKey,
+                        comment = body.comment
+                    )
+                }
+            }
+        }
     }
 
     private suspend fun makeCommentElement(

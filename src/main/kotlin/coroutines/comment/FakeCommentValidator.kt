@@ -1,6 +1,6 @@
 package comment
 
-import domain.comment.CommentValidator
+import coroutines.comment.CommentValidator
 
 /**
  * Fake implementation of CommentValidator for testing.
