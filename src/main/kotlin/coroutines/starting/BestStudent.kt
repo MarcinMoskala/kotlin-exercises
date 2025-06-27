@@ -22,7 +22,7 @@ interface StudentsRepository {
     suspend fun getStudent(id: Int): Student
 }
 
-class RequestTest {
+class BestStudentTest {
 
     @Test
     fun `Function does return the best student in the semester`() = runTest {
