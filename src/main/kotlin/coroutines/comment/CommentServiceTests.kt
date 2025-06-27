@@ -1,8 +1,10 @@
 package domain.comment
 
 import comment.FakeCommentRepository
+import comment.FakeCommentValidator
 import comment.FakeUserService
 import coroutines.comment.commentservice.CommentService
+import domain.comment.CommentValidationException
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.test.currentTime
 import kotlinx.coroutines.test.runTest
@@ -11,14 +13,16 @@ import org.junit.Before
 import org.junit.Test
 import java.time.Instant
 import kotlin.test.assertEquals
+import kotlin.test.assertFailsWith
 
 class CommentServiceTests {
     private val commentsRepository = FakeCommentRepository()
     private val userService = FakeUserService()
     private val uuidProvider = FakeUuidProvider()
     private val timeProvider = FakeTimeProvider()
+    private val commentValidator = FakeCommentValidator()
     private val commentsFactory: CommentModelFactory = CommentModelFactory(uuidProvider, timeProvider)
-    private val commentService: CommentService = CommentService(commentsRepository, userService, commentsFactory)
+    private val commentService: CommentService = CommentService(commentsRepository, userService, commentsFactory, commentValidator)
 
     @Before
     fun setup() {
@@ -31,6 +35,7 @@ class CommentServiceTests {
         uuidProvider.clean()
         commentsRepository.clean()
         userService.clear()
+        commentValidator.reset()
     }
 
     @Test
@@ -210,4 +215,45 @@ class CommentServiceTests {
         comment = "Some comment 3",
         date = date2,
     )
+
+    @Test
+    fun `Should add comment when validation passes`() = runTest {
+        // given
+        commentValidator.setShouldValidate(true)
+        userService.hasToken(aToken, user2.id)
+        uuidProvider.alwaysReturn(commentModel2.id)
+        timeProvider.advanceTimeTo(commentModel2.date)
+
+        // when
+        commentService.addComment(aToken, collectionKey2, AddComment(commentModel2.comment))
+
+        // then
+        assertEquals(commentModel2, commentsRepository.getComment(commentModel2.id))
+    }
+
+    @Test
+    fun `Should throw exception when validation fails`() = runTest {
+        // given
+        commentValidator.setShouldValidate(false)
+        userService.hasToken(aToken, user2.id)
+
+        // when/then
+        assertFailsWith<CommentValidationException> {
+            commentService.addComment(aToken, collectionKey2, AddComment(commentModel2.comment))
+        }
+    }
+
+    @Test
+    fun `Should throw exception when validation fails with custom predicate`() = runTest {
+        // given
+        commentValidator.setValidationPredicate { comment -> 
+            comment != null && comment.length >= 5 
+        }
+        userService.hasToken(aToken, user2.id)
+
+        // when/then
+        assertFailsWith<CommentValidationException> {
+            commentService.addComment(aToken, collectionKey2, AddComment("abc"))
+        }
+    }
 }

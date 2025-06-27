@@ -10,6 +10,7 @@ class CommentService(
     private val commentRepository: CommentRepository,
     private val userService: UserService,
     private val commentModelFactory: CommentModelFactory,
+    private val commentValidator: CommentValidator,
 ) {
     suspend fun addComment(
         token: String,
@@ -17,6 +18,10 @@ class CommentService(
         body: AddComment
     ) {
         val userId = userService.readUserId(token)
+
+        if (!commentValidator.validate(body.comment)) {
+            throw CommentValidationException("Invalid comment")
+        }
 
         val commentModel = commentModelFactory
             .toCommentModel(userId, collectionKey, body)
