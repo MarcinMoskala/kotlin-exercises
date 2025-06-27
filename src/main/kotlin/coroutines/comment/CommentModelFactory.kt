@@ -1,11 +1,11 @@
-package domain.comment
+package coroutines.comment
 
-class CommentFactory(
+class CommentModelFactory(
     private val uuidProvider: UuidProvider,
     private val timeProvider: TimeProvider,
 ) {
-    fun toCommentDocument(userId: String, collectionKey: String, body: AddComment) = CommentDocument(
-        _id = uuidProvider.next(),
+    fun toCommentModel(userId: String, collectionKey: String, body: AddComment) = CommentModel(
+        id = uuidProvider.next(),
         collectionKey = collectionKey,
         userId = userId,
         comment = body.comment,
