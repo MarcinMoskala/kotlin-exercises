@@ -19,34 +19,11 @@ class LecturesViewModel(
     val uiState: StateFlow<LecturesUiState> = _uiState.asStateFlow()
 
     init {
-        _uiState.update { it.copy(loading = true) }
-        loadPresentations()
+        TODO()
     }
 
     fun onToggleFavorite(lectureId: String) {
-        val currentState = _uiState.value.lectures.find { it.id == lectureId }?.isFavorite ?: return
-        val newState = !currentState
-        _uiState.update {
-            it.copy(lectures = it.lectures.map {
-                if (it.id == lectureId) it.copy(isFavorite = newState) else it
-            })
-        }
-        viewModelScope.launch {
-            lecturesRepository.setUserFavorite(lectureId, newState)
-            loadPresentations()
-        }
-    }
-
-    private fun loadPresentations() {
-        viewModelScope.launch {
-            val lectures = async { lecturesRepository.getPresentations() }
-            val userFavorites = async { lecturesRepository.getUserFavorites() }
-            val favoriteSet = userFavorites.await().toSet()
-            val lecturesUi = lectures.await().map { lecture ->
-                lecture.toUi(isFavorite = lecture.id in favoriteSet)
-            }
-            _uiState.update { it.copy(lectures = lecturesUi, loading = false) }
-        }
+        TODO()
     }
 }
 
