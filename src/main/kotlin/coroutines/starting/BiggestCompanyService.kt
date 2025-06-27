@@ -14,12 +14,11 @@ class BiggestCompanyService(
     private val companyRepository: CompanyRepository,
     private val backgroundScope: CoroutineScope,
 ) {
-    @Volatile
-    var companyWithHighestRevenue: CompanyDetails? = null
-        private set
+    private val _companyWithHighestRevenue = MutableStateFlow<CompanyDetails?>(null)
+    val companyWithHighestRevenue = _companyWithHighestRevenue
 
     fun updateHighestRevenueCompany() {
-       // TODO
+        // TODO
     }
 }
 
