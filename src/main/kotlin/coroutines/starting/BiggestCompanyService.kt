@@ -1,7 +1,5 @@
-package coroutines.starting
+package coroutines.starting.biggestcompanyservice
 
-import coroutines.starting.DelayedFakeCompanyRepo.Companion.GET_COMPANY_DETAILS_DELAY
-import coroutines.starting.DelayedFakeCompanyRepo.Companion.GET_COMPANY_LIST_DELAY
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.test.TestScope
@@ -16,18 +14,13 @@ class BiggestCompanyService(
     private val companyRepository: CompanyRepository,
     private val backgroundScope: CoroutineScope,
 ) {
-    private val _companyWithHighestRevenue = MutableStateFlow<CompanyDetails?>(null)
-    val companyWithHighestRevenue = _companyWithHighestRevenue
+    @Volatile
+    var companyWithHighestRevenue: CompanyDetails? = null
+        private set
 
     fun updateHighestRevenueCompany() {
-        backgroundScope.launch {
-            _companyWithHighestRevenue.value = companyRepository.getCompanyList()
-                .map { async { companyRepository.getCompanyDetails(it.id) } }
-                .awaitAll()
-                .maxByOrNull { it.revenue }
-        }
+       // TODO
     }
-
 }
 
 interface CompanyRepository {
@@ -92,12 +85,12 @@ class BiggestCompanyServiceTest {
         // when
         service.updateHighestRevenueCompany()
 
-        testScope.advanceTimeBy(GET_COMPANY_LIST_DELAY)
+        testScope.advanceTimeBy(DelayedFakeCompanyRepo.GET_COMPANY_LIST_DELAY)
 
         assertEquals(1, repo.getListCallCount)
         assertEquals(0, repo.getDetailsCallCount)
 
-        testScope.advanceTimeBy(GET_COMPANY_DETAILS_DELAY)
+        testScope.advanceTimeBy(DelayedFakeCompanyRepo.GET_COMPANY_DETAILS_DELAY)
 
         assertEquals(1, repo.getListCallCount)
 
@@ -107,7 +100,7 @@ class BiggestCompanyServiceTest {
         assertEquals(3, repo.getDetailsCallCount, "After that time all details should be fetched")
 
         testScope.advanceUntilIdle()
-        assertEquals(GET_COMPANY_LIST_DELAY + GET_COMPANY_DETAILS_DELAY, testScope.currentTime)
+        assertEquals(DelayedFakeCompanyRepo.GET_COMPANY_LIST_DELAY + DelayedFakeCompanyRepo.GET_COMPANY_DETAILS_DELAY, testScope.currentTime)
     }
 }
 
@@ -128,7 +121,7 @@ class DelayedFakeCompanyRepo : CompanyRepository {
 
     override suspend fun getCompanyList(): List<Company> {
         getListCallCount++
-        delay(GET_COMPANY_LIST_DELAY)
+        delay(DelayedFakeCompanyRepo.GET_COMPANY_LIST_DELAY)
         return listOf(
             Company("1", "Company A"),
             Company("2", "Company B"),
@@ -138,7 +131,7 @@ class DelayedFakeCompanyRepo : CompanyRepository {
 
     override suspend fun getCompanyDetails(id: String): CompanyDetails {
         getDetailsCallCount++
-        delay(GET_COMPANY_DETAILS_DELAY)
+        delay(DelayedFakeCompanyRepo.GET_COMPANY_DETAILS_DELAY)
         return when(id) {
             "1" -> CompanyDetails("1", "Company A", 500.0, 50)
             "2" -> CompanyDetails("2", "Company B", 1000.0, 100)
