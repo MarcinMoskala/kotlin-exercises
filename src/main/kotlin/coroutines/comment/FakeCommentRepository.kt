@@ -1,12 +1,12 @@
 package comment
 
-import domain.comment.CommentDocument
+import domain.comment.CommentModel
 import domain.comment.CommentRepository
 
 class FakeCommentRepository: CommentRepository {
-    private var comments = listOf<CommentDocument>()
+    private var comments = listOf<CommentModel>()
 
-    fun has(vararg comment: CommentDocument) {
+    fun has(vararg comment: CommentModel) {
         comments = comments + comment
     }
 
@@ -14,13 +14,13 @@ class FakeCommentRepository: CommentRepository {
         comments = emptyList()
     }
 
-    override suspend fun getComments(collectionKey: String): List<CommentDocument> =
+    override suspend fun getComments(collectionKey: String): List<CommentModel> =
         comments.filter { it.collectionKey == collectionKey }
 
-    override suspend fun getComment(id: String): CommentDocument? =
-        comments.find { it._id == id }
+    override suspend fun getComment(id: String): CommentModel? =
+        comments.find { it.id == id }
 
-    override suspend fun addComment(comment: CommentDocument) {
+    override suspend fun addComment(comment: CommentModel) {
         comments = comments + comment
     }
 

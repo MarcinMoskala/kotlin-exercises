@@ -3,7 +3,7 @@ package domain.comment
 import comment.FakeCommentRepository
 import comment.FakeUserService
 import coroutines.comment.commentservice.CommentService
-import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.test.currentTime
 import kotlinx.coroutines.test.runTest
 import org.junit.After
@@ -17,7 +17,7 @@ class CommentServiceTests {
     private val userService = FakeUserService()
     private val uuidProvider = FakeUuidProvider()
     private val timeProvider = FakeTimeProvider()
-    private val commentsFactory: CommentFactory = CommentFactory(uuidProvider, timeProvider)
+    private val commentsFactory: CommentModelFactory = CommentModelFactory(uuidProvider, timeProvider)
     private val commentService: CommentService = CommentService(commentsRepository, userService, commentsFactory)
 
     @Before
@@ -37,29 +37,29 @@ class CommentServiceTests {
     fun `Should add comment`() = runTest {
         // given
         commentsRepository.has(
-            commentDocument1,
+            commentModel1,
         )
         userService.hasUsers(
             user1,
             user2
         )
         userService.hasToken(aToken, user2.id)
-        uuidProvider.alwaysReturn(commentDocument2._id)
-        timeProvider.advanceTimeTo(commentDocument2.date)
+        uuidProvider.alwaysReturn(commentModel2.id)
+        timeProvider.advanceTimeTo(commentModel2.date)
 
         // when
-        commentService.addComment(aToken, collectionKey2, AddComment(commentDocument2.comment))
+        commentService.addComment(aToken, collectionKey2, AddComment(commentModel2.comment))
 
         // then
-        assertEquals(commentDocument2, commentsRepository.getComment(commentDocument2._id))
+        assertEquals(commentModel2, commentsRepository.getComment(commentModel2.id))
     }
 
     @Test
     fun `Should get comments by collection key`() = runTest {
         // given
         commentsRepository.has(
-            commentDocument1,
-            commentDocument2,
+            commentModel1,
+            commentModel2,
             commentDocument3
         )
         userService.hasUsers(
@@ -81,10 +81,10 @@ class CommentServiceTests {
     fun `Should concurrently find users when getting comments`() = runTest {
         // given
         commentsRepository.has(
-            commentDocument1,
-            commentDocument1,
-            commentDocument1,
-            commentDocument2,
+            commentModel1,
+            commentModel1,
+            commentModel1,
+            commentModel2,
             commentDocument3,
         )
         userService.hasUsers(
@@ -98,6 +98,52 @@ class CommentServiceTests {
 
         // then
         assertEquals(1000, currentTime)
+    }
+
+    @Test
+    fun `Should add comment using blocking method`() {
+        // given
+        commentsRepository.has(
+            commentModel1,
+        )
+        userService.hasUsers(
+            user1,
+            user2
+        )
+        userService.hasToken(aToken, user2.id)
+        uuidProvider.alwaysReturn(commentModel2.id)
+        timeProvider.advanceTimeTo(commentModel2.date)
+
+        // when
+        commentService.addCommentBlocking(aToken, collectionKey2, AddComment(commentModel2.comment))
+
+        // then
+        runBlocking { 
+            assertEquals(commentModel2, commentsRepository.getComment(commentModel2.id))
+        }
+    }
+
+    @Test
+    fun `Should get comments by collection key using blocking method`() {
+        // given
+        commentsRepository.has(
+            commentModel1,
+            commentModel2,
+            commentDocument3
+        )
+        userService.hasUsers(
+            user1,
+            user2
+        )
+
+        // when
+        val result: CommentsCollection = commentService.getCommentsBlocking(collectionKey1)
+
+        // then
+        with(result) {
+            assertEquals(collectionKey1, collectionKey)
+            assertEquals(listOf(commentElement1, commentElement3), elements)
+        }
     }
 
     // Fake Data
@@ -122,22 +168,22 @@ class CommentServiceTests {
     )
     private val user1 = userDocument1.toUser()
     private val user2 = userDocument2.toUser()
-    private val commentDocument1 = CommentDocument(
-        _id = "C_ID_1",
+    private val commentModel1 = CommentModel(
+        id = "C_ID_1",
         collectionKey = collectionKey1,
         userId = user1.id,
         comment = "Some comment 1",
         date = date1,
     )
-    private val commentDocument2 = CommentDocument(
-        _id = "C_ID_2",
+    private val commentModel2 = CommentModel(
+        id = "C_ID_2",
         collectionKey = collectionKey2,
         userId = user2.id,
         comment = "Some comment 2",
         date = date2,
     )
-    private val commentDocument3 = CommentDocument(
-        _id = "C_ID_3",
+    private val commentDocument3 = CommentModel(
+        id = "C_ID_3",
         collectionKey = collectionKey1,
         userId = user2.id,
         comment = "Some comment 3",

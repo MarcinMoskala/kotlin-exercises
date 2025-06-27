@@ -3,14 +3,14 @@ package domain.comment
 import java.time.Instant
 
 interface CommentRepository {
-    suspend fun getComments(collectionKey: String): List<CommentDocument>
-    suspend fun getComment(id: String): CommentDocument?
-    suspend fun addComment(comment: CommentDocument)
+    suspend fun getComments(collectionKey: String): List<CommentModel>
+    suspend fun getComment(id: String): CommentModel?
+    suspend fun addComment(comment: CommentModel)
     suspend fun deleteComment(commentId: String)
 }
 
-data class CommentDocument(
-    val _id: String,
+data class CommentModel(
+    val id: String,
     val collectionKey: String,
     val userId: String,
     val comment: String?,
