@@ -36,7 +36,6 @@ data class UserDetails(
 data class Friend(val id: String)
 data class Profile(val description: String)
 
-@Suppress("FunctionName")
 class UserDetailsRepositoryTest {
 
     @Test

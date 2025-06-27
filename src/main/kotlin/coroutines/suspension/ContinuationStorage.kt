@@ -40,7 +40,6 @@ fun main(): Unit = runBlocking<Unit> {
 // This is some text
 // After
 
-@Suppress("FunctionName")
 class ContinuationStealTests {
 
     private val fakeText = "This is some text"
