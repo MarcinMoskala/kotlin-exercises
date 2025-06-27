@@ -24,7 +24,6 @@ interface NewsRepository {
 
 data class News(val title: String, val content: String)
 
-@Suppress("FunctionName")
 class DiscNewsRepositoryTests {
 
     @Test

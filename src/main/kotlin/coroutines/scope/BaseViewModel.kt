@@ -55,7 +55,6 @@ interface NewsRepository {
 data class UserData(val name: String)
 data class News(val date: Date)
 
-@Suppress("FunctionName")
 class BaseViewModelTests {
 
     private val UI = newSingleThreadContext("UIThread") // Normally it will be Dispatchers.Main
