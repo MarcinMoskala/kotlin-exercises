@@ -34,7 +34,6 @@ class BiggestCompanyServiceTest {
 
     @Test
     fun `should update company with highest revenue`() {
-        // given
         val highestRevenueCompany = CompanyDetails("2", "Company B", 1000.0, 100)
         val repo = ImmediateFakeCompanyRepo(
             listOf(
@@ -51,11 +50,9 @@ class BiggestCompanyServiceTest {
         val testScope = TestScope()
         val service = BiggestCompanyService(repo, testScope)
 
-        // when
         service.updateHighestRevenueCompany()
         testScope.advanceUntilIdle() // Process all coroutines
 
-        // then
         assertEquals(highestRevenueCompany, service.companyWithHighestRevenue.value)
     }
 

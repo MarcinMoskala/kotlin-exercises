@@ -123,7 +123,6 @@ class EvaluationServiceTest {
         assert(result.getOrNull()?.status == "Primary Engine Result")
         assert(currentTime == 1000L)
 
-        // Verify secondary engine completed with error but didn't affect primary result
         backgroundScope.coroutineContext.job.children.forEach { it.join() }
         assert(currentTime == 2500L)
     }
@@ -185,7 +184,6 @@ class EvaluationServiceTest {
         // Then
         assert(!secondaryEnginesCalled) // Should not be called immediately
 
-        // After joining all background jobs
         backgroundScope.coroutineContext.job.children.forEach { it.join() }
         assert(secondaryEnginesCalled) // Should be called after joining
     }
