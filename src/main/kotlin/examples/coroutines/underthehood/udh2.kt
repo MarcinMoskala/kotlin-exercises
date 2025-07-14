@@ -1,6 +1,5 @@
 package examples.coroutines.underthehood.udh2
 
-import kotlinx.coroutines.delay
 import java.util.concurrent.Executors
 import java.util.concurrent.TimeUnit
 import kotlin.coroutines.Continuation
@@ -18,9 +17,9 @@ import kotlin.coroutines.resume
 
 fun getValue() = "ABCD"
 
-fun myFunction(continuation: Continuation<Unit>): Any {
-    val continuation = continuation as? MyFunctionContinuation
-        ?: MyFunctionContinuation(continuation)
+fun myFunction(completion: Continuation<Unit>): Any {
+    val continuation = completion as? MyFunctionContinuation
+        ?: MyFunctionContinuation(completion)
     var a = continuation.a
 
     if (continuation.label == 0) {

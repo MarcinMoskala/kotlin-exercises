@@ -1,6 +1,5 @@
 package examples.coroutines.underthehood.udh1
 
-import kotlinx.coroutines.delay
 import java.util.concurrent.Executors
 import java.util.concurrent.TimeUnit
 import kotlin.coroutines.Continuation
@@ -14,9 +13,9 @@ import kotlin.coroutines.resume
 //    println("After")
 //}
 
-fun myFunction(continuation: Continuation<Unit>): Any {
-    val continuation = continuation as? MyFunctionContinuation
-        ?: MyFunctionContinuation(continuation)
+fun myFunction(completion: Continuation<Unit>): Any {
+    val continuation = completion as? MyFunctionContinuation
+        ?: MyFunctionContinuation(completion)
 
     if (continuation.label == 0) {
         println("Before")

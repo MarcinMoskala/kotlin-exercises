@@ -1,6 +1,5 @@
 package examples.coroutines.underthehood.udh3
 
-import kotlinx.coroutines.delay
 import java.util.concurrent.Executors
 import java.util.concurrent.TimeUnit
 import kotlin.coroutines.Continuation
@@ -29,9 +28,9 @@ import kotlin.coroutines.resume
 
 data class User(val id: String, val name: String)
 
-fun printUser(token: String, continuation: Continuation<*>): Any {
-    val continuation = continuation as? PrintUserContinuation
-        ?: PrintUserContinuation(continuation as Continuation<Unit>, token)
+fun printUser(token: String, completion: Continuation<*>): Any {
+    val continuation = completion as? PrintUserContinuation
+        ?: PrintUserContinuation(completion as Continuation<Unit>, token)
 
     var result: Result<Any>? = continuation.result
     var userId: String? = continuation.userId
@@ -95,15 +94,13 @@ fun main() {
     Thread.sleep(3000)    // Needed to prevent the function from finishing immediately.
 }
 
-fun getUserId(token: String, continuation: Continuation<String>): Any {
-    executor.schedule({ continuation.resume("SomeId") }, 1000, TimeUnit.MILLISECONDS)
+fun getUserId(token: String, completion: Continuation<String>): Any {
+    executor.schedule({ completion.resume("SomeId") }, 1000, TimeUnit.MILLISECONDS)
     return COROUTINE_SUSPENDED
 }
 
-fun getUserName(userId: String, continuation: Continuation<String>): Any {
-    executor.schedule({
-        continuation.resume("SomeName")
-    }, 1000, TimeUnit.MILLISECONDS)
+fun getUserName(userId: String, completion: Continuation<String>): Any {
+    executor.schedule({ completion.resume("SomeName") }, 1000, TimeUnit.MILLISECONDS)
     return COROUTINE_SUSPENDED
 }
 
