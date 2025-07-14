@@ -1,9 +1,9 @@
-package coroutines.starting.notificationsender
+package coroutines.starting.notificationsendertask
 
 import kotlinx.coroutines.*
 import kotlinx.coroutines.test.StandardTestDispatcher
-import org.junit.Test
 import kotlin.test.assertEquals
+import org.junit.Test
 
 class NotificationSenderTask(
     val notificationRepository: NotificationRepository,
@@ -13,17 +13,7 @@ class NotificationSenderTask(
 
     @Cron("0 0/1 * * * ?")
     fun sendNotifications() {
-        backgroundScope.launch {
-            val notificationsToSend = notificationRepository.getPendingNotifications()
-            notificationsToSend.map {
-                async {
-                    notificationSender.send(it)
-                }
-            }.awaitAll().zip(notificationsToSend)
-                .filter { it.first }
-                .map { it.second.id }
-                .let { notificationRepository.markAsSent(it) }
-        }
+        TODO()
     }
 }
 
