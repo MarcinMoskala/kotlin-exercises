@@ -49,8 +49,6 @@ class NotificationSenderTaskTest {
             notificationSender = fakeSender,
             backgroundScope = CoroutineScope(testDispatcher)
         )
-
-        // Add some pending notifications
         val notifications = List(5) { Notification("ID$it", "Message $it") }
         fakeRepository.setPendingNotifications(notifications)
 
@@ -59,7 +57,6 @@ class NotificationSenderTaskTest {
         testDispatcher.scheduler.advanceUntilIdle()
 
         // then
-        // All notifications should be sent
         assertEquals(notifications.size, fakeSender.sentNotifications.size, "All notifications should be sent")
         val expectedTimeIfAsynchronous = sendingTime + markAsSentTime + getPendingNotificationTime
         val expectedTimeIfSynchronous = sendingTime + getPendingNotificationTime + markAsSentTime * 5
@@ -97,7 +94,6 @@ class NotificationSenderTaskTest {
             "No notifications should be marked as sent before advancing time"
         )
 
-        // Advance time to allow coroutines to complete
         testDispatcher.scheduler.advanceUntilIdle()
 
         // then - after advancing time, all notifications should be sent

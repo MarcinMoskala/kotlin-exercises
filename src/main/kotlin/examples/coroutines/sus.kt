@@ -58,7 +58,7 @@ suspend fun main() {
 //}
 
 data class User(val name: String)
-class ApiException: Throwable()
+class ApiException: Exception()
 class Call {
     fun cancel() {}
 }
