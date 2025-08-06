@@ -69,7 +69,6 @@ class MockNotesLocalRepository(
     }
 }
 
-// Tests
 class UpdateNotesDatabaseUseCaseTest {
 
     @Test
