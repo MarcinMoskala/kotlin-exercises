@@ -43,8 +43,7 @@ data class Fahrenheit(
     val temperature: Double,
 )
 
-@ExperimentalCoroutinesApi
-class TemperatureServiceTest {
+      class TemperatureServiceTest {
 
     @Test
     fun `should emit temperature updates in Fahrenheit`() = runTest {

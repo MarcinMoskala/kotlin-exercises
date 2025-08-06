@@ -40,7 +40,6 @@ sealed class WeatherUpdate {
     data class Success(val city: String, val temperature: Double) : WeatherUpdate()
 }
 
-@ExperimentalCoroutinesApi
 class WeatherServiceTest {
 
     @Test

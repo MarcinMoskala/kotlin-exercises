@@ -79,14 +79,13 @@ class NotificationSenderTaskTest {
             backgroundScope = CoroutineScope(testDispatcher)
         )
 
-        // Add some pending notifications
         val notifications = List(5) { Notification("ID$it", "Message $it") }
         fakeRepository.setPendingNotifications(notifications)
 
         // when
         task.sendNotifications()
 
-        // then - before advancing time, nothing should be sent yet
+        // then
         assertEquals(0, fakeSender.sentNotifications.size, "No notifications should be sent before advancing time")
         assertEquals(
             0,
@@ -113,7 +112,6 @@ class NotificationSenderTaskTest {
             backgroundScope = CoroutineScope(testDispatcher)
         )
 
-        // Add some pending notifications
         val notifications = List(5) { Notification("ID$it", "Message $it") }
         fakeRepository.setPendingNotifications(notifications)
 
@@ -139,7 +137,6 @@ class FakeNotificationRepository(
     private var pendingNotifications: List<Notification> = emptyList()
     var markedAsSent: List<String> = emptyList()
 
-    // Method to set pending notifications for testing
     fun setPendingNotifications(notifications: List<Notification>) {
         pendingNotifications = notifications
     }

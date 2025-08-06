@@ -41,8 +41,7 @@ data class Product(
     val price: Double,
 )
 
-@ExperimentalCoroutinesApi
-class ProductServiceTest {
+      class ProductServiceTest {
 
     @Test
     fun `should emit distinct products`() = runTest {
