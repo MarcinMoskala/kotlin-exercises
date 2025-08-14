@@ -3,8 +3,8 @@
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 plugins {
-    kotlin("jvm") version "2.1.20"
-    kotlin("plugin.power-assert") version "2.1.20"
+    kotlin("jvm") version "2.2.0"
+    kotlin("plugin.power-assert") version "2.2.0"
     application
 }
 
@@ -31,7 +31,7 @@ dependencies {
 tasks.withType<KotlinCompile> {
     compilerOptions {
         optIn.add("kotlinx.coroutines.ExperimentalCoroutinesApi")
-        optIn.add("kotlinx.coroutines.ExperimentalAtomicApi")
+//        optIn.add("kotlinx.coroutines.ExperimentalAtomicApi")
         optIn.add("kotlinx.coroutines.ExperimentalUuidApi")
 //        freeCompilerArgs.add("-Xdebug")
     }
@@ -51,6 +51,6 @@ tasks.withType<JavaCompile>().configureEach {
 
 }
 
-//kotlin {
-//    jvmToolchain(20)
-//}
+kotlin {
+    jvmToolchain(20)
+}
