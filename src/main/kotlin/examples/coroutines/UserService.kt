@@ -1,9 +1,5 @@
 package examples.coroutines
 
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.SupervisorJob
-import kotlinx.coroutines.launch
-
 class UserService(
     private val authRepository: AuthRepository,
     private val userProfileRepository: UserProfileRepository,
@@ -20,42 +16,29 @@ class UserService(
     }
 }
 
-fun main() {
-    val scope = CoroutineScope(SupervisorJob())
-    scope.launch {
-        val a = "ASD"
-        userService.registerNewUser(CreateUserData("email@gmail.com", "password123", "John Doe"))
-        println("User registration completed, $a")
+suspend fun main() {
+    val authRepo = object : AuthRepository {
+        override suspend fun createUserAccount(createUserData: CreateUserData): String {
+            return "user123"
+        }
     }
-}
 
-
-val authRepo = object : AuthRepository {
-    override suspend fun createUserAccount(createUserData: CreateUserData): String {
-        return "user123"
+    val userProfileRepo = object : UserProfileRepository {
+        override suspend fun createProfile(createUserData: CreateUserData, userId: String): UserProfile {
+            return UserProfile(userId, createUserData.displayName, createUserData.email)
+        }
     }
-}
 
-val userProfileRepo = object : UserProfileRepository {
-    override suspend fun createProfile(createUserData: CreateUserData, userId: String): UserProfile {
-        return UserProfile(userId, createUserData.displayName, createUserData.email)
+    val emailClient = object : EmailClient {
+        override suspend fun sendWelcomeEmail(to: String, name: String) {
+            println("Welcome email sent to $name at $to")
+        }
     }
+
+    val userService = UserService(authRepo, userProfileRepo, emailClient)
+    val newUser = userService.registerNewUser(CreateUserData("some@email.com", "password123", "John Doe"))
+    println("New user registered: $newUser")
 }
-
-val emailClient = object : EmailClient {
-    override suspend fun sendWelcomeEmail(to: String, name: String) {
-        println("Welcome email sent to $name at $to")
-    }
-}
-
-val userService = UserService(authRepo, userProfileRepo, emailClient)
-
-
-//suspend fun main() {
-//    // Example usage
-//    val newUser = userService.registerNewUser(CreateUserData("some@email.com", "password123", "John Doe"))
-//    println("New user registered: $newUser")
-//}
 
 interface AuthRepository {
     suspend fun createUserAccount(createUserData: CreateUserData): String
