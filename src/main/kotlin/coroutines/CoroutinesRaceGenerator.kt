@@ -782,6 +782,14 @@ sealed class ChallengeStatement {
 
 fun randomId() = UUID.randomUUID().toString()
 
+fun ChallengeBlock.toCompleteCode(): String = buildString {
+    if (this@toCompleteCode.anyStatement { it is ScopeLaunch }) {
+        appendLine("val backgroundScope = CoroutineScope(SupervisorJob())")
+        appendLine()
+    }
+    append("suspend fun main() = \n${toCode()}")
+}
+
 fun ChallengeStatement.toCode(): String = when (this) {
     is ChallengeStatement.CoroutineScope -> "coroutineScope {\n${statements.toCodeWithIndent()}\n}"
     is ScopeLaunch -> "backgroundScope.launch {\n${statements.toCodeWithIndent()}\n}"
@@ -994,6 +1002,6 @@ class CoroutinesGameValueGenerator(seed: Long = Random.nextLong()) {
 
 suspend fun main() = repeat(20) {
     val challenge = generateChallengeBlock(10, CoroutinesRacesDifficulty.WithSynchronization)
-    println(challenge.toCode())
+    println(challenge.toCompleteCode())
     println(challenge.getStringResult())
 }
