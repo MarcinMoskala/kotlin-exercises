@@ -31,9 +31,10 @@ dependencies {
 tasks.withType<KotlinCompile> {
     compilerOptions {
         optIn.add("kotlinx.coroutines.ExperimentalCoroutinesApi")
-//        optIn.add("kotlinx.coroutines.ExperimentalAtomicApi")
+        optIn.add("kotlinx.coroutines.ExperimentalAtomicApi")
         optIn.add("kotlinx.coroutines.ExperimentalUuidApi")
 //        freeCompilerArgs.add("-Xdebug")
+        freeCompilerArgs.add("-Xcontext-parameters")
     }
 }
 

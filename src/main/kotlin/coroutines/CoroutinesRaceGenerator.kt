@@ -1,6 +1,6 @@
-package coroutines
+package coroutines.generator
 
-import coroutines.ChallengeStatement.*
+import coroutines.generator.ChallengeStatement.*
 import kotlinx.coroutines.*
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
@@ -11,7 +11,7 @@ import kotlin.collections.ArrayDeque
 import kotlin.random.Random
 import kotlin.time.Duration.Companion.seconds
 
-suspend fun generateChallengeBlock(
+private suspend fun generateChallengeBlock(
     expectedStatements: Int,
     difficulty: CoroutinesRacesDifficulty
 ) = generateChallengeBlock(
@@ -20,7 +20,7 @@ suspend fun generateChallengeBlock(
     types = difficulty.typesForDifficulty()
 )
 
-enum class CoroutinesRacesDifficulty {
+private enum class CoroutinesRacesDifficulty {
     Simple,
     WithSynchronization,
     WithSynchronizationAndExceptions,
@@ -79,7 +79,7 @@ private fun CoroutinesRacesDifficulty.typesForDifficulty(): List<ChallengeStatem
         )
     }
 
-suspend private fun generateChallengeBlock(
+private suspend fun generateChallengeBlock(
     expectedStatements: Int,
     vg: CoroutinesGameValueGenerator = CoroutinesGameValueGenerator(),
     types: List<ChallengeStatementType> = ChallengeStatementType.entries,
@@ -284,7 +284,7 @@ private fun randomChallengeStatementType(
         .let { if (isFirstInBlock) it.filterNot { it.hasUsage } - listOf(ChallengeStatementType.Print) else it }
         .randomOrNull(vg.random) ?: ChallengeStatementType.Print
 
-enum class ChallengeStatementType(
+private enum class ChallengeStatementType(
     val isBlock: Boolean = false,
     val hasUsage: Boolean = false,
 ) {
@@ -308,7 +308,7 @@ enum class ChallengeStatementType(
     val statementsNeeded = 1 + (if (isBlock) 1 else 0) + (if (hasUsage) 1 else 0)
 }
 
-fun ChallengeStatement.countStatements(): Int =
+private fun ChallengeStatement.countStatements(): Int =
     if (this is ChallengeBlock) statements.sumOf { it.countStatements() } + 1
     else 1
 
@@ -361,7 +361,7 @@ private fun ChallengeBlock.addStatementAtFirstPosition(
     return withStatements(listOf(statement) + statements)
 }
 
-fun ChallengeBlock.addStatementAtRandomPosition(
+private fun ChallengeBlock.addStatementAtRandomPosition(
     statement: ChallengeStatement,
     vg: CoroutinesGameValueGenerator,
 ): ChallengeBlock {
@@ -392,7 +392,7 @@ fun ChallengeBlock.addStatementAtRandomPosition(
     return addStatementToChosenInsertionPoint(chosenPoint)
 }
 
-fun ChallengeBlock.addStatementAtRandomPositionAfter(
+private fun ChallengeBlock.addStatementAtRandomPositionAfter(
     statement: ChallengeStatement,
     afterStatement: ChallengeStatement,
     vg: CoroutinesGameValueGenerator,
@@ -413,7 +413,7 @@ fun ChallengeBlock.addStatementAtRandomPositionAfter(
     return findStatementToStartInsertion()
 }
 
-fun ChallengeBlock.purgeStatementsThatNotAffectResult(): ChallengeBlock {
+private fun ChallengeBlock.purgeStatementsThatNotAffectResult(): ChallengeBlock {
     // We must compare like statements, otherwise comparing launch or async is useless
     fun getResult(statements: List<ChallengeStatement>) =
         ChallengeStatement.CoroutineScope(statements = statements).getResult()
@@ -504,7 +504,7 @@ fun ChallengeBlock.purgeStatementsThatNotAffectResult(): ChallengeBlock {
     }
 }
 
-fun List<ChallengeStatement>.removeUsages(statement: ChallengeStatement): List<ChallengeStatement> {
+private fun List<ChallengeStatement>.removeUsages(statement: ChallengeStatement): List<ChallengeStatement> {
     if (statement is WithUsage) {
         return ChallengeStatement.CoroutineScope(statements = this)
             .mapNotNullStatement {
@@ -598,17 +598,17 @@ private fun ChallengeBlock.purgeJoinsThatResultWithInfiniteWait(): ChallengeBloc
     }
 }
 
-fun ChallengeStatement.forEveryStatement(block: (ChallengeStatement) -> Unit) {
+private fun ChallengeStatement.forEveryStatement(block: (ChallengeStatement) -> Unit) {
     block(this)
     if (this is ChallengeBlock) {
         statements.forEach { it.forEveryStatement(block) }
     }
 }
 
-fun ChallengeBlock.mapStatementsRecursive(block: (List<ChallengeStatement>) -> List<ChallengeStatement>): ChallengeBlock =
+private fun ChallengeBlock.mapStatementsRecursive(block: (List<ChallengeStatement>) -> List<ChallengeStatement>): ChallengeBlock =
     withStatements(statements.let(block).map { if (it is ChallengeBlock) it.mapStatementsRecursive(block) else it })
 
-fun ChallengeBlock.findStatement(predicate: (ChallengeStatement) -> Boolean): ChallengeStatement? {
+private fun ChallengeBlock.findStatement(predicate: (ChallengeStatement) -> Boolean): ChallengeStatement? {
     for (statement in statements) {
         if (predicate(statement)) return statement
         if (statement is ChallengeBlock) {
@@ -636,7 +636,7 @@ private fun ChallengeBlock.mapNotNullStatement(block: (ChallengeStatement) -> Ch
     withStatements(statements.mapNotNull { block(it) }
         .map { if (it is ChallengeBlock) it.mapNotNullStatement(block) else it })
 
-operator fun ChallengeStatement.contains(statement: ChallengeStatement): Boolean =
+private operator fun ChallengeStatement.contains(statement: ChallengeStatement): Boolean =
     when (this) {
         is ChallengeBlock -> this == statement || statements.any { it.contains(statement) }
         else -> this == statement
@@ -655,7 +655,7 @@ private fun <T> List<T>.plusAt(index: Int, element: T): List<T> {
     return mutable
 }
 
-sealed class ChallengeStatement {
+private sealed class ChallengeStatement {
     abstract val id: String
 
     sealed class ChallengeBlock : ChallengeStatement() {
@@ -780,9 +780,9 @@ sealed class ChallengeStatement {
     }
 }
 
-fun randomId() = UUID.randomUUID().toString()
+private fun randomId() = UUID.randomUUID().toString()
 
-fun ChallengeBlock.toCompleteCode(): String = buildString {
+private fun ChallengeBlock.toCompleteCode(): String = buildString {
     if (this@toCompleteCode.anyStatement { it is ScopeLaunch }) {
         appendLine("val backgroundScope = CoroutineScope(SupervisorJob())")
         appendLine()
@@ -790,7 +790,7 @@ fun ChallengeBlock.toCompleteCode(): String = buildString {
     append("suspend fun main() = \n${toCode()}")
 }
 
-fun ChallengeStatement.toCode(): String = when (this) {
+private fun ChallengeStatement.toCode(): String = when (this) {
     is ChallengeStatement.CoroutineScope -> "coroutineScope {\n${statements.toCodeWithIndent()}\n}"
     is ScopeLaunch -> "backgroundScope.launch {\n${statements.toCodeWithIndent()}\n}"
     is Launch -> "launch {\n${statements.toCodeWithIndent()}\n}"
@@ -827,9 +827,9 @@ private fun List<ChallengeStatement>.toCodeWithIndent() = joinToString(separator
     it.toCode().prependIndent("    ")
 }
 
-data class PrintWithTime(val value: String, val time: Long)
+private data class PrintWithTime(val value: String, val time: Long)
 
-fun ChallengeStatement.getResult(): List<PrintWithTime> = buildList<PrintWithTime> {
+private fun ChallengeStatement.getResult(): List<PrintWithTime> = buildList<PrintWithTime> {
     try {
         val jobs = mutableMapOf<String, Job>()
         val deferred = mutableMapOf<String, Deferred<String>>()
@@ -941,10 +941,10 @@ private class MyException : Exception()
 private class GameException : Exception()
 private class GameCancellationException : CancellationException("")
 
-fun ChallengeStatement.getStringResult() = getResult()
+private fun ChallengeStatement.getStringResult() = getResult()
     .joinToString(separator = "\n") { "[${it.time}] ${it.value}" }
 
-fun ChallengeStatement.getSequentialResult(): List<String> {
+private fun ChallengeStatement.getSequentialResult(): List<String> {
     val result = getResult()
     return result
         .windowed(size = 2, step = 1, partialWindows = true)
@@ -969,7 +969,7 @@ fun ChallengeStatement.getSequentialResult(): List<String> {
         }
 }
 
-class CoroutinesGameValueGenerator(seed: Long = Random.nextLong()) {
+private class CoroutinesGameValueGenerator(seed: Long = Random.nextLong()) {
     val random = Random(seed)
 
     val variableNamesInitial = (1..1000).map { "value$it" }
