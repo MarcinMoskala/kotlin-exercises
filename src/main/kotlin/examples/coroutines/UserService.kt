@@ -1,4 +1,4 @@
-package examples.coroutines
+package examples.coroutines.UserService
 
 class UserService(
     private val authRepository: AuthRepository,
