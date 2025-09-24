@@ -19,8 +19,6 @@ class FetchTasksUseCase(
         TODO()
     suspend fun fetchTasksResult(): Result<List<Task>> =
         TODO()
-    suspend fun fetchTasksOrNull(): List<Task>? =
-        TODO()
 }
 
 interface FetchTasksCallbackUseCase {
@@ -159,68 +157,6 @@ class FetchTasksTests {
         // when
         val job = launch {
             useCase.fetchTasksResult()
-        }
-
-        // then
-        runCurrent()
-        assertEquals(false, cancelled)
-        job.cancel()
-        assertEquals(true, cancelled)
-    }
-
-    @Test
-    fun `fetchTasksOrNull should resume with result`() = runTest {
-        // given
-        val fakeFetchTaskCallback = FakeFetchTasksCallbackUseCase()
-        val useCase = FetchTasksUseCase(fakeFetchTaskCallback)
-        val NO_VALUE = Any()
-        var result: Any? = NO_VALUE
-
-        // when
-        launch {
-            result = useCase.fetchTasksOrNull()
-        }
-
-        // then
-        runCurrent()
-        assertEquals(NO_VALUE, result)
-        fakeFetchTaskCallback.onSuccess?.invoke(someTasks)
-        runCurrent()
-        assertEquals(someTasks, result)
-    }
-
-    @Test
-    fun `fetchTasksOrNull should resume with failure`() = runTest {
-        // given
-        val fakeFetchTaskCallback = FakeFetchTasksCallbackUseCase()
-        val useCase = FetchTasksUseCase(fakeFetchTaskCallback)
-        val NO_VALUE = Any()
-        var result: Any? = NO_VALUE
-
-        // when
-        launch {
-            result = useCase.fetchTasksOrNull()
-        }
-
-        // then
-        runCurrent()
-        assertEquals(NO_VALUE, result)
-        fakeFetchTaskCallback.onError?.invoke(someException)
-        runCurrent()
-        assertEquals(null, result)
-    }
-
-    @Test
-    fun `fetchTasksOrNull should support cancellation`() = runTest {
-        // given
-        val fakeFetchTaskCallback = FakeFetchTasksCallbackUseCase()
-        val useCase = FetchTasksUseCase(fakeFetchTaskCallback)
-        var cancelled = false
-        fakeFetchTaskCallback.onCancelled = { cancelled = true }
-
-        // when
-        val job = launch {
-            useCase.fetchTasksOrNull()
         }
 
         // then

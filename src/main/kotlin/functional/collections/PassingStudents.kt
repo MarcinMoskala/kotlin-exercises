@@ -79,10 +79,10 @@ class PassingStudentsListTest {
             Student(name = "A", surname = "B", result = 84.0, pointsInSemester = 16)
         )
 
-        // When
+        // when
         val text = students.makePassingStudentsList()
 
-        // Then
+        // then
         val expected = """
             A A, 83.0
             B A, 81.0

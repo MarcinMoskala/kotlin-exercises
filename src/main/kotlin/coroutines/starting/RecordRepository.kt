@@ -68,8 +68,6 @@ class ProcessRecordTest {
         }
         val messageSender = object : MessageSender {
             override suspend fun commit(record: ConsumerRecord) {
-                // If notifyEngines has started before commit is called,
-                // it means commit was incorrectly called after launching background tasks
                 if (notifyEnginesStarted) {
                     assert(false) { "messageSender.commit was called after notifyEngines started, suggesting it was called in a background scope" }
                 }
@@ -174,23 +172,18 @@ class ProcessRecordTest {
             }
         }
         val messageSender = object : MessageSender {
-            override suspend fun commit(record: ConsumerRecord) {
-                // Do nothing
-            }
+            override suspend fun commit(record: ConsumerRecord) {}
         }
         val engineService = object : EngineService {
             override suspend fun notifyEngines(notification: Notification) {
-                // Record the start time for this notification
                 processingStartTimes[notification.id] = currentTime
 
-                // Add different delays for each notification to verify they run in parallel
                 when (notification.id) {
                     "1" -> delay(100)
                     "2" -> delay(200)
                     "3" -> delay(300)
                 }
 
-                // Record the processing time (how long it took to process this notification)
                 notificationProcessingTimes[notification.id] = currentTime - processingStartTimes[notification.id]!!
                 notifiedEngines.add(notification.id)
             }
@@ -199,23 +192,18 @@ class ProcessRecordTest {
 
         // when
         repository.processRecord(record)
-
-        // then
         advanceUntilIdle()
 
-        // Verify all notifications were processed
+        // then
         assert(notifiedEngines.size == 3) { "Expected 3 notifications to be processed, but got ${notifiedEngines.size}" }
         assert(notifiedEngines.containsAll(listOf("1", "2", "3"))) { "Not all notifications were processed: $notifiedEngines" }
 
-        // Verify that the total time is equal to the longest notification processing time
-        // This verifies that notifications were processed in parallel, not sequentially
         val maxProcessingTime = notificationProcessingTimes.values.maxOrNull() ?: 0
         assert(currentTime == maxProcessingTime) {
             "Expected total time to be $maxProcessingTime (longest notification processing time), but was $currentTime. " +
             "This suggests notifications were not processed in parallel."
         }
 
-        // Verify that each notification took the expected amount of time to process
         assert(notificationProcessingTimes["1"] == 100L) { "Notification 1 should take 100ms, but took ${notificationProcessingTimes["1"]}ms" }
         assert(notificationProcessingTimes["2"] == 200L) { "Notification 2 should take 200ms, but took ${notificationProcessingTimes["2"]}ms" }
         assert(notificationProcessingTimes["3"] == 300L) { "Notification 3 should take 300ms, but took ${notificationProcessingTimes["3"]}ms" }

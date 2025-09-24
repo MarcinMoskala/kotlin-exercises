@@ -476,7 +476,6 @@ class CommentServiceTests {
     fun `Should throw exception when token is invalid`() = runTest {
         // given
         val invalidToken = "INVALID_TOKEN"
-        // Not registering this token with hasToken, so it will be invalid
 
         // when/then
         assertFailsWith<NoSuchUserException> {
@@ -489,7 +488,6 @@ class CommentServiceTests {
         // given
         val nonExistentUserId = "NON_EXISTENT_USER_ID"
 
-        // Add a comment with a non-existent user ID
         val commentWithNonExistentUser = CommentModel(
             id = "C_ID_NON_EXISTENT",
             collectionKey = collectionKey1,
@@ -524,8 +522,6 @@ class CommentServiceTests {
         userService.hasToken(aToken, user1.id)
         uuidProvider.alwaysReturn(commentModel1.id)
         timeProvider.advanceTimeTo(commentModel1.date)
-
-        // No observers set up for the collection
         commentsRepository.setObservers(collectionKey1, emptyList())
 
         // when
@@ -571,7 +567,6 @@ class CommentServiceTests {
     @Test
     fun `Should improve concurrent test with better assertions`() = runTest {
         // given
-        // Create three different comments with the same user ID but different comment IDs
         val comment1 = CommentModel(
             id = "C_ID_CONCURRENT_1",
             collectionKey = collectionKey1,
@@ -603,19 +598,15 @@ class CommentServiceTests {
         val endTime = currentTime
 
         // then
-        // Verify that the operation took exactly the time of one user lookup, not three
         assertEquals(1000, endTime - startTime)
 
-        // Verify the result contains the expected number of comments
         assertEquals(collectionKey1, result.collectionKey)
         assertEquals(3, result.elements.size)
 
-        // Verify all comments have the same user
         result.elements.forEach { element ->
             assertEquals(user1, element.user)
         }
 
-        // Verify the comments have the expected IDs
         val commentIds = result.elements.map { it.id }.toSet()
         assertEquals(setOf("C_ID_CONCURRENT_1", "C_ID_CONCURRENT_2", "C_ID_CONCURRENT_3"), commentIds)
     }
@@ -642,22 +633,18 @@ class CommentServiceTests {
         uuidProvider.alwaysReturn(commentModel1.id)
         timeProvider.advanceTimeTo(commentModel1.date)
 
-        // Set up multiple observers for the collection
-        val observers = listOf(user2.id, user3.id, user4.id)
+         val observers = listOf(user2.id, user3.id, user4.id)
         commentsRepository.setObservers(collectionKey1, observers)
 
-        // Set a delay for notifications to ensure we can detect concurrency
         emailService.notificationDelay = 1000
 
         // when
         commentService.addComment(aToken, collectionKey1, AddComment(commentModel1.comment))
 
-        // Use the testDispatcher to run all pending tasks
         runCurrent()
         advanceUntilIdle()
 
         // then
-        // Verify all emails were sent
         val expectedEmails = listOf(
             user2.email to "New comment in collection $collectionKey1: ${commentModel1.comment}",
             user3.email to "New comment in collection $collectionKey1: ${commentModel1.comment}",
@@ -665,9 +652,6 @@ class CommentServiceTests {
         )
         assertEquals(expectedEmails, emailService.getEmailsSent())
 
-        // Verify that notifications were called concurrently
-        // If they were called sequentially, maxConcurrentNotifications would be 1
-        // If they were called concurrently, maxConcurrentNotifications should be equal to the number of observers
         assertEquals(3, emailService.getMaxConcurrentNotifications())
     }
 
@@ -679,11 +663,9 @@ class CommentServiceTests {
         uuidProvider.alwaysReturn(commentModel1.id)
         timeProvider.advanceTimeTo(commentModel1.date)
 
-        // Set up observers for the collection
         val observers = listOf(user2.id)
         commentsRepository.setObservers(collectionKey1, observers)
 
-        // Set a long delay for notifications to ensure we can detect if we're waiting
         emailService.notificationDelay = 10000
 
         // when
@@ -695,16 +677,13 @@ class CommentServiceTests {
         // Verify that addComment returns immediately, without waiting for the notification process to complete
         assertEquals(0, endTime - startTime)
 
-        // Verify that the notification process is started but not completed
         runCurrent() // Run the initial part of the background task
         assertTrue(emailService.isNotificationStarted())
         assertFalse(emailService.isNotificationCompleted())
         assertEquals(emptyList(), emailService.getEmailsSent())
 
-        // Advance time to complete the notification process
         advanceUntilIdle()
 
-        // Verify that the notification process is completed and emails are sent
         assertTrue(emailService.isNotificationCompleted())
         val expectedEmails = listOf(
             user2.email to "New comment in collection $collectionKey1: ${commentModel1.comment}"
@@ -715,7 +694,6 @@ class CommentServiceTests {
     @Test
     fun `Should not fetch the same user more than once when getting comments`() = runTest {
         // given
-        // Create multiple comments with the same user IDs to test deduplication
         val comment1 = CommentModel(
             id = "C_ID_DEDUP_1",
             collectionKey = collectionKey1,
@@ -752,14 +730,11 @@ class CommentServiceTests {
         val result = commentService.getComments(collectionKey1)
 
         // then
-        // Verify we got all 4 comments
         assertEquals(4, result.elements.size)
 
-        // Verify that findUserById was called exactly once for each unique user ID
         assertEquals(1, userService.getFindUserByIdCalls(user1.id))
         assertEquals(1, userService.getFindUserByIdCalls(user2.id))
 
-        // Verify the total number of calls matches the number of unique users
         val allCalls = userService.getAllFindUserByIdCalls()
         assertEquals(2, allCalls.size)
         assertEquals(2, allCalls.values.sum())
@@ -860,19 +835,16 @@ class CommentServiceTests {
             notificationStarted.set(true)
             val currentConcurrent = concurrentNotifications.incrementAndGet()
 
-            // Update max concurrent notifications
             synchronized(this) {
                 if (currentConcurrent > maxConcurrentNotifications) {
                     maxConcurrentNotifications = currentConcurrent
                 }
             }
 
-            // Simulate work with delay
             delay(notificationDelay)
 
             val body = "New comment in collection $collectionKey: $comment"
 
-            // Add the email to the list of sent emails
             synchronized(this) {
                 emailsSent.add(email to body)
             }
