@@ -25,6 +25,7 @@ dependencies {
     implementation("io.ktor:ktor-client-core:3.0.2")
     implementation("io.ktor:ktor-client-java:3.0.2")
     implementation("io.ktor:ktor-client-websockets:3.0.2")
+    implementation("app.cash.turbine:turbine:1.2.1") // For ObserveAppointmentsUseCase.kt
 //    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-debug:1.7.3")
 }
 
