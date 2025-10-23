@@ -1,4 +1,4 @@
-package coroutines.cancellation.userrepository
+package coroutines.cancellation.signaturesender
 
 import kotlinx.coroutines.*
 import kotlinx.coroutines.test.currentTime
@@ -6,35 +6,42 @@ import kotlinx.coroutines.test.runTest
 import org.junit.Assert.assertEquals
 import org.junit.Test
 
-class UserRepository(
-    private val storage: FileStorage,
-    private val database: UserDatabaseDao,
+class SignatureSender(
+    private val signatureApi: SignatureApi,
+    private val signatureCalculator: SignatureCalculator,
+    private val fileReader: FileReader,
+    private val logger: Logger,
     private val ioDispatcher: CoroutineDispatcher,
 ) {
-    suspend fun updateUser() {
-        val user = storage.readUser() // blocking
-        val userSettings = storage.readUserSettings(user.id) // blocking
-
+    suspend fun sendSignature(file: File) {
         try {
-            database.updateUserInDatabase(user, userSettings) // suspending
-        } catch (e: CancellationException) {
-            database.revertUnfinishedTransactions() // suspending
+            val content = fileReader.readFile(file) // blocking
+            val signature = signatureCalculator.calculateSignature(content) // CPU-intensive function
+            signatureApi.sendSignature(signature) // suspending
+        } catch (e: Exception) {
+            logger.logError("Error while sending signature", e)
+        } finally {
+            fileReader.deleteFile(file)
         }
     }
 }
 
-interface FileStorage {
-    fun readUser(): User
-    fun readUserSettings(userId: String): UserSettings
+interface SignatureApi {
+    suspend fun sendSignature(signature: String)
 }
 
-interface UserDatabaseDao {
-    suspend fun updateUserInDatabase(user: User, userSettings: UserSettings)
-    suspend fun revertUnfinishedTransactions()
+interface SignatureCalculator {
+    fun calculateSignature(content: String): String
 }
 
-data class User(val id: String, val name: String)
-data class UserSettings(val userId: String, val language: String)
+interface FileReader {
+    fun readFile(file: File): String
+    fun deleteFile(file: File)
+}
+
+interface Logger {
+    fun logError(message: String, e: Exception)
+}
 
 class UserRepositoryTest {
     @Test
