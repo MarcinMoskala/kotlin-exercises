@@ -307,7 +307,6 @@ class UserArticlesSaverTest {
             try {
                 saver.storeUserArticles(1)
             } catch (e: CancellationException) {
-                // Expected
             }
         }
 
@@ -410,7 +409,6 @@ class UserArticlesSaverTest {
             try {
                 saver.storeUserArticles(1)
             } catch (e: CancellationException) {
-                // Expected
             }
         }
 
