@@ -421,7 +421,6 @@ class UserArticlesSaverTest {
     }
 }
 
-// Test utilities
 private class FakeTokenProvider : TokenProvider {
     override suspend fun getToken() = "test-token"
 }
