@@ -178,7 +178,6 @@ class CommentServiceTests {
 
     @Before
     fun setup() {
-        // Initialize common test data
         userService.hasUsers(user1, user2)
         commentValidator.setShouldValidate(true)
     }
@@ -306,7 +305,6 @@ class CommentServiceTests {
         }
     }
 
-    // Fake Data
     private val aToken = "SOME_TOKEN"
     private val collectionKey1 = "SOME_COLLECTION_KEY_1"
     private val collectionKey2 = "SOME_COLLECTION_KEY_2"
@@ -420,15 +418,11 @@ class CommentServiceTests {
         uuidProvider.alwaysReturn(commentModel1.id)
         timeProvider.advanceTimeTo(commentModel1.date)
 
-        // Set up observers for the collection
         val observers = listOf(user2.id)
         commentsRepository.setObservers(collectionKey1, observers)
 
         // when
         commentService.addComment(aToken, collectionKey1, AddComment(commentModel1.comment))
-
-        // Use the testDispatcher to run all pending tasks
-        runCurrent()
         advanceUntilIdle()
 
         // then
@@ -453,7 +447,6 @@ class CommentServiceTests {
         uuidProvider.alwaysReturn(commentModel1.id)
         timeProvider.advanceTimeTo(commentModel1.date)
 
-        // Set up multiple observers for the collection
         val observers = listOf(user2.id, user3.id)
         commentsRepository.setObservers(collectionKey1, observers)
 
@@ -541,7 +534,6 @@ class CommentServiceTests {
         userService.hasToken(aToken, user1.id)
         uuidProvider.alwaysReturn(commentModel1.id)
         timeProvider.advanceTimeTo(commentModel1.date)
-        // Default validator allows null comments
 
         // when
         commentService.addComment(aToken, collectionKey1, AddComment(null))
@@ -555,7 +547,6 @@ class CommentServiceTests {
     fun `Should throw exception when null comment is rejected by validator`() = runTest {
         // given
         userService.hasToken(aToken, user1.id)
-        // Configure validator to reject null comments
         commentValidator.setValidationPredicate { comment -> comment != null }
 
         // when/then
@@ -674,10 +665,9 @@ class CommentServiceTests {
         val endTime = currentTime
 
         // then
-        // Verify that addComment returns immediately, without waiting for the notification process to complete
         assertEquals(0, endTime - startTime)
 
-        runCurrent() // Run the initial part of the background task
+        runCurrent()
         assertTrue(emailService.isNotificationStarted())
         assertFalse(emailService.isNotificationCompleted())
         assertEquals(emptyList(), emailService.getEmailsSent())
@@ -718,7 +708,7 @@ class CommentServiceTests {
         val comment4 = CommentModel(
             id = "C_ID_DEDUP_4",
             collectionKey = collectionKey1,
-            userId = user2.id,  // Same user as comment3
+            userId = user2.id, 
             comment = "Another comment from user2",
             date = date1
         )
@@ -825,7 +815,7 @@ class CommentServiceTests {
 
     class FakeEmailService : EmailService {
         private var emailsSent = mutableListOf<Pair<String, String>>()
-        var notificationDelay: Long = 1000 // Default delay of 1 second
+        var notificationDelay: Long = 1000 
         private val concurrentNotifications = AtomicInteger(0)
         private var maxConcurrentNotifications = 0
         private val notificationStarted = AtomicBoolean(false)
