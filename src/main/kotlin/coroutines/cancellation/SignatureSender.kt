@@ -1,10 +1,12 @@
 package coroutines.cancellation.signaturesender
 
 import kotlinx.coroutines.*
-import kotlinx.coroutines.test.currentTime
+
 import kotlinx.coroutines.test.runTest
+import kotlinx.coroutines.test.currentTime
 import org.junit.Assert.assertEquals
 import org.junit.Test
+import java.io.File
 
 class SignatureSender(
     private val signatureApi: SignatureApi,
@@ -43,73 +45,124 @@ interface Logger {
     fun logError(message: String, e: Exception)
 }
 
-class UserRepositoryTest {
+class SignatureSenderTest {
     @Test
-    fun `should update user in database`() = runTest {
+    fun `should send signature and delete file`() = runTest {
         // given
-        var updatedUser: User? = null
-        var updatedUserSettings: UserSettings? = null
-        val storage = object : FileStorage {
-            override fun readUser(): User {
-                return User("1", "John Doe")
-            }
-
-            override fun readUserSettings(userId: String): UserSettings {
-                return UserSettings(userId, "EN")
+        var sentSignature: String? = null
+        var deletedFiles = listOf<File>()
+        val signatureApi = object : SignatureApi {
+            override suspend fun sendSignature(signature: String) {
+                sentSignature = signature
             }
         }
-        val database = object : UserDatabaseDao {
-            override suspend fun updateUserInDatabase(user: User, userSettings: UserSettings) {
-                updatedUser = user
-                updatedUserSettings = userSettings
+        val signatureCalculator = object : SignatureCalculator {
+            override fun calculateSignature(content: String): String {
+                return "calculated-signature"
+            }
+        }
+        val fileReader = object : FileReader {
+            override fun readFile(file: File): String {
+                return "file-content"
             }
 
-            override suspend fun revertUnfinishedTransactions() {
-                updatedUser = null
-                updatedUserSettings = null
+            override fun deleteFile(file: File) {
+                deletedFiles = deletedFiles + file
+            }
+        }
+        val logger = object : Logger {
+            override fun logError(message: String, e: Exception) {
+                // no-op
             }
         }
         val dispatcher = coroutineContext[CoroutineDispatcher]!!
-        val userRepository = UserRepository(storage, database, dispatcher)
+        val signatureSender = SignatureSender(signatureApi, signatureCalculator, fileReader, logger, dispatcher)
+        val testFile = File("test-file")
 
         // when
-        userRepository.updateUser()
+        signatureSender.sendSignature(testFile)
 
         // then
-        assertEquals(User("1", "John Doe"), updatedUser)
-        assertEquals(UserSettings("1", "EN"), updatedUserSettings)
+        assertEquals("calculated-signature", sentSignature)
+        assert(deletedFiles.contains(testFile))
     }
 
     @Test
-    fun `should not block the caller thread`() = runTest {
+    fun `should log exceptions`() = runTest {
+        // given
+        val loggedMessages = mutableListOf<String>()
+        val signatureApi = object : SignatureApi {
+            override suspend fun sendSignature(signature: String) {
+                throw Exception("API error")
+            }
+        }
+        val signatureCalculator = object : SignatureCalculator {
+            override fun calculateSignature(content: String): String {
+                return "calculated-signature"
+            }
+        }
+        val fileReader = object : FileReader {
+            override fun readFile(file: File): String {
+                return "file-content"
+            }
+
+            override fun deleteFile(file: File) {
+                // no-op
+            }
+        }
+        val logger = object : Logger {
+            override fun logError(message: String, e: Exception) {
+                loggedMessages.add("$message: ${e.message}")
+            }
+        }
+        val dispatcher = coroutineContext[CoroutineDispatcher]!!
+        val signatureSender = SignatureSender(signatureApi, signatureCalculator, fileReader, logger, dispatcher)
+        val testFile = File("test-file")
+
+        // when
+        signatureSender.sendSignature(testFile)
+
+        // then
+        assert(loggedMessages.any { it.contains("Error while sending signature: API error") })
+    }
+
+    @Test
+    fun `should not block caller thread`() = runTest {
         // given
         var blockedThreadsNames = listOf<String>()
-        val storage = object : FileStorage {
-            override fun readUser(): User {
-                blockedThreadsNames += Thread.currentThread().name
-                return User("1", "John Doe")
-            }
-
-            override fun readUserSettings(userId: String): UserSettings {
-                blockedThreadsNames += Thread.currentThread().name
-                return UserSettings(userId, "EN")
-            }
-        }
-        val database = object : UserDatabaseDao {
-            override suspend fun updateUserInDatabase(user: User, userSettings: UserSettings) {
+        val signatureApi = object : SignatureApi {
+            override suspend fun sendSignature(signature: String) {
                 delay(1000)
             }
-
-            override suspend fun revertUnfinishedTransactions() {
-                delay(100)
+        }
+        val signatureCalculator = object : SignatureCalculator {
+            override fun calculateSignature(content: String): String {
+                blockedThreadsNames += Thread.currentThread().name
+                return "calculated-signature"
             }
         }
-        val userRepository = UserRepository(storage, database, Dispatchers.IO)
+        val fileReader = object : FileReader {
+            override fun readFile(file: File): String {
+                blockedThreadsNames += Thread.currentThread().name
+                return "file-content"
+            }
+
+            override fun deleteFile(file: File) {
+                // no-op
+            }
+        }
+        val logger = object : Logger {
+            override fun logError(message: String, e: Exception) {
+                // no-op
+            }
+        }
+        val signatureSender = SignatureSender(signatureApi, signatureCalculator, fileReader, logger, Dispatchers.IO)
         val callerThreadName = "test"
+        val testFile = File("test-file")
 
         // when
         withContext(newSingleThreadContext(callerThreadName)) {
-            userRepository.updateUser()
+            signatureSender.sendSignature(testFile)
         }
 
         // then
@@ -118,114 +171,41 @@ class UserRepositoryTest {
     }
 
     @Test
-    fun `should allow cancellation between two blocking functions`() = runTest {
+    fun `not consume CancellationException`() = runTest {
         // given
-        var job: Job? = null
-        var readUserSettingsInvoked = false
-        val storage = object : FileStorage {
-            override fun readUser(): User {
-                job?.cancel()
-                return User("1", "John Doe")
-            }
-
-            override fun readUserSettings(userId: String): UserSettings {
-                readUserSettingsInvoked = true
-                return UserSettings(userId, "EN")
-            }
-        }
-        val database = object : UserDatabaseDao {
-            override suspend fun updateUserInDatabase(user: User, userSettings: UserSettings) {
+        val signatureApi = object : SignatureApi {
+            override suspend fun sendSignature(signature: String) {
                 delay(1000)
             }
-
-            override suspend fun revertUnfinishedTransactions() {
-                delay(100)
+        }
+        val signatureCalculator = object : SignatureCalculator {
+            override fun calculateSignature(content: String): String {
+                return "calculated-signature"
             }
         }
-        val dispatcher = coroutineContext[CoroutineDispatcher]!!
-        val userRepository = UserRepository(storage, database, dispatcher)
-
-        // when
-        job = launch {
-            userRepository.updateUser()
-        }
-        job.join()
-
-        // then
-        assert(job.isCancelled)
-        assert(!readUserSettingsInvoked)
-        assert(currentTime == 0L)
-    }
-
-    @Test
-    fun `should invoke revertUnfinishedTransactions on cancellation during suspending function`() = runTest {
-        // given
-        var revertUnfinishedTransactionsInvoked = false
-        val storage = object : FileStorage {
-            override fun readUser(): User {
-                return User("1", "John Doe")
+        val fileReader = object : FileReader {
+            override fun readFile(file: File): String {
+                return "file-content"
             }
 
-            override fun readUserSettings(userId: String): UserSettings {
-                return UserSettings(userId, "EN")
+            override fun deleteFile(file: File) {
+                // no-op
             }
         }
-        val database = object : UserDatabaseDao {
-            override suspend fun updateUserInDatabase(user: User, userSettings: UserSettings) {
-                delay(1000)
-            }
-
-            override suspend fun revertUnfinishedTransactions() {
-                revertUnfinishedTransactionsInvoked = true
-                delay(100)
+        val loggedExceptions = mutableListOf<Exception>()
+        val logger = object : Logger {
+            override fun logError(message: String, e: Exception) {
+                loggedExceptions.add(e)
             }
         }
-        val dispatcher = coroutineContext[CoroutineDispatcher]!!
-        val userRepository = UserRepository(storage, database, dispatcher)
-
-        // when
-        val job = launch {
-            userRepository.updateUser()
-        }
-        delay(100) // ensure we are in the suspending function
-        job.cancel()
-        job.join()
-
-        // then
-        assert(job.isCancelled)
-        assert(revertUnfinishedTransactionsInvoked)
-        assert(currentTime == 200L) // the moment when we canceled + execution time of revertUnfinishedTransactions
-    }
-
-    @Test
-    fun `should not consume CancellationException`() = runTest {
-        // given
-        val storage = object : FileStorage {
-            override fun readUser(): User {
-                return User("1", "John Doe")
-            }
-
-            override fun readUserSettings(userId: String): UserSettings {
-                return UserSettings(userId, "EN")
-            }
-        }
-        val database = object : UserDatabaseDao {
-            override suspend fun updateUserInDatabase(user: User, userSettings: UserSettings) {
-                delay(1000)
-            }
-
-            override suspend fun revertUnfinishedTransactions() {
-                delay(100)
-            }
-        }
-        val dispatcher = coroutineContext[CoroutineDispatcher]!!
-        val userRepository = UserRepository(storage, database, dispatcher)
+        val signatureSender = SignatureSender(signatureApi, signatureCalculator, fileReader, logger, Dispatchers.IO)
+        val testFile = File("test-file")
 
         // when
         var result: Result<Unit>? = null
         val job = launch {
             result = runCatching {
-                userRepository.updateUser()
+                signatureSender.sendSignature(testFile)
             }
         }
         delay(500)
@@ -233,5 +213,54 @@ class UserRepositoryTest {
 
         // then
         assert(result?.exceptionOrNull() is CancellationException)
+        assert(loggedExceptions.isEmpty())
+    }
+
+    @Test
+    fun `should allow cancellation between blocking and CPU-intensive call`() {
+        runTest {
+            // given
+            var job: Job? = null
+            var calculateSignatureCalled = false
+            val signatureApi = object : SignatureApi {
+                override suspend fun sendSignature(signature: String) {
+                    delay(1000)
+                }
+            }
+            val signatureCalculator = object : SignatureCalculator {
+                override fun calculateSignature(content: String): String {
+                    calculateSignatureCalled = true
+                    return "calculated-signature"
+                }
+            }
+            val fileReader = object : FileReader {
+                override fun readFile(file: File): String {
+                    job?.cancel()
+                    return "file-content"
+                }
+
+                override fun deleteFile(file: File) {
+                    // no-op
+                }
+            }
+            val logger = object : Logger {
+                override fun logError(message: String, e: Exception) {
+                    // no-op
+                }
+            }
+            val signatureSender = SignatureSender(signatureApi, signatureCalculator, fileReader, logger, Dispatchers.IO)
+            val callerThreadName = "test"
+            val testFile = File("test-file")
+
+            // when
+            job = launch {
+                signatureSender.sendSignature(testFile)
+            }
+            job.join()
+
+            // then
+            assert(!calculateSignatureCalled) { "Should allow cancellation between blocking and CPU-intensive call" }
+            assertEquals(0, currentTime)
+        }
     }
 }
