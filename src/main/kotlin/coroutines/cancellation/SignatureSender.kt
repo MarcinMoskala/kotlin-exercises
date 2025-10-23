@@ -72,7 +72,6 @@ class SignatureSenderTest {
         }
         val logger = object : Logger {
             override fun logError(message: String, e: Exception) {
-                // no-op
             }
         }
         val dispatcher = coroutineContext[CoroutineDispatcher]!!
@@ -107,7 +106,6 @@ class SignatureSenderTest {
             }
 
             override fun deleteFile(file: File) {
-                // no-op
             }
         }
         val logger = object : Logger {
@@ -148,12 +146,10 @@ class SignatureSenderTest {
             }
 
             override fun deleteFile(file: File) {
-                // no-op
             }
         }
         val logger = object : Logger {
             override fun logError(message: String, e: Exception) {
-                // no-op
             }
         }
         val signatureSender = SignatureSender(signatureApi, signatureCalculator, fileReader, logger, Dispatchers.IO)
@@ -189,7 +185,6 @@ class SignatureSenderTest {
             }
 
             override fun deleteFile(file: File) {
-                // no-op
             }
         }
         val loggedExceptions = mutableListOf<Exception>()
@@ -240,12 +235,10 @@ class SignatureSenderTest {
                 }
 
                 override fun deleteFile(file: File) {
-                    // no-op
                 }
             }
             val logger = object : Logger {
                 override fun logError(message: String, e: Exception) {
-                    // no-op
                 }
             }
             val signatureSender = SignatureSender(signatureApi, signatureCalculator, fileReader, logger, Dispatchers.IO)
