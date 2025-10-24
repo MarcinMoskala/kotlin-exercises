@@ -1,8 +1,5 @@
 package coroutines.sf.betterproductservice
 
-import coroutines.sf.betterproductservice.TestData.product1
-import coroutines.sf.betterproductservice.TestData.product2
-import coroutines.sf.betterproductservice.TestData.product3
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.channels.Channel
@@ -261,11 +258,9 @@ class ProductServiceTest {
     }
 }
 
-object TestData {
-    val product1 = Product("1", "electronics", "Smartphone", 500.0)
-    val product2 = Product("2", "books", "Novel", 20.0)
-    val product3 = Product("3", "clothing", "T-Shirt", 15.0)
-}
+val product1 = Product("1", "electronics", "Smartphone", 500.0)
+val product2 = Product("2", "books", "Novel", 20.0)
+val product3 = Product("3", "clothing", "T-Shirt", 15.0)
 
 class FakeProductRepository(
     private val fetchProductsDelay: Long = 0,
