@@ -61,9 +61,9 @@ fun main() {
 }
 
 class MapTest {
-
-    @Test
-    fun mapTests() {
+//
+//  @Test
+//  fun mapTests() {
 //        val numbers = 1..5
 //        val names = listOf("Mike", "Jane", "Marcin", "John", "James")
 //
@@ -77,5 +77,5 @@ class MapTest {
 //        assertEquals(list.map { it * 2 }, listOf(2, 4, 6))
 //        assertEquals(list.map { "$it!" }, listOf("1!", "2!", "3!"))
 //        assertEquals(list.map { it % 2 == 0 }, listOf(false, true, false))
-    }
+//  }
 }
