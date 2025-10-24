@@ -1,6 +1,8 @@
 package examples.coroutines
 
-import kotlinx.coroutines.*
+import kotlinx.coroutines.coroutineScope
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 
 suspend fun main(): Unit = coroutineScope {
    val job = launch {
@@ -33,3 +35,27 @@ suspend fun main(): Unit = coroutineScope {
 //}
 //
 //data class User(val name: String)
+
+//suspend fun trySendUntilSuccess() {
+//    var success = false
+//    do {
+//        try {
+//            send()
+//            success = true
+//        } catch (e: Exception) {
+//            println("Error while sending: ${e.message}")
+//            e.printStackTrace()
+//        }
+//    } while (!success)
+//}
+//
+//fun main() = runBlocking {
+//    val job = launch { trySendUntilSuccess() }
+//    delay(100)
+//    job.cancelAndJoin()
+//}
+//
+//suspend fun send() {
+//    println("Sending...")
+//    delay(1000)
+//}
