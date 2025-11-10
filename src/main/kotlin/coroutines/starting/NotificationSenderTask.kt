@@ -35,7 +35,7 @@ class NotificationSenderTaskTest {
     @Test
     fun `should send notifications concurrently using virtual time`() {
         // given
-        val testDispatcher = StandardTestDispatcher()
+        val scope = TestScope()
         val sendingTime = 101L
         val markAsSentTime = 102L
         val getPendingNotificationTime = 103L
@@ -47,20 +47,20 @@ class NotificationSenderTaskTest {
         val task = NotificationSenderTask(
             notificationRepository = fakeRepository,
             notificationSender = fakeSender,
-            backgroundScope = CoroutineScope(testDispatcher)
+            backgroundScope = scope
         )
         val notifications = List(5) { Notification("ID$it", "Message $it") }
         fakeRepository.setPendingNotifications(notifications)
 
         // when
         task.sendNotifications()
-        testDispatcher.scheduler.advanceUntilIdle()
+        scope.advanceUntilIdle()
 
         // then
         assertEquals(notifications.size, fakeSender.sentNotifications.size, "All notifications should be sent")
         val expectedTimeIfAsynchronous = sendingTime + markAsSentTime + getPendingNotificationTime
         val expectedTimeIfSynchronous = sendingTime + getPendingNotificationTime + markAsSentTime * 5
-        val actualTime = testDispatcher.scheduler.currentTime
+        val actualTime = scope.currentTime
         assertEquals(
             sendingTime + markAsSentTime + getPendingNotificationTime, actualTime,
             "Total time should be the sum of sending, marking as sent, and getting pending notifications, so $expectedTimeIfAsynchronous, not it is $actualTime" + if (actualTime == expectedTimeIfSynchronous) " what means that tasks were executed synchronously" else ""
