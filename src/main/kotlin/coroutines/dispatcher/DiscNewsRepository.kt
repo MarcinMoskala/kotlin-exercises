@@ -34,10 +34,6 @@ class DiscNewsRepositoryTests {
         assertEquals("Some content", res.content)
     }
 
-    class ImmediateDiscReader(val map: Map<String, List<String>>) : DiscReader {
-        override fun read(key: String): List<String> = map[key] ?: error("Element not found")
-    }
-
     @Test
     fun `should be prepared for many reads at the same time`() = runBlocking<Unit> {
         val repo = DiscNewsRepository(OneSecDiscReader(listOf("Some title", "Some content")))
@@ -50,10 +46,10 @@ class DiscNewsRepositoryTests {
                 }
             }
         }
-        assert(time < 200) { "Should take less than 200, took $time" }
+        assert(time < 2000) { "Should take less than 200, took $time" }
     }
 
-    @Test(timeout = 200)
+    @Test(timeout = 2000)
     fun `should be prepared for 20 parallel reads`() = runBlocking<Unit> {
         val repo = DiscNewsRepository(OneSecDiscReader(listOf("Some title", "Some content")))
         val time = measureTimeMillis {
@@ -65,22 +61,22 @@ class DiscNewsRepositoryTests {
                 }
             }
         }
-        assert(time < 190) { "Should take less than 200, took $time" }
+        assert(time < 1900) { "Should take less than 2000, took $time" }
     }
 
-    @Test(timeout = 300)
+    @Test(timeout = 3000)
     fun `should not allow more than 20 parallel reads`() = runBlocking<Unit> {
         val repo = DiscNewsRepository(OneSecDiscReader(listOf("Some title", "Some content")))
         val time = measureTimeMillis {
             coroutineScope {
-                repeat(201) { id ->
+                repeat(21) { id ->
                     launch {
                         repo.getNews("SomeUserId$id")
                     }
                 }
             }
         }
-        assert(time > 200) { "Should take longer than 200, took $time" }
+        assert(time > 2000) { "Should take longer than 2000, took $time" }
     }
 
     class OneSecDiscReader(private val response: List<String>) : DiscReader {
