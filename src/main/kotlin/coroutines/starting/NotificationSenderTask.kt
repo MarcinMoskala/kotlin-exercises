@@ -1,7 +1,7 @@
 package coroutines.starting.notificationsendertask
 
 import kotlinx.coroutines.*
-import kotlinx.coroutines.test.StandardTestDispatcher
+import kotlinx.coroutines.test.*
 import kotlin.test.assertEquals
 import org.junit.Test
 
