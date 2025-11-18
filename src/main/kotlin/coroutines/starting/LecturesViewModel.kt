@@ -15,7 +15,7 @@ import kotlin.test.assertEquals
 class LecturesViewModel(
     private val lecturesRepository: LecturesRepository,
 ) : ViewModel() {
-    private val _uiState = MutableStateFlow(LecturesUiState())
+    private val _uiState = MutableStateFlow(LecturesUiState(loading = true))
     val uiState: StateFlow<LecturesUiState> = _uiState.asStateFlow()
 
     init {

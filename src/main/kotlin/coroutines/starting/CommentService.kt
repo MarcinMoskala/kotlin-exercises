@@ -453,7 +453,6 @@ class CommentServiceTests {
         // when
         commentService.addComment(aToken, collectionKey1, AddComment(commentModel1.comment))
 
-        // Use the testDispatcher to run all pending tasks
         runCurrent()
         advanceUntilIdle()
 
@@ -520,7 +519,6 @@ class CommentServiceTests {
         // when
         commentService.addComment(aToken, collectionKey1, AddComment(commentModel1.comment))
 
-        // Use the testDispatcher to run all pending tasks
         testDispatcher.scheduler.runCurrent()
         advanceUntilIdle()
 
