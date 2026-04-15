@@ -10,7 +10,7 @@ fun main() {
     //val list = listOf(1, "A", 3, "B")
     //println(list.anyOf<Int>()) // true
     //println(list.anyOf<String>()) // true
-    //println(list.anyOf<Double>()) // true
+    //println(list.anyOf<Double>()) // false
     //
     //println(list.firstOfOrNull<String>()) // A
     //println(list.firstOfOrNull<Int>()) // 1
