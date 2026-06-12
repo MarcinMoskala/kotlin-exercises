@@ -1,5 +1,3 @@
-@file:OptIn(ExperimentalStdlibApi::class)
-
 package coroutines.cancellation.userrepository
 
 import kotlinx.coroutines.*

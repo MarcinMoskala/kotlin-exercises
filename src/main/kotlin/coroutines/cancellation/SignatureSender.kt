@@ -1,5 +1,3 @@
-@file:OptIn(ExperimentalStdlibApi::class)
-
 package coroutines.cancellation.signaturesender
 
 import kotlinx.coroutines.*

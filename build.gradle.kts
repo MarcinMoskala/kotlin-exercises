@@ -31,11 +31,6 @@ dependencies {
 
 tasks.withType<KotlinCompile> {
     compilerOptions {
-        optIn.add("kotlinx.coroutines.ExperimentalCoroutinesApi")
-        optIn.add("kotlinx.coroutines.ExperimentalAtomicApi")
-        optIn.add("kotlinx.coroutines.ExperimentalUuidApi")
-        optIn.add("kotlin.ExperimentalStdlibApi")
-        
         freeCompilerArgs.add("-Xdebug")
         freeCompilerArgs.add("-Xexplicit-backing-fields")
     }
@@ -43,6 +38,10 @@ tasks.withType<KotlinCompile> {
 
 kotlin {
     compilerOptions {
+        optIn.add("kotlinx.coroutines.ExperimentalCoroutinesApi")
+        optIn.add("kotlinx.coroutines.ExperimentalAtomicApi")
+        optIn.add("kotlinx.coroutines.ExperimentalUuidApi")
+        optIn.add("kotlin.ExperimentalStdlibApi")
         freeCompilerArgs.add("-Xcollection-literals")
     }
 }
