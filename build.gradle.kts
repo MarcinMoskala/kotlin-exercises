@@ -34,6 +34,7 @@ tasks.withType<KotlinCompile> {
         optIn.add("kotlinx.coroutines.ExperimentalCoroutinesApi")
         optIn.add("kotlinx.coroutines.ExperimentalAtomicApi")
         optIn.add("kotlinx.coroutines.ExperimentalUuidApi")
+        optIn.add("kotlin.ExperimentalStdlibApi")
         
         freeCompilerArgs.add("-Xdebug")
         freeCompilerArgs.add("-Xexplicit-backing-fields")
