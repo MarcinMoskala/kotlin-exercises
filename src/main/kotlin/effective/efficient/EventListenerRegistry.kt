@@ -1,6 +1,7 @@
 package effective.efficient.eventlistenerregistry
 
 import org.junit.Test
+import java.lang.ref.WeakReference
 import java.util.concurrent.ConcurrentHashMap
 import kotlin.test.assertEquals
 
@@ -109,5 +110,28 @@ class EventListenerRegistryTest {
         eventListenerRepository.invokeListeners(Event.A)
 
         assertEquals(0, a)
+    }
+
+    @Test
+    fun `should clean memory after cancel`() {
+        val eventListenerRepository = EventListenerRegistry<Event>()
+        var ref: WeakReference<Any>? = null
+
+        run {
+            val someMemory = Any()
+            val listener = eventListenerRepository.addEventListener(Event.A) {
+                println(someMemory)
+                ref = WeakReference(someMemory)
+            }
+            listener.handleEvent()
+            listener.cancel()
+        }
+
+        repeat(100) {
+            System.gc()
+        }
+
+        assert(ref != null)
+        assert(ref?.get() == null)
     }
 }
