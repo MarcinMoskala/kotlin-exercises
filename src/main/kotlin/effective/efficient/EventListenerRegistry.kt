@@ -113,7 +113,7 @@ class EventListenerRegistryTest {
     }
 
     @Test
-    fun `should clean memory after cancel`() {
+    fun `should clean function after cancel`() {
         val eventListenerRepository = EventListenerRegistry<Event>()
         var ref: WeakReference<Any>? = null
 
@@ -127,6 +127,25 @@ class EventListenerRegistryTest {
             listener.cancel()
         }
 
+        repeat(100) {
+            System.gc()
+        }
+
+        assert(ref != null)
+        assert(ref?.get() == null)
+    }
+
+    @Test
+    fun `should clean canceled event listener when invokeListeners`() {
+        val eventListenerRepository = EventListenerRegistry<Event>()
+        var ref: WeakReference<EventListener<Event>>? = null
+        run {
+            val event = eventListenerRepository.addEventListener(Event.A) {}
+            ref = WeakReference(event)
+            event.cancel()
+            eventListenerRepository.invokeListeners(Event.A)
+        }
+        
         repeat(100) {
             System.gc()
         }
