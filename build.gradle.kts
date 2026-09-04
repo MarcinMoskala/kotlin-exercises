@@ -3,8 +3,8 @@
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 plugins {
-    kotlin("jvm") version "2.3.20"
-    kotlin("plugin.power-assert") version "2.3.20"
+    kotlin("jvm") version "2.4.0"
+    kotlin("plugin.power-assert") version "2.4.0"
     application
 }
 
@@ -31,12 +31,18 @@ dependencies {
 
 tasks.withType<KotlinCompile> {
     compilerOptions {
+        freeCompilerArgs.add("-Xdebug")
+        freeCompilerArgs.add("-Xexplicit-backing-fields")
+    }
+}
+
+kotlin {
+    compilerOptions {
         optIn.add("kotlinx.coroutines.ExperimentalCoroutinesApi")
         optIn.add("kotlinx.coroutines.ExperimentalAtomicApi")
         optIn.add("kotlinx.coroutines.ExperimentalUuidApi")
-        
-        freeCompilerArgs.add("-Xdebug")
-        freeCompilerArgs.add("-Xexplicit-backing-fields")
+        optIn.add("kotlin.ExperimentalStdlibApi")
+        freeCompilerArgs.add("-Xcollection-literals")
     }
 }
 
