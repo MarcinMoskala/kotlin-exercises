@@ -59,7 +59,7 @@ class NotificationSenderTaskTest {
         // then
         assertEquals(notifications.size, fakeSender.sentNotifications.size, "All notifications should be sent")
         val expectedTimeIfAsynchronous = sendingTime + markAsSentTime + getPendingNotificationTime
-        val expectedTimeIfSynchronous = sendingTime + getPendingNotificationTime + markAsSentTime * 5
+        val expectedTimeIfSynchronous = sendingTime * notifications.size + getPendingNotificationTime + markAsSentTime
         val actualTime = scope.currentTime
         assertEquals(
             sendingTime + markAsSentTime + getPendingNotificationTime, actualTime,
