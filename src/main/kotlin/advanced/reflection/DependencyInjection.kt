@@ -32,7 +32,7 @@ import kotlin.test.assertSame
 //        singleton<UserConfiguration> {
 //            UserConfiguration("http://localhost:8080")
 //        }
-//        normal<UserService> {
+//        register<UserService> {
 //            UserService(
 //                userRepository = get(),
 //                userConfiguration = get(),

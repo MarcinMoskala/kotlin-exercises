@@ -34,8 +34,8 @@ fun Flow<*>.toNextNumbers(): Flow<Int> = TODO()
 fun <T> Flow<T>.withHistory(): Flow<List<T>> = TODO()
 
 // Based on two light switches, should decide if the general light should be switched on.
-// Should be if one is true and another is false.
-// The first state should be false, and then with each even from any switch, new state should be emitted.
+// Should be true if one is true and another is false.
+// The first state should be false, and then with each event from any switch, a new state should be emitted.
 // Example:
 // switch1 -------t-----f----------t-t-------
 // switch2 ----------------f-t-f--------t-f-t
@@ -43,8 +43,8 @@ fun <T> Flow<T>.withHistory(): Flow<List<T>> = TODO()
 fun makeLightSwitch(switch1: Flow<Boolean>, switch2: Flow<Boolean>): Flow<Boolean> = TODO()
 
 // Based on two light switches, should decide if the general light should be switched on.
-// Should be if one is turned on and another is off
-// Each event from a switch emits news state. The first state is true, each new state is toggled.
+// Should be true if one is turned on and another is off
+// Each event from a switch emits a new state. The first state is true, each new state is toggled.
 // Example:
 // switch1 -------U-----U--------------------------U---------------UU-----
 // switch2 ----------------U-------------------U-------------U------------

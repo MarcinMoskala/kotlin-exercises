@@ -24,10 +24,10 @@ class MainViewModel(
     private val newsRepo: NewsRepository
 ) : BaseViewModel() {
     private val _userData = MutableStateFlow<UserData?>(null)
-    val userData: StateFlow<UserData?> = _userData
+    val userData: StateFlow<UserData?> = _userData.asStateFlow()
 
     private val _news = MutableStateFlow(emptyList<News>())
-    val news: StateFlow<List<News>> = _news
+    val news: StateFlow<List<News>> = _news.asStateFlow()
 
     init {
         scope.launch {
