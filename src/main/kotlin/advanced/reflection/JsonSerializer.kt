@@ -2,6 +2,7 @@ package advanced.reflection.jsonserializer
 
 import org.junit.Test
 import kotlin.reflect.KClass
+import kotlin.reflect.full.createInstance
 import kotlin.reflect.full.findAnnotation
 import kotlin.reflect.full.hasAnnotation
 import kotlin.reflect.full.memberProperties
@@ -26,7 +27,7 @@ class Creature(
     val extraDetails: String? = null,
 )
 
-object LowerCaseName : NameMapper {
+class LowerCaseName : NameMapper {
     override fun map(name: String): String = name.lowercase()
 }
 
