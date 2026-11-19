@@ -7,6 +7,7 @@ import org.junit.Assert.assertEquals
 import org.junit.Test
 import java.io.File
 import java.util.concurrent.ConcurrentHashMap
+import java.util.concurrent.CopyOnWriteArrayList
 import java.util.concurrent.atomic.AtomicInteger
 
 class UserArticlesSaver(
@@ -166,7 +167,8 @@ class UserArticlesSaverTest {
     fun `should keep structured concurrency`() = runTest {
         // Given
         val name = CoroutineName("test-coroutine")
-        var suspendingCallNames = listOf<CoroutineName?>()
+        // Thread-safe: a solution may legitimately save articles on a multi-threaded dispatcher
+        val suspendingCallNames = CopyOnWriteArrayList<CoroutineName?>()
         suspend fun addNameToList() {
             suspendingCallNames += currentCoroutineContext()[CoroutineName]
         }
